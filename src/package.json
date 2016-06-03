@@ -18,6 +18,8 @@
   },
   "dependencies": {
     "angular": "^1.5.6",
-    "bootstrap": "^3.3.6"
+    "angular-xml": "^2.2.1",
+    "bootstrap": "^3.3.6",
+    "x2js": "^2.0.1"
   }
 }
