@@ -11,6 +11,7 @@
 			vMixService.getStatus().then(function(data){
 				$log.debug('status', data);
                 $scope.vmix = data;
+                $log.debug('stringify', JSON.stringify(data));
 			});
 		}	
 	}

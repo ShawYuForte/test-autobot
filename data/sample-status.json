@@ -1,0 +1,188 @@
+{
+	"version": "17.0.0.85",
+	"inputs": {
+		"input": [{
+			"_key": "614e3713-b38b-4601-9e9c-d4871f32f9b0",
+			"_number": "1",
+			"_type": "Image",
+			"_title": "logo_dark_background.jpg",
+			"_state": "Paused",
+			"_position": "0",
+			"_duration": "0",
+			"_loop": "False",
+			"__text": "logo_dark_background.jpg"
+		},
+		{
+			"_key": "b9bd830e-332d-45c7-8a0e-83df08249b07",
+			"_number": "2",
+			"_type": "Video",
+			"_title": "logo_dark_background_mantis.mp4",
+			"_state": "Completed",
+			"_position": "14014",
+			"_duration": "14336",
+			"_loop": "False",
+			"_muted": "False",
+			"_volume": "100",
+			"_balance": "0",
+			"_solo": "False",
+			"_audiobusses": "M",
+			"_meterF1": "0",
+			"_meterF2": "0",
+			"__text": "logo_dark_background_mantis.mp4"
+		},
+		{
+			"_key": "71f40c8a-16cc-4c25-b0de-5dcdbbbfaf63",
+			"_number": "3",
+			"_type": "Image",
+			"_title": "overlay_1280_720.png",
+			"_state": "Paused",
+			"_position": "0",
+			"_duration": "0",
+			"_loop": "False",
+			"__text": "overlay_1280_720.png"
+		},
+		{
+			"_key": "2e1479cc-8e19-4619-93df-f3ad2efd9fd0",
+			"_number": "4",
+			"_type": "Placeholder",
+			"_title": "Offline - RTSPTCP rtsp://root:pass@10.100.0.111/axis-media/media.amp",
+			"_state": "Paused",
+			"_position": "0",
+			"_duration": "0",
+			"_loop": "False",
+			"__text": "Offline - RTSPTCP rtsp://root:pass@10.100.0.111/axis-media/media.amp"
+		},
+		{
+			"_key": "d6666adf-9592-445b-a1d1-4bf61b9346c9",
+			"_number": "5",
+			"_type": "Placeholder",
+			"_title": "Offline - RTSPTCP rtsp://root:pass@10.100.0.112/axis-media/media.amp",
+			"_state": "Paused",
+			"_position": "0",
+			"_duration": "0",
+			"_loop": "False",
+			"__text": "Offline - RTSPTCP rtsp://root:pass@10.100.0.112/axis-media/media.amp"
+		},
+		{
+			"_key": "e1d3a1fe-3032-4bb9-a3f4-111baebfe5c6",
+			"_number": "6",
+			"_type": "Placeholder",
+			"_title": "Offline - RTSPTCP rtsp://root:pass@10.100.0.113/axis-media/media.amp",
+			"_state": "Paused",
+			"_position": "0",
+			"_duration": "0",
+			"_loop": "False",
+			"__text": "Offline - RTSPTCP rtsp://root:pass@10.100.0.113/axis-media/media.amp"
+		},
+		{
+			"_key": "33356cd5-3ce6-4a51-945f-de771d849d7e",
+			"_number": "7",
+			"_type": "Image",
+			"_title": "logo_reveal.png",
+			"_state": "Paused",
+			"_position": "0",
+			"_duration": "0",
+			"_loop": "False",
+			"__text": "logo_reveal.png"
+		},
+		{
+			"_key": "ce98d268-83bd-4914-ad7b-9320dfbaf813",
+			"_number": "8",
+			"_type": "Video",
+			"_title": "logo_reveal_house.mp4",
+			"_state": "Completed",
+			"_position": "16016",
+			"_duration": "17771",
+			"_loop": "False",
+			"_muted": "True",
+			"_volume": "100",
+			"_balance": "0",
+			"_solo": "False",
+			"_audiobusses": "M",
+			"_meterF1": "0",
+			"_meterF2": "0",
+			"__text": "logo_reveal_house.mp4"
+		},
+		{
+			"_key": "9bcd4fb7-0a14-4976-a437-5619370a0912",
+			"_number": "9",
+			"_type": "Image",
+			"_title": "logo_girl_warrior_stance.jpg",
+			"_state": "Paused",
+			"_position": "0",
+			"_duration": "0",
+			"_loop": "False",
+			"__text": "logo_girl_warrior_stance.jpg"
+		},
+		{
+			"_key": "51cbc7d9-f7fd-4a1f-983b-5c0629069cb0",
+			"_number": "10",
+			"_type": "Placeholder",
+			"_title": "Offline - Audio Microphone",
+			"_state": "Paused",
+			"_position": "0",
+			"_duration": "0",
+			"_loop": "False",
+			"__text": "Offline - Audio Microphone"
+		}]
+	},
+	"overlays": {
+		"overlay": [{
+			"_number": "1"
+		},
+		{
+			"_number": "2"
+		},
+		{
+			"_number": "3"
+		},
+		{
+			"_number": "4"
+		},
+		{
+			"_number": "5"
+		},
+		{
+			"_number": "6"
+		}]
+	},
+	"preview": "8",
+	"active": "2",
+	"fadeToBlack": "False",
+	"transitions": {
+		"transition": [{
+			"_number": "1",
+			"_effect": "Fade",
+			"_duration": "500"
+		},
+		{
+			"_number": "2",
+			"_effect": "Merge",
+			"_duration": "1000"
+		},
+		{
+			"_number": "3",
+			"_effect": "Wipe",
+			"_duration": "1000"
+		},
+		{
+			"_number": "4",
+			"_effect": "CubeZoom",
+			"_duration": "1000"
+		}]
+	},
+	"recording": "False",
+	"external": "False",
+	"streaming": "False",
+	"playList": "False",
+	"multiCorder": "False",
+	"audio": {
+		"master": {
+			"_volume": "38.95009",
+			"_muted": "False",
+			"_meterF1": "0",
+			"_meterF2": "0",
+			"_headphonesVolume": "100"
+		}
+	}
+}
