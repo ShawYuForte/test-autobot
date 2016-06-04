@@ -22,6 +22,34 @@
         
     </div>
     
+    <div class="form-group">
+    
+        <label class="control-label col-md-2">Inputs</label>
+        
+        <div class="col-md-10">
+			<ul>
+				<li ng-repeat="item in vmix.inputs.input">
+					<input class="form-control" ng-value="item._title" readonly />
+				</li>
+			</ul>
+        </div>
+        
+    </div>
+    
+    <div class="form-group">
+    
+        <label class="control-label col-md-2">Audio</label>
+        
+        <div class="col-md-10">
+			<ul>
+				<li ng-repeat="item in vmix.inputs.input">
+					<input class="form-control" ng-value="item._title" readonly />
+				</li>
+			</ul>
+        </div>
+        
+    </div>
+    
 </div>
 
 <span ng-bind="JSON.stringify(vmix)"></span>

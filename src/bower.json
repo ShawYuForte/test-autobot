@@ -1,0 +1,15 @@
+{
+  "name": "forte-iot",
+  "version": "0.0.1",
+  "dependencies": {
+    "angular": "^1.5.6",
+    "angular-cookies": "^1.5.6",
+    "angular-messages": "^1.5.6",
+    "angular-resource": "^1.5.6",
+    "angular-route": "^1.5.6",
+    "bootstrap": "^3.3.6",
+    "underscore": "^1.8.3",
+    "font-awesome": "^4.6.3"
+  },
+  "private": true
+}
