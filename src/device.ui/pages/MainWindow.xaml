@@ -1,0 +1,75 @@
+﻿<Window x:Class="device.ui.pages.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        xmlns:local="clr-namespace:device.ui"
+        mc:Ignorable="d" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen"
+        DataContext="{Binding RelativeSource={RelativeSource Self}}"
+        Title="{Binding Path=State.Version}" Height="350" Width="535.381" Loaded="Window_Loaded">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" ></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+        </Grid.RowDefinitions>
+        <xctk:BusyIndicator IsBusy="{Binding IsBusy}" >
+        </xctk:BusyIndicator>
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Grid.Row="0">
+            <Button x:Name="loadPresetButton" Height="80" VerticalAlignment="Top" Width="80" Click="loadPresetButton_Click" Margin="10" HorizontalAlignment="Center">
+                <StackPanel>
+                    <Image Source="/images/open-512.png" MaxHeight="22" MaxWidth="75" />
+                    <TextBlock>Load Presets</TextBlock>
+                </StackPanel>
+            </Button>
+            <Image Source="/images/right-green.jpg" MaxHeight="22" MaxWidth="75"  Margin="10"/>
+            <Button x:Name="startAzureButton" Height="80" VerticalAlignment="Top" Width="80" Margin="10" HorizontalAlignment="Center">
+                <StackPanel>
+                    <Image Source="/images/azure.png" MaxHeight="22" MaxWidth="75" />
+                    <TextBlock>Start Azure</TextBlock>
+                </StackPanel>
+            </Button>
+            <Image Source="/images/right-green.jpg" MaxHeight="22" MaxWidth="75"  Margin="10"/>
+            <Button x:Name="startStreamButton" Height="80" VerticalAlignment="Top" Width="80" Margin="10" HorizontalAlignment="Center">
+                <StackPanel>
+                    <Image Source="/images/online.png" MaxHeight="22" MaxWidth="75" />
+                    <TextBlock>Start Stream</TextBlock>
+                </StackPanel>
+            </Button>
+            <Image Source="/images/right-green.jpg" MaxHeight="22" MaxWidth="75"  Margin="10"/>
+            <Button x:Name="endStreamButton" Height="80" VerticalAlignment="Top" Width="80" Margin="10" HorizontalAlignment="Center">
+                <StackPanel>
+                    <Image Source="/images/tick.png" MaxHeight="22" MaxWidth="75" />
+                    <TextBlock>End Stream</TextBlock>
+                </StackPanel>
+            </Button>
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="1" Margin="10">
+            <StackPanel>
+                <ContentControl Visibility="{Binding Step0Visible}">
+                    Step 0
+                </ContentControl>
+                <ContentControl Visibility="{Binding Step1Visible}">
+                    Step 1
+                </ContentControl>
+                <ContentControl Visibility="{Binding Step2Visible}">
+                    Step 2
+                </ContentControl>
+                <ContentControl Visibility="{Binding Step3Visible}">
+                    Step 3
+                </ContentControl>
+                <ContentControl Visibility="{Binding Step4Visible}">
+                    Step 4
+                </ContentControl>
+            </StackPanel>
+        </ScrollViewer>
+
+        <StackPanel VerticalAlignment="Bottom" Grid.Row="2">
+            <Separator />
+            <Label VerticalAlignment="Bottom">Logs:</Label>
+            <TextBox TextWrapping="Wrap" VerticalAlignment="Bottom" IsReadOnly="True" Height="100" Margin="5" Name="logTextBlock" VerticalScrollBarVisibility="Auto"></TextBox>
+        </StackPanel>
+    </Grid>
+</Window>
