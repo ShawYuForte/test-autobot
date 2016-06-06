@@ -23,9 +23,12 @@
             <div class="panel-heading">
                 Active Input
             </div>
-            <div class="panel-body">
+            <div class="panel-body" ng-if="vmix.active">
                 <img class="img img-responsive" ng-src="{{vmix.active.logo}}" />
                 <div ng-bind="vmix.active.display"></div>
+            </div>
+            <div class="panel-body" ng-if="!vmix.active">
+                None!
             </div>
         </div>
         <div class="panel panel-default">
