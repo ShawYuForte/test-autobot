@@ -1,55 +1,62 @@
-<h3>Dashboard</h3>
-
-<div class="form-horizontal">
-
-    <div class="form-group">
+<fieldset>
+    <legend>Dashboard <span ng-if="vmix">(vMix {{vmix.version}})</span></legend>
     
-        <label class="control-label col-md-2">vMix Version</label>
-        
-        <div class="col-md-10">
-            <input class="form-control" ng-model="vmix.version" readonly />
+    <div class="btn-toolbar">
+        <div class="btn-group">
+            <button class="btn btn-default" ng-click="loadPreset()">Load Preset</button>
+            <button class="btn btn-default" ng-click="verifyPreset()">Verify Preset</button>
         </div>
-        
-    </div>
-
-    <div class="form-group">
-    
-        <label class="control-label col-md-2">Playlist</label>
-        
-        <div class="col-md-10">
-            <input class="form-control" ng-value="(vmix.playList === 'True' ? 'Yes' : 'No')" readonly />
+        <div class="btn-group">
+            <button class="btn btn-success" ng-click="startStream()">Start Stream</button>
+            <button class="btn btn-warning" ng-click="stopStream()">Stop Stream</button>
         </div>
-        
     </div>
     
-    <div class="form-group">
+    <br />
     
-        <label class="control-label col-md-2">Inputs</label>
-        
-        <div class="col-md-10">
-			<ul>
-				<li ng-repeat="item in vmix.inputs.input">
-					<input class="form-control" ng-value="item._title" readonly />
-				</li>
-			</ul>
-        </div>
-        
+    <div class="alert alert-info" ng-if="status">
+        <i ng-if="!busy" class="fa fa-info-circle"></i><i ng-if="busy" class="fa fa-spinner fa-spin"></i>&nbsp;&nbsp;<span ng-bind="status"></span>
     </div>
-    
-    <div class="form-group">
-    
-        <label class="control-label col-md-2">Audio</label>
-        
-        <div class="col-md-10">
-			<ul>
-				<li ng-repeat="item in vmix.inputs.input">
-					<input class="form-control" ng-value="item._title" readonly />
-				</li>
-			</ul>
-        </div>
-        
-    </div>
-    
-</div>
 
-<span ng-bind="JSON.stringify(vmix)"></span>
+    <div class="col-md-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                Active Input
+            </div>
+            <div class="panel-body">
+                <img class="img img-responsive" ng-src="{{vmix.active.logo}}" />
+                <div ng-bind="vmix.active.display"></div>
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                Preview Input
+            </div>
+            <div class="panel-body">
+                <img class="img img-responsive" ng-src="{{vmix.preview.logo}}" />
+                <div ng-bind="vmix.preview.display"></div>
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                Playlist
+            </div>
+            <div class="panel-body">
+                <div ng-if="vmix.playList==='False'">None</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                Inputs
+            </div>
+            <div class="panel-body">
+                <div ng-repeat="input in expectedInputs" ngfit-input input="input">
+                </div>
+            </div>
+        </div>
+    </div>
+
+</fieldset>
