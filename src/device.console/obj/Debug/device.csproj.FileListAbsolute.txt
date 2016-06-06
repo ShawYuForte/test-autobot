@@ -1,2 +1,0 @@
-C:\dev\forte\iot\src\forte-iot\device\bin\Debug\device.exe.config
-C:\dev\forte\iot\src\device.console\bin\Debug\device.exe.config

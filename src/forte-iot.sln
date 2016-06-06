@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "device.console", "device.co
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "device.services", "device.services\device.services.csproj", "{A848959A-23E7-41E6-83B2-9A047BAF6FA5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "device.ui", "device.ui\device.ui.csproj", "{519883EC-EFEC-4964-ABCD-40DC51C2B5FB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{A848959A-23E7-41E6-83B2-9A047BAF6FA5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A848959A-23E7-41E6-83B2-9A047BAF6FA5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A848959A-23E7-41E6-83B2-9A047BAF6FA5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{519883EC-EFEC-4964-ABCD-40DC51C2B5FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{519883EC-EFEC-4964-ABCD-40DC51C2B5FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{519883EC-EFEC-4964-ABCD-40DC51C2B5FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{519883EC-EFEC-4964-ABCD-40DC51C2B5FB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

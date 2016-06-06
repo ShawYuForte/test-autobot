@@ -1,15 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using forte.device.services;
 
 namespace device
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
+            var svc = new VMixService();
+            var state = svc.FetchState();
+            Console.WriteLine($"Fetched state for version: {state.Version}");
         }
     }
 }

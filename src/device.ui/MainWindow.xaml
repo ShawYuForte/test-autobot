@@ -1,0 +1,21 @@
+﻿<Window x:Class="device.ui.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        xmlns:local="clr-namespace:device.ui"
+        mc:Ignorable="d" 
+        DataContext="{Binding RelativeSource={RelativeSource Self}}"
+        Title="{Binding Path=State.Version}" Height="350" Width="525">
+    <Grid>
+        <xctk:BusyIndicator IsBusy="{Binding IsBusy}" >
+        </xctk:BusyIndicator>
+        <ToolBar x:Name="toolBar" HorizontalAlignment="Left" VerticalAlignment="Top">
+            <Button x:Name="loadPresetButton" Content="Load Preset" Height="22" VerticalAlignment="Top" Width="75" Click="loadPresetButton_Click"/>
+        </ToolBar>
+
+        <Line HorizontalAlignment="Stretch"></Line>
+        <TextBox TextWrapping="Wrap" VerticalAlignment="Bottom" IsReadOnly="True" Height="100" Margin="5" Name="logTextBlock" VerticalScrollBarVisibility="Auto"></TextBox>
+    </Grid>
+</Window>
