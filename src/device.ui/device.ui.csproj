@@ -95,6 +95,8 @@
   <ItemGroup>
     <Compile Include="pages\MainWindowProperties.cs" />
     <Compile Include="pages\MainWindowStates.cs" />
+    <Compile Include="pages\MainWindowStep4.cs" />
+    <Compile Include="pages\MainWindowStep3.cs" />
     <Compile Include="pages\MainWindowStep2.cs" />
     <Compile Include="pages\MainWindowStep1.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">

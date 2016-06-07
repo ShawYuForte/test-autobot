@@ -49,6 +49,9 @@ namespace forte.device.services
                 input.Role = presetInput.Role;
             }
 
+            state.Active = state.Inputs.FirstOrDefault(input => input.Number == state.ActiveNumber);
+            state.Preview = state.Inputs.FirstOrDefault(input => input.Number == state.PreviewNumber);
+
             return state;
         }
 
@@ -110,6 +113,60 @@ namespace forte.device.services
         public VMixState SetOverlay(VMixInput input)
         {
             var request = new RestRequest($"/?Function=OverlayInput1&Input={input.Key}", Method.GET);
+            _client.Execute<VMixState>(request);
+
+            return FetchState();
+        }
+
+        /// <summary>
+        ///     Start streaming to the already selected channel
+        /// </summary>
+        /// <returns></returns>
+        public VMixState StartStreaming()
+        {
+            var request = new RestRequest("/?Function=StartStreaming", Method.GET);
+            _client.Execute<VMixState>(request);
+
+            return FetchState();
+        }
+
+        public VMixState FadeToPreview()
+        {
+            var request = new RestRequest("/?Function=Transition1", Method.GET);
+            _client.Execute<VMixState>(request);
+
+            return FetchState();
+        }
+
+        public VMixState ToggleAudio(VMixInput audioInput)
+        {
+            var request = new RestRequest($"/?Function=Audio&Input={audioInput.Key}", Method.GET);
+            _client.Execute<VMixState>(request);
+
+            return FetchState();
+        }
+
+        public VMixState ToggleOverlay(VMixInput overlayInput)
+        {
+            var request = new RestRequest($"/?Function=OverlayInput1&Input={overlayInput.Key}", Method.GET);
+            _client.Execute<VMixState>(request);
+
+            return FetchState();
+        }
+
+        public VMixState StartPlaylist()
+        {
+            var request = new RestRequest($"/?Function=SelectPlayList&Value={ConfigurationManager.AppSettings["playlist-name"]}", Method.GET);
+            _client.Execute<VMixState>(request);
+            request = new RestRequest("/?Function=StartPlayList", Method.GET);
+            _client.Execute<VMixState>(request);
+
+            return FetchState();
+        }
+
+        public VMixState StopPlaylist()
+        {
+            var request = new RestRequest("/?Function=StopPlayList", Method.GET);
             _client.Execute<VMixState>(request);
 
             return FetchState();

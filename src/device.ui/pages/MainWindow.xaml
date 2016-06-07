@@ -44,7 +44,7 @@
                     </Button>
                     <Image Source="/images/right-green.jpg" MaxHeight="22" MaxWidth="75" Margin="10" />
                     <Button x:Name="startStreamButton" Height="80" VerticalAlignment="Top" Width="80" Margin="10"
-                            HorizontalAlignment="Center" IsEnabled="{Binding Step2Visible}">
+                            HorizontalAlignment="Center" IsEnabled="{Binding Step2Visible}" Click="startStreamButton_Click">
                         <StackPanel>
                             <TextBlock HorizontalAlignment="Center" Margin="5" FontWeight="Bold">Step 3</TextBlock>
                             <Image Source="/images/online.png" MaxHeight="22" MaxWidth="75" />
@@ -53,7 +53,7 @@
                     </Button>
                     <Image Source="/images/right-green.jpg" MaxHeight="22" MaxWidth="75" Margin="10" />
                     <Button x:Name="endStreamButton" Height="80" VerticalAlignment="Top" Width="80" Margin="10"
-                            HorizontalAlignment="Center" IsEnabled="{Binding Step3Visible}">
+                            HorizontalAlignment="Center" IsEnabled="{Binding Step3Visible}" Click="endStreamButton_Click">
                         <StackPanel>
                             <TextBlock HorizontalAlignment="Center" Margin="5" FontWeight="Bold">Step 4</TextBlock>
                             <Image Source="/images/tick.png" MaxHeight="22" MaxWidth="75" />
@@ -88,11 +88,17 @@
                         </ContentControl>
                         <ContentControl
                             Visibility="{Binding Step3Visible, Converter={StaticResource BooleanToVisibility}}">
-                            Step 3
+                            <TextBlock TextWrapping="Wrap">
+                                <Bold>Step 3 Complete - We Have Live Video</Bold><LineBreak />
+                                Live video is being broadcast, now you wait for the end of the class, when it's over, press the "Step 4" button.
+                            </TextBlock>
                         </ContentControl>
                         <ContentControl
                             Visibility="{Binding Step4Visible, Converter={StaticResource BooleanToVisibility}}">
-                            Step 4
+                            <TextBlock TextWrapping="Wrap">
+                                <Bold>Session Complete!</Bold><LineBreak />
+                                That's it, you're done with this session, we can start over again. To play it safe, shut me down and start me again.
+                            </TextBlock>
                         </ContentControl>
                     </StackPanel>
                 </ScrollViewer>

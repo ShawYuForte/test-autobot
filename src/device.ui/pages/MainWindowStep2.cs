@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Windows;
 using forte.device.models;
 
@@ -8,20 +9,51 @@ namespace device.ui.pages
     {
         protected void ExecuteStep2Workflow()
         {
-            // Set the active window to static background image
-            var backgroundImageInputs =
-                State.Inputs.Where(input => input.Role == InputRole.OpeninStaticImage).ToList();
-            if (backgroundImageInputs.Count != 1)
+            if (!ActivateOpeningStaticImage()) return;
+            if (!PreviewOpeningVideo()) return;
+
+            _vmixService.StartStreaming();
+            Log("Started streaming!");
+            // Set the workflow step so the user can read the instructions
+            SetWorkflowStep(Workflow.ReadyForAzure);
+        }
+
+        private bool PreviewOpeningVideo()
+        {
+            VMixInput openingVideoInput;
+            try
+            {
+                // Set the active window to static background image
+                openingVideoInput = State.Inputs.Single(input => input.Role == InputRole.OpeningVideo);
+            }
+            catch (InvalidOperationException)
+            {
+                MessageBox.Show("Wrong number of starting video inputs specified, can't tell which one to select!",
+                    "Cannot set background", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                return false;
+            }
+            _vmixService.SetPreview(openingVideoInput);
+            Log($"Set the preview input to '{openingVideoInput.Title}'.");
+            return true;
+        }
+
+        private bool ActivateOpeningStaticImage()
+        {
+            VMixInput backgroundImageInput;
+            try
+            {
+                // Set the active window to static background image
+                backgroundImageInput = State.Inputs.Single(input => input.Role == InputRole.OpeninStaticImage);
+            }
+            catch (InvalidOperationException)
             {
                 MessageBox.Show("Wrong number of background image inputs specified, can't tell which one to select!",
                     "Cannot set background", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-                return;
+                return false;
             }
-            var backgroundImageInput = backgroundImageInputs.First();
             _vmixService.SetActive(backgroundImageInput);
-            Log($"Set the active input to '{backgroundImageInput.Title}', waiting for Azure Program.");
-            // Set the workflow step so the user can read the instructions
-            SetWorkflowStep(Workflow.ReadyForAzure);
+            Log($"Set the active input to '{backgroundImageInput.Title}'.");
+            return true;
         }
     }
 }
