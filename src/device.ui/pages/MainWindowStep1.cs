@@ -26,12 +26,13 @@ namespace device.ui.pages
                     Dispatcher.Invoke(() =>
                     {
                         IsBusy = false;
-                        Log($"Loaded preset ({watch.Elapsed.Seconds} s)");
+                        Log($"Loaded preset ({(int)watch.Elapsed.TotalSeconds} s)");
+                        FetchState();
                     });
                 }
                 else
                 {
-                    Dispatcher.Invoke(() => Log($"Waiting to verify preset is loaded ({watch.Elapsed.TotalSeconds} s)..."));
+                    Dispatcher.Invoke(() => Log($"Waiting to verify preset is loaded ({(int)watch.Elapsed.TotalSeconds} s)..."));
                 }
             }, null, waitFor, repeatAfter);
         }
@@ -40,9 +41,9 @@ namespace device.ui.pages
         {
             IsBusy = true;
             State = _vmixService.FetchState();
-            if (!_vmixService.PresetLoaded())
+            if (_vmixService.PresetLoaded() && WorkflowState == Workflow.NotStarted)
             {
-                SetVisibleStep(1);
+                SetWorkflowStep(Workflow.PresetLoadVerified);
             }
             IsBusy = false;
             Log("vMix State Retrieved!");

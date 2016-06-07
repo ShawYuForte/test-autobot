@@ -37,13 +37,9 @@ namespace device.ui.pages
             FetchState();
         }
 
-        void SetVisibleStep(int step)
+        private void startAzureButton_Click(object sender, RoutedEventArgs e)
         {
-            Step0Visible = step == 0 ? Visibility.Visible : Visibility.Collapsed;
-            Step1Visible = step == 1 ? Visibility.Visible : Visibility.Collapsed;
-            Step2Visible = step == 2 ? Visibility.Visible : Visibility.Collapsed;
-            Step3Visible = step == 3 ? Visibility.Visible : Visibility.Collapsed;
-            Step4Visible = step == 4 ? Visibility.Visible : Visibility.Collapsed;
+            ExecuteStep2Workflow();
         }
     }
 }

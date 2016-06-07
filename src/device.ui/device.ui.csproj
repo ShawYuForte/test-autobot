@@ -94,6 +94,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="pages\MainWindowProperties.cs" />
+    <Compile Include="pages\MainWindowStates.cs" />
+    <Compile Include="pages\MainWindowStep2.cs" />
     <Compile Include="pages\MainWindowStep1.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>

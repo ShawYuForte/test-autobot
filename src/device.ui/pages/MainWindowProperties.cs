@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using forte.device.models;
 
 namespace device.ui.pages
@@ -19,28 +20,28 @@ namespace device.ui.pages
 
         // Using a DependencyProperty as the backing store for Step0Visible.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty Step0VisibleProperty =
-            DependencyProperty.Register("Step0Visible", typeof (Visibility), typeof (MainWindow),
-                new PropertyMetadata(Visibility.Visible));
+            DependencyProperty.Register("Step0Visible", typeof (Boolean), typeof (MainWindow),
+                new PropertyMetadata(true));
 
         // Using a DependencyProperty as the backing store for Step1Visible.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty Step1VisibleProperty =
-            DependencyProperty.Register("Step1Visible", typeof (Visibility), typeof (MainWindow),
-                new PropertyMetadata(Visibility.Collapsed));
+            DependencyProperty.Register("Step1Visible", typeof (Boolean), typeof (MainWindow),
+                new PropertyMetadata(false));
 
         // Using a DependencyProperty as the backing store for Step2Visible.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty Step2VisibleProperty =
-            DependencyProperty.Register("Step2Visible", typeof (Visibility), typeof (MainWindow),
-                new PropertyMetadata(Visibility.Collapsed));
+            DependencyProperty.Register("Step2Visible", typeof (Boolean), typeof (MainWindow),
+                new PropertyMetadata(false));
 
         // Using a DependencyProperty as the backing store for Step3Visible.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty Step3VisibleProperty =
-            DependencyProperty.Register("Step3Visible", typeof (Visibility), typeof (MainWindow),
-                new PropertyMetadata(Visibility.Collapsed));
+            DependencyProperty.Register("Step3Visible", typeof (Boolean), typeof (MainWindow),
+                new PropertyMetadata(false));
 
         // Using a DependencyProperty as the backing store for Step4Visible.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty Step4VisibleProperty =
-            DependencyProperty.Register("Step4Visible", typeof (Visibility), typeof (MainWindow),
-                new PropertyMetadata(Visibility.Collapsed));
+            DependencyProperty.Register("Step4Visible", typeof (Boolean), typeof (MainWindow),
+                new PropertyMetadata(false));
 
         public VMixState State
         {
@@ -61,34 +62,34 @@ namespace device.ui.pages
             set { SetValue(LogMessagesProperty, value); }
         }
 
-        public Visibility Step0Visible
+        public Boolean Step0Visible
         {
-            get { return (Visibility)GetValue(Step0VisibleProperty); }
+            get { return (Boolean)GetValue(Step0VisibleProperty); }
             set { SetValue(Step0VisibleProperty, value); }
         }
 
-        public Visibility Step1Visible
+        public Boolean Step1Visible
         {
-            get { return (Visibility) GetValue(Step1VisibleProperty); }
+            get { return (Boolean) GetValue(Step1VisibleProperty); }
             set { SetValue(Step1VisibleProperty, value); }
         }
 
-        public Visibility Step2Visible
+        public Boolean Step2Visible
         {
-            get { return (Visibility) GetValue(Step2VisibleProperty); }
+            get { return (Boolean) GetValue(Step2VisibleProperty); }
             set { SetValue(Step2VisibleProperty, value); }
         }
 
-        public Visibility Step3Visible
+        public Boolean Step3Visible
         {
-            get { return (Visibility) GetValue(Step3VisibleProperty); }
+            get { return (Boolean) GetValue(Step3VisibleProperty); }
             set { SetValue(Step3VisibleProperty, value); }
         }
 
 
-        public Visibility Step4Visible
+        public Boolean Step4Visible
         {
-            get { return (Visibility) GetValue(Step4VisibleProperty); }
+            get { return (Boolean) GetValue(Step4VisibleProperty); }
             set { SetValue(Step4VisibleProperty, value); }
         }
     }

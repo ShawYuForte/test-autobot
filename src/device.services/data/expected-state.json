@@ -5,70 +5,70 @@
       "Number": "1",
       "Type": "Image",
       "Title": "logo_dark_background.jpg",
-      "State": "Paused"
+      "Role": "OpeninStaticImage"
     },
     {
       "Key": "b9bd830e-332d-45c7-8a0e-83df08249b07",
       "Number": "2",
       "Type": "Video",
       "Title": "logo_dark_background_mantis.mp4",
-      "State": "Completed"
+      "Role": "OpeningVideo"
     },
     {
       "Key": "71f40c8a-16cc-4c25-b0de-5dcdbbbfaf63",
       "Number": "3",
       "Type": "Image",
       "Title": "overlay_1280_720.png",
-      "State": "Paused"
+      "Role": "LogoOverlay"
     },
     {
       "Key": "2e1479cc-8e19-4619-93df-f3ad2efd9fd0",
       "Number": "4",
       "Type": "Placeholder",
       "Title": "RTSPTCP rtsp://root:pass@10.100.0.111/axis-media/media.amp",
-      "State": "Paused"
+      "Role": "Camera"
     },
     {
       "Key": "d6666adf-9592-445b-a1d1-4bf61b9346c9",
       "Number": "5",
       "Type": "Placeholder",
       "Title": "RTSPTCP rtsp://root:pass@10.100.0.112/axis-media/media.amp",
-      "State": "Paused"
+      "Role": "Camera"
     },
     {
       "Key": "e1d3a1fe-3032-4bb9-a3f4-111baebfe5c6",
       "Number": "6",
       "Type": "Placeholder",
       "Title": "RTSPTCP rtsp://root:pass@10.100.0.113/axis-media/media.amp",
-      "State": "Paused"
+      "Role": "Camera"
     },
     {
       "Key": "33356cd5-3ce6-4a51-945f-de771d849d7e",
       "Number": "7",
       "Type": "Image",
       "Title": "logo_reveal.png",
-      "State": "Paused"
+      "Role": "None"
     },
     {
       "Key": "ce98d268-83bd-4914-ad7b-9320dfbaf813",
       "Number": "8",
       "Type": "Video",
       "Title": "logo_reveal_house.mp4",
-      "State": "Completed"
+      "Role": "ClosingVideo"
     },
     {
       "Key": "9bcd4fb7-0a14-4976-a437-5619370a0912",
       "Number": "9",
       "Type": "Image",
       "Title": "logo_girl_warrior_stance.jpg",
-      "State": "Paused"
+      "Role": "ClosingStaticImage"
     },
     {
       "Key": "51cbc7d9-f7fd-4a1f-983b-5c0629069cb0",
       "Number": "10",
       "Type": "Placeholder",
       "Title": "Audio Microphone",
-      "State": "Paused"
+      "Role": "Audio"
     }
   ]
 }

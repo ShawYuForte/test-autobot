@@ -8,68 +8,102 @@
         mc:Ignorable="d" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen"
         DataContext="{Binding RelativeSource={RelativeSource Self}}"
         Title="{Binding Path=State.Version}" Height="350" Width="535.381" Loaded="Window_Loaded">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibility" />
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" ></RowDefinition>
-            <RowDefinition Height="*"></RowDefinition>
-            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <xctk:BusyIndicator IsBusy="{Binding IsBusy}" >
+        <xctk:BusyIndicator IsBusy="{Binding IsBusy}" Grid.Row="0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" MinHeight="100" />
+                </Grid.RowDefinitions>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Grid.Row="0" HorizontalAlignment="Center">
+                    <Button x:Name="loadPresetButton" Height="80" VerticalAlignment="Top" Width="80"
+                            Click="loadPresetButton_Click" Margin="10" HorizontalAlignment="Center">
+                        <StackPanel HorizontalAlignment="Center">
+                            <TextBlock HorizontalAlignment="Center" Margin="5" FontWeight="Bold">Step 1</TextBlock>
+                            <Image Source="/images/open-512.png" MaxHeight="22" MaxWidth="75" />
+                            <TextBlock HorizontalAlignment="Center" Margin="5">Load Presets</TextBlock>
+                        </StackPanel>
+                    </Button>
+                    <Image Source="/images/right-green.jpg" MaxHeight="22" MaxWidth="75" Margin="10"
+                           IsEnabled="{Binding Step1Visible}" />
+                    <Button x:Name="startAzureButton" Height="80" VerticalAlignment="Top" Width="80" Margin="10"
+                            HorizontalAlignment="Center" IsEnabled="{Binding Step1Visible}"
+                            Click="startAzureButton_Click">
+                        <StackPanel>
+                            <TextBlock HorizontalAlignment="Center" Margin="5" FontWeight="Bold">Step 2</TextBlock>
+                            <Image Source="/images/azure.png" MaxHeight="22" MaxWidth="75" />
+                            <TextBlock HorizontalAlignment="Center" Margin="5">Start Azure</TextBlock>
+                        </StackPanel>
+                    </Button>
+                    <Image Source="/images/right-green.jpg" MaxHeight="22" MaxWidth="75" Margin="10" />
+                    <Button x:Name="startStreamButton" Height="80" VerticalAlignment="Top" Width="80" Margin="10"
+                            HorizontalAlignment="Center" IsEnabled="{Binding Step2Visible}">
+                        <StackPanel>
+                            <TextBlock HorizontalAlignment="Center" Margin="5" FontWeight="Bold">Step 3</TextBlock>
+                            <Image Source="/images/online.png" MaxHeight="22" MaxWidth="75" />
+                            <TextBlock HorizontalAlignment="Center" Margin="5">Start Stream</TextBlock>
+                        </StackPanel>
+                    </Button>
+                    <Image Source="/images/right-green.jpg" MaxHeight="22" MaxWidth="75" Margin="10" />
+                    <Button x:Name="endStreamButton" Height="80" VerticalAlignment="Top" Width="80" Margin="10"
+                            HorizontalAlignment="Center" IsEnabled="{Binding Step3Visible}">
+                        <StackPanel>
+                            <TextBlock HorizontalAlignment="Center" Margin="5" FontWeight="Bold">Step 4</TextBlock>
+                            <Image Source="/images/tick.png" MaxHeight="22" MaxWidth="75" />
+                            <TextBlock HorizontalAlignment="Center" Margin="5">End Stream</TextBlock>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+
+                <ScrollViewer Grid.Row="1" Margin="10">
+                    <StackPanel MaxWidth="500" HorizontalAlignment="Center">
+                        <ContentControl
+                            Visibility="{Binding Step0Visible, Converter={StaticResource BooleanToVisibility}}">
+                            <TextBlock TextWrapping="Wrap">
+                                <Bold>Kickoff</Bold><LineBreak />
+                                You are at the starting point, you must start by loading presets (click "Load Presets" above), then I will share more information.
+                            </TextBlock>
+                        </ContentControl>
+                        <StackPanel Visibility="{Binding Step1Visible, Converter={StaticResource BooleanToVisibility}}">
+                            <TextBlock TextWrapping="Wrap">
+                                <Bold>Step 1 Complete - Presets Verified</Bold><LineBreak />
+                                Presets were verified, the expected inputs are all available. Click on the "Step 2" button to continue!
+                            </TextBlock>
+                        </StackPanel>
+                        <ContentControl
+                            Visibility="{Binding Step2Visible, Converter={StaticResource BooleanToVisibility}}">
+                            <TextBlock TextWrapping="Wrap">
+                                <Bold>Step 2 Complete - Ready to Stream</Bold><LineBreak />
+                                vMix is now ready to stream, but before you do, you must start the Azure Channel and Program. Go to the Azure
+                                Portal now and start the channel, create the program, and start it. When the program is successfully running,
+                                click on the the "Step 3" button above.
+                            </TextBlock>
+                        </ContentControl>
+                        <ContentControl
+                            Visibility="{Binding Step3Visible, Converter={StaticResource BooleanToVisibility}}">
+                            Step 3
+                        </ContentControl>
+                        <ContentControl
+                            Visibility="{Binding Step4Visible, Converter={StaticResource BooleanToVisibility}}">
+                            Step 4
+                        </ContentControl>
+                    </StackPanel>
+                </ScrollViewer>
+
+            </Grid>
         </xctk:BusyIndicator>
-        <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Grid.Row="0">
-            <Button x:Name="loadPresetButton" Height="80" VerticalAlignment="Top" Width="80" Click="loadPresetButton_Click" Margin="10" HorizontalAlignment="Center">
-                <StackPanel>
-                    <Image Source="/images/open-512.png" MaxHeight="22" MaxWidth="75" />
-                    <TextBlock>Load Presets</TextBlock>
-                </StackPanel>
-            </Button>
-            <Image Source="/images/right-green.jpg" MaxHeight="22" MaxWidth="75"  Margin="10"/>
-            <Button x:Name="startAzureButton" Height="80" VerticalAlignment="Top" Width="80" Margin="10" HorizontalAlignment="Center">
-                <StackPanel>
-                    <Image Source="/images/azure.png" MaxHeight="22" MaxWidth="75" />
-                    <TextBlock>Start Azure</TextBlock>
-                </StackPanel>
-            </Button>
-            <Image Source="/images/right-green.jpg" MaxHeight="22" MaxWidth="75"  Margin="10"/>
-            <Button x:Name="startStreamButton" Height="80" VerticalAlignment="Top" Width="80" Margin="10" HorizontalAlignment="Center">
-                <StackPanel>
-                    <Image Source="/images/online.png" MaxHeight="22" MaxWidth="75" />
-                    <TextBlock>Start Stream</TextBlock>
-                </StackPanel>
-            </Button>
-            <Image Source="/images/right-green.jpg" MaxHeight="22" MaxWidth="75"  Margin="10"/>
-            <Button x:Name="endStreamButton" Height="80" VerticalAlignment="Top" Width="80" Margin="10" HorizontalAlignment="Center">
-                <StackPanel>
-                    <Image Source="/images/tick.png" MaxHeight="22" MaxWidth="75" />
-                    <TextBlock>End Stream</TextBlock>
-                </StackPanel>
-            </Button>
-        </StackPanel>
-
-        <ScrollViewer Grid.Row="1" Margin="10">
-            <StackPanel>
-                <ContentControl Visibility="{Binding Step0Visible}">
-                    Step 0
-                </ContentControl>
-                <ContentControl Visibility="{Binding Step1Visible}">
-                    Step 1
-                </ContentControl>
-                <ContentControl Visibility="{Binding Step2Visible}">
-                    Step 2
-                </ContentControl>
-                <ContentControl Visibility="{Binding Step3Visible}">
-                    Step 3
-                </ContentControl>
-                <ContentControl Visibility="{Binding Step4Visible}">
-                    Step 4
-                </ContentControl>
-            </StackPanel>
-        </ScrollViewer>
-
-        <StackPanel VerticalAlignment="Bottom" Grid.Row="2">
+        <StackPanel VerticalAlignment="Bottom" Grid.Row="1">
             <Separator />
             <Label VerticalAlignment="Bottom">Logs:</Label>
-            <TextBox TextWrapping="Wrap" VerticalAlignment="Bottom" IsReadOnly="True" Height="100" Margin="5" Name="logTextBlock" VerticalScrollBarVisibility="Auto"></TextBox>
+            <TextBox TextWrapping="Wrap" VerticalAlignment="Bottom" IsReadOnly="True" Height="100" Margin="5"
+                     Name="logTextBlock" VerticalScrollBarVisibility="Auto" />
         </StackPanel>
     </Grid>
 </Window>
