@@ -8,19 +8,14 @@ namespace forte.device.models
         NotStarted,
 
         /// <summary>
-        ///     User confirmed Azure Media Services configuration is correct
+        ///     User confirmed configuration settings are correct
         /// </summary>
-        AzureInformationConfirmed,
+        SettingsConfirmed,
 
         /// <summary>
-        ///     vMix preset has been loaded and verified
+        /// Program has been created, vMix is broadcasting, ready for class to start
         /// </summary>
-        PresetLoadVerified,
-
-        /// <summary>
-        ///     Static image loaded, ready for Azure Program to be started
-        /// </summary>
-        ReadyForAzure,
+        ReadyToStartProgram,
 
         /// <summary>
         ///     Started streaming

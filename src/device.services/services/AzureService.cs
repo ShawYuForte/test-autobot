@@ -11,10 +11,12 @@ namespace forte.device.services
 {
     public class AzureService
     {
-        private readonly string _mediaServicesEnableEncoding;
-        private readonly CloudMediaContext _context;
+        private string _mediaServicesEnableEncoding;
+        public event LogDelegate OnLog;
 
-        public AzureService()
+        public delegate void LogDelegate(string message);
+
+        private CloudMediaContext CreateContext()
         {
             var mediaServicesAccountName = AppState.Instance.AmsAccountName;
             var mediaServicesAccountKey = AppState.Instance.AmsAccountKey;
@@ -26,36 +28,47 @@ namespace forte.device.services
                 mediaServicesAccountKey);
 
             // Used the cached credentials to create CloudMediaContext.
-            _context = new CloudMediaContext(cachedCredentials);
+            var context = new CloudMediaContext(cachedCredentials);
+            return context;
         }
 
-        public async Task<IProgram> CreateProgramAsync()
+        public AzureProgram CreateProgram()
         {
-            var azureChannel = _context.Channels.ToList().FirstOrDefault(c => c.Name == AppState.Instance.ChannelName);
+            var response = CreateProgramAsync();
+            response.Wait();
+
+            return new AzureProgram
+            {
+                AssetName = response.Result.Asset.Name,
+                AssetUrl = response.Result.Asset.Uri.ToString(),
+                Name = response.Result.Name,
+                Id = response.Result.Id,
+                AssetId = response.Result.Asset.Id
+            };
+        }
+
+        private async Task<IProgram> CreateProgramAsync()
+        {
+            var context = CreateContext();
+            var azureChannel = context.Channels.ToList().FirstOrDefault(c => c.Name == AppState.Instance.ChannelName);
             var trainerName = AppState.Instance.TrainerName.ToLower().Replace(" ", "");
             // Make sure asset is ready
-            var assetName = $"{DateTime.Now.ToString("ddMMyy-HHmm")}-{trainerName}";
-            var asset = await CreateAndConfigureAssetAsync(assetName);
+            var assetName = $"{AppState.Instance.ClassStartTime.ToString("ddMMyy-HHmm")}-{trainerName}";
+            var asset = await CreateAndConfigureAssetAsync(context, assetName);
 
             // Make sure program created
             var options = GetOptionsForProgramCreation(assetName, asset.Id);
-            var azureProgram = _context.Programs.ToList().FirstOrDefault(c => c.Name == options.Name) ??
+            var azureProgram = context.Programs.ToList().FirstOrDefault(c => c.Name == options.Name) ??
                            await azureChannel.Programs.CreateAsync(options);
-
-            // Make sure channel is running
-            if (azureProgram.State != ProgramState.Running)
-            {
-                await azureProgram.StartAsync();
-            }
 
             return azureProgram;
         }
 
-        private async Task<IAsset> CreateAndConfigureAssetAsync(string assetName)
+        private async Task<IAsset> CreateAndConfigureAssetAsync(CloudMediaContext context, string assetName)
         {
-            var asset = await _context.Assets.CreateAsync(assetName, AssetCreationOptions.None, CancellationToken.None);
+            var asset = await context.Assets.CreateAsync(assetName, AssetCreationOptions.None, CancellationToken.None);
 
-            var policy = await _context.AssetDeliveryPolicies.CreateAsync(
+            var policy = await context.AssetDeliveryPolicies.CreateAsync(
                 "Clear Policy",
                 AssetDeliveryPolicyType.NoDynamicEncryption,
                 AssetDeliveryProtocol.HLS | AssetDeliveryProtocol.SmoothStreaming | AssetDeliveryProtocol.Dash,
@@ -67,13 +80,13 @@ namespace forte.device.services
             return asset;
         }
 
-        private IProgram FindAzureProgram(string azureProgramId)
+        private IProgram FindAzureProgram(CloudMediaContext context, string azureProgramId)
         {
             if (string.IsNullOrEmpty(azureProgramId)) return null;
 
             try
             {
-                var program = _context.Programs.ToList().FirstOrDefault(c => c.Id == azureProgramId);
+                var program = context.Programs.ToList().FirstOrDefault(c => c.Id == azureProgramId);
                 return program;
             }
             catch (Exception ex)
@@ -94,6 +107,47 @@ namespace forte.device.services
                 AssetId = assetId
             };
             return options;
+        }
+
+        public bool VerifySettings()
+        {
+            try
+            {
+                var context = CreateContext();
+                var channel = context.Channels.ToList().FirstOrDefault(ch => ch.Name == AppState.Instance.ChannelName);
+                return channel != null;
+            }
+            catch (Exception exception)
+            {
+                Log($"ERROR: {exception.Message}");
+                return false;
+            }
+        }
+
+        void Log(string message)
+        {
+            OnLog?.Invoke(message);
+        }
+
+        public bool IsChannelRunning()
+        {
+            var context = CreateContext();
+            var channel = context.Channels.ToList().FirstOrDefault(ch => ch.Name == AppState.Instance.ChannelName);
+            return channel.State == ChannelState.Running;
+        }
+
+        public void StartChannel()
+        {
+            var context = CreateContext();
+            var channel = context.Channels.ToList().FirstOrDefault(ch => ch.Name == AppState.Instance.ChannelName);
+            if (channel.State == ChannelState.Stopped) channel.StartAsync().Wait();
+        }
+
+        public void StopChannel()
+        {
+            var context = CreateContext();
+            var channel = context.Channels.ToList().FirstOrDefault(ch => ch.Name == AppState.Instance.ChannelName);
+            if (channel.State == ChannelState.Running) channel.StopAsync().Wait();
         }
     }
 }

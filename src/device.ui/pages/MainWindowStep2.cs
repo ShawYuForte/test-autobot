@@ -9,13 +9,6 @@ namespace device.ui.pages
     {
         protected void ExecuteStep2Workflow()
         {
-            if (!ActivateOpeningStaticImage()) return;
-            if (!PreviewOpeningVideo()) return;
-
-            _vmixService.StartStreaming();
-            Log("Started streaming!");
-            // Set the workflow step so the user can read the instructions
-            SetWorkflowStep(Workflow.ReadyForAzure);
         }
 
         private bool PreviewOpeningVideo()

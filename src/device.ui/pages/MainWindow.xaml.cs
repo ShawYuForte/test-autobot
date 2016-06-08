@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Windows;
 using forte.device.services;
+using Xceed.Wpf.Toolkit.Core;
 
 namespace device.ui.pages
 {
@@ -11,6 +12,7 @@ namespace device.ui.pages
     public partial class MainWindow : Window
     {
         private readonly VMixService _vmixService = new VMixService();
+        private readonly AzureService _azureService = new AzureService();
         private Timer _timer;
 
         public MainWindow()
@@ -32,8 +34,8 @@ namespace device.ui.pages
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            FetchState();
-            CalculateWorkflowStep();
+            //FetchState();
+            //CalculateWorkflowStep();
         }
 
         private void startAzureButton_Click(object sender, RoutedEventArgs e)
@@ -55,23 +57,12 @@ namespace device.ui.pages
         {
             switch (wizard.CurrentPage.Name)
             {
-                case "IntroPage":
-                    if (string.IsNullOrWhiteSpace(AppState.AmsAccountKey) ||
-                        string.IsNullOrWhiteSpace(AppState.AmsAccountName) ||
-                        string.IsNullOrWhiteSpace(AppState.TrainerName) ||
-                        string.IsNullOrWhiteSpace(AppState.ChannelName))
-                    {
-                        e.Cancel = true;
-                        MessageBox.Show("All info on this page is required", "Validation failed", MessageBoxButton.OK, MessageBoxImage.Stop);
-                    }
+                case nameof(SettingsPage):
+                    SettingsPage_Next(sender, e);
                     break;
 
-                case "PresetPage":
-                    if (!_vmixService.PresetLoaded())
-                    {
-                        e.Cancel = true;
-                        MessageBox.Show("Load presets before continuing", "Validation failed", MessageBoxButton.OK, MessageBoxImage.Stop);
-                    }
+                case nameof(GetReadyPage):
+                    GetReadyPage_Next(sender, e);
                     break;
             }
         }
@@ -86,9 +77,20 @@ namespace device.ui.pages
 
         }
 
-        private void IntroPage_Leave(object sender, RoutedEventArgs e)
+        private void SettingsPage_Leave(object sender, RoutedEventArgs e)
         {
-            AppState.WorkflowState = forte.device.models.Workflow.AzureInformationConfirmed;
+            AppState.WorkflowState = forte.device.models.Workflow.SettingsConfirmed;
+        }
+
+        private void wizard_Cancel(object sender, RoutedEventArgs e)
+        {
+            if (AppState.WorkflowState != forte.device.models.Workflow.NotStarted)
+            {
+                var response = MessageBox.Show("Start over?", "Confirm", MessageBoxButton.YesNo,
+                    MessageBoxImage.Question);
+                if (response == MessageBoxResult.No) return;
+            }
+            AppState.Reset();
         }
     }
 }
