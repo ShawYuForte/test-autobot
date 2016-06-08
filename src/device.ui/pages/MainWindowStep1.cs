@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Threading;
 using System.Windows;
+using forte.device.models;
 
 namespace device.ui.pages
 {
@@ -41,7 +42,7 @@ namespace device.ui.pages
         {
             IsBusy = true;
             State = _vmixService.FetchState();
-            if (_vmixService.PresetLoaded() && WorkflowState == Workflow.NotStarted)
+            if (_vmixService.PresetLoaded() && AppState.WorkflowState == Workflow.NotStarted)
             {
                 SetWorkflowStep(Workflow.PresetLoadVerified);
             }

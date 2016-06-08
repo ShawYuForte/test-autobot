@@ -50,5 +50,45 @@ namespace device.ui.pages
         {
             ExecuteStep4Workflow();
         }
+
+        private void Wizard_Next(object sender, Xceed.Wpf.Toolkit.Core.CancelRoutedEventArgs e)
+        {
+            switch (wizard.CurrentPage.Name)
+            {
+                case "IntroPage":
+                    if (string.IsNullOrWhiteSpace(AppState.AmsAccountKey) ||
+                        string.IsNullOrWhiteSpace(AppState.AmsAccountName) ||
+                        string.IsNullOrWhiteSpace(AppState.TrainerName) ||
+                        string.IsNullOrWhiteSpace(AppState.ChannelName))
+                    {
+                        e.Cancel = true;
+                        MessageBox.Show("All info on this page is required", "Validation failed", MessageBoxButton.OK, MessageBoxImage.Stop);
+                    }
+                    break;
+
+                case "PresetPage":
+                    if (!_vmixService.PresetLoaded())
+                    {
+                        e.Cancel = true;
+                        MessageBox.Show("Load presets before continuing", "Validation failed", MessageBoxButton.OK, MessageBoxImage.Stop);
+                    }
+                    break;
+            }
+        }
+
+        private void PresetPage_Enter(object sender, RoutedEventArgs e)
+        {
+            
+        }
+
+        private void PresetPage_Leave(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void IntroPage_Leave(object sender, RoutedEventArgs e)
+        {
+            AppState.WorkflowState = forte.device.models.Workflow.AzureInformationConfirmed;
+        }
     }
 }

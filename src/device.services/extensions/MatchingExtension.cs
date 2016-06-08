@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using forte.device.models;
+using KellermanSoftware.CompareNetObjects;
 
 namespace forte.device.extensions
 {
@@ -34,6 +35,11 @@ namespace forte.device.extensions
                 (thisState.Inputs.All(thisInput => thatState.Inputs.Any(thatInput => thatInput.SameAs(thisInput))) &&
                 thatState.Inputs.All(thatInput => thisState.Inputs.Any(thisInput => thisInput.SameAs(thatInput))));
             return result;
+        }
+
+        public static bool ExactlyAs(this VMixState thisState, VMixState thatState)
+        {
+            return new CompareLogic().Compare(thisState, thatState).AreEqual;
         }
     }
 }

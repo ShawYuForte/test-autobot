@@ -10,6 +10,15 @@
         Title="{Binding Path=State.Version}" Height="350" Width="535.381" Loaded="Window_Loaded">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibility" />
+        <ControlTemplate x:Key="BulletTemplate" TargetType="{x:Type ContentControl}">
+            <BulletDecorator>
+                <BulletDecorator.Bullet>
+                    <Ellipse Fill="Black" Height="5" Margin="5,0" UseLayoutRounding="True" Width="5"
+                             d:DesignUseLayoutRounding="True" />
+                </BulletDecorator.Bullet>
+                <ContentPresenter Margin="10,0" />
+            </BulletDecorator>
+        </ControlTemplate>
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -17,66 +26,152 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <xctk:BusyIndicator IsBusy="{Binding IsBusy}" Grid.Row="0">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" MinHeight="100" />
-                </Grid.RowDefinitions>
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Grid.Row="0" HorizontalAlignment="Center">
-                    <Button x:Name="loadPresetButton" Height="80" VerticalAlignment="Top" Width="80"
-                            Click="loadPresetButton_Click" Margin="10" HorizontalAlignment="Center">
-                        <StackPanel HorizontalAlignment="Center">
-                            <TextBlock HorizontalAlignment="Center" Margin="5" FontWeight="Bold">Step 1</TextBlock>
-                            <Image Source="/images/open-512.png" MaxHeight="22" MaxWidth="75" />
-                            <TextBlock HorizontalAlignment="Center" Margin="5">Load Presets</TextBlock>
-                        </StackPanel>
-                    </Button>
-                    <Image Source="/images/right-green.jpg" MaxHeight="22" MaxWidth="75" Margin="10"
-                           IsEnabled="{Binding Step1Visible}" />
-                    <Button x:Name="startAzureButton" Height="80" VerticalAlignment="Top" Width="80" Margin="10"
-                            HorizontalAlignment="Center" IsEnabled="{Binding Step1Visible}"
-                            Click="startAzureButton_Click">
-                        <StackPanel>
-                            <TextBlock HorizontalAlignment="Center" Margin="5" FontWeight="Bold">Step 2</TextBlock>
-                            <Image Source="/images/azure.png" MaxHeight="22" MaxWidth="75" />
-                            <TextBlock HorizontalAlignment="Center" Margin="5">Start Azure</TextBlock>
-                        </StackPanel>
-                    </Button>
-                    <Image Source="/images/right-green.jpg" MaxHeight="22" MaxWidth="75" Margin="10" />
-                    <Button x:Name="startStreamButton" Height="80" VerticalAlignment="Top" Width="80" Margin="10"
-                            HorizontalAlignment="Center" IsEnabled="{Binding Step2Visible}" Click="startStreamButton_Click">
-                        <StackPanel>
-                            <TextBlock HorizontalAlignment="Center" Margin="5" FontWeight="Bold">Step 3</TextBlock>
-                            <Image Source="/images/online.png" MaxHeight="22" MaxWidth="75" />
-                            <TextBlock HorizontalAlignment="Center" Margin="5">Start Stream</TextBlock>
-                        </StackPanel>
-                    </Button>
-                    <Image Source="/images/right-green.jpg" MaxHeight="22" MaxWidth="75" Margin="10" />
-                    <Button x:Name="endStreamButton" Height="80" VerticalAlignment="Top" Width="80" Margin="10"
-                            HorizontalAlignment="Center" IsEnabled="{Binding Step3Visible}" Click="endStreamButton_Click">
-                        <StackPanel>
-                            <TextBlock HorizontalAlignment="Center" Margin="5" FontWeight="Bold">Step 4</TextBlock>
-                            <Image Source="/images/tick.png" MaxHeight="22" MaxWidth="75" />
-                            <TextBlock HorizontalAlignment="Center" Margin="5">End Stream</TextBlock>
-                        </StackPanel>
-                    </Button>
-                </StackPanel>
-
-                <ScrollViewer Grid.Row="1" Margin="10">
-                    <StackPanel MaxWidth="500" HorizontalAlignment="Center">
-                        <ContentControl
-                            Visibility="{Binding Step0Visible, Converter={StaticResource BooleanToVisibility}}">
+            <xctk:Wizard FinishButtonClosesWindow="false" Next="Wizard_Next" x:Name="wizard"
+                         HelpButtonVisibility="Collapsed" MinHeight="300" MinWidth="500">
+                <xctk:WizardPage x:Name="IntroPage" PageType="Exterior"
+                                 Title="Let's start a'streaming"
+                                 Description="I'm going to walk you through streaming, all you need is your mouse fingers."
+                                 Leave="IntroPage_Leave">
+                    <TextBlock TextWrapping="Wrap" MaxWidth="400">
+                        This worklfow takes about 15 mins, make sure you start early enough. You will go through these steps:
+                        <LineBreak />
+                        <LineBreak />
+                        <ContentControl Template="{StaticResource BulletTemplate}">
                             <TextBlock TextWrapping="Wrap">
-                                <Bold>Kickoff</Bold><LineBreak />
-                                You are at the starting point, you must start by loading presets (click "Load Presets" above), then I will share more information.
+                                (1-2min) Verify Azure configuration
                             </TextBlock>
                         </ContentControl>
+                        <LineBreak />
+                        <ContentControl Template="{StaticResource BulletTemplate}">
+                            <TextBlock TextWrapping="Wrap">
+                                (1-2min) Load vMix with Forte preset, start vMix streaming (static image)
+                            </TextBlock>
+                        </ContentControl>
+                        <LineBreak />
+                        <ContentControl Template="{StaticResource BulletTemplate}">
+                            <TextBlock TextWrapping="Wrap">
+                                (3-5min) Create and start Azure Program, kick off vMix workflow (recording starts here)
+                            </TextBlock>
+                        </ContentControl>
+                        <LineBreak />
+                        <ContentControl Template="{StaticResource BulletTemplate}">
+                            <TextBlock TextWrapping="Wrap">
+                                (2-3min) End vMix workflow, stop Azure Program, kick off Video Processing (on Azure) and give you the video URL
+                            </TextBlock>
+                        </ContentControl>
+                    </TextBlock>
+                </xctk:WizardPage>
+                <xctk:WizardPage x:Name="AzureSettingsPage" PageType="Interior"
+                                 Title="Let's start a'streaming"
+                                 Description="I'm going to walk you through streaming, all you need is your mouse fingers."
+                                 Leave="IntroPage_Leave">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <Label Grid.Column="0" Grid.Row="0">Channel Name</Label>
+                        <TextBox Grid.Column="1" Grid.Row="0" Text="{Binding AppState.ChannelName}"
+                                 VerticalAlignment="Center" />
+
+                        <Label Grid.Column="0" Grid.Row="1">Trainer Name</Label>
+                        <TextBox Grid.Column="1" Grid.Row="1" Text="{Binding AppState.TrainerName}"
+                                 VerticalAlignment="Center" />
+
+                        <Label Grid.Column="0" Grid.Row="2">AMS Account Name</Label>
+                        <TextBox Grid.Column="1" Grid.Row="2" Text="{Binding AppState.AmsAccountName}"
+                                 VerticalAlignment="Center" />
+
+                        <Label Grid.Column="0" Grid.Row="3">AMS Account Key</Label>
+                        <TextBox Grid.Column="1" Grid.Row="3" Text="{Binding AppState.AmsAccountKey}"
+                                 VerticalAlignment="Center" />
+                    </Grid>
+                </xctk:WizardPage>
+                <xctk:WizardPage x:Name="PresetPage" PageType="Interior"
+                                 Title="Configure vMix" PreviousPage="{Binding ElementName=IntroPage}"
+                                 Description="Now I will help you load vMix Preset. This will help us load Forte pre-configured settings."
+                                 Enter="PresetPage_Enter" Leave="PresetPage_Leave">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+                        <Button x:Name="loadPresetButton" Height="80" VerticalAlignment="Top" Width="80" Grid.Row="0"
+                                Grid.Column="1"
+                                Click="loadPresetButton_Click" Margin="10" HorizontalAlignment="Center">
+                            <StackPanel HorizontalAlignment="Center">
+                                <TextBlock HorizontalAlignment="Center" Margin="5" FontWeight="Bold">Step 1</TextBlock>
+                                <Image Source="/images/open-512.png" MaxHeight="22" MaxWidth="75" />
+                                <TextBlock HorizontalAlignment="Center" Margin="5">Load Presets</TextBlock>
+                            </StackPanel>
+                        </Button>
+
+                        <Label Grid.Row="1" Grid.Column="0">Preset File Path:</Label>
+                        <TextBox Text="{Binding AppState.VmixPresetFilePath}" Grid.Row="1" Grid.Column="1" />
+                    </Grid>
+                </xctk:WizardPage>
+                <xctk:WizardPage x:Name="AzurePage" PageType="Interior"
+                                 Title="Page 1"
+                                 Description="This is the first page in the process."
+                                 NextPage="{Binding ElementName=Page2}"
+                                 PreviousPage="{Binding ElementName=PresetPage}">
+                    <StackPanel>
+                        <Button x:Name="startAzureButton" Height="80" VerticalAlignment="Top" Width="80" Margin="10"
+                                HorizontalAlignment="Center" IsEnabled="{Binding Step1Visible}"
+                                Click="startAzureButton_Click">
+                            <StackPanel>
+                                <TextBlock HorizontalAlignment="Center" Margin="5" FontWeight="Bold">Step 2</TextBlock>
+                                <Image Source="/images/azure.png" MaxHeight="22" MaxWidth="75" />
+                                <TextBlock HorizontalAlignment="Center" Margin="5">Start Azure</TextBlock>
+                            </StackPanel>
+                        </Button>
                         <StackPanel Visibility="{Binding Step1Visible, Converter={StaticResource BooleanToVisibility}}">
                             <TextBlock TextWrapping="Wrap">
                                 <Bold>Step 1 Complete - Presets Verified</Bold><LineBreak />
                                 Presets were verified, the expected inputs are all available. Click on the "Step 2" button to continue!
                             </TextBlock>
                         </StackPanel>
+                    </StackPanel>
+                </xctk:WizardPage>
+                <xctk:WizardPage x:Name="Page2" PageType="Interior"
+                                 Title="Page 2"
+                                 Description="This is the second page in the process">
+                    <Button x:Name="startStreamButton" Height="80" VerticalAlignment="Top" Width="80" Margin="10"
+                            HorizontalAlignment="Center" IsEnabled="{Binding Step2Visible}"
+                            Click="startStreamButton_Click">
+                        <StackPanel>
+                            <TextBlock HorizontalAlignment="Center" Margin="5" FontWeight="Bold">Step 3</TextBlock>
+                            <Image Source="/images/online.png" MaxHeight="22" MaxWidth="75" />
+                            <TextBlock HorizontalAlignment="Center" Margin="5">Start Stream</TextBlock>
+                        </StackPanel>
+                    </Button>
+                </xctk:WizardPage>
+                <xctk:WizardPage x:Name="LastPage" PageType="Interior"
+                                 Title="Last Page"
+                                 Description="This is the last page in the process"
+                                 CanFinish="True">
+                    <StackPanel>
+                        <Button x:Name="endStreamButton" Height="80" VerticalAlignment="Top" Width="80" Margin="10"
+                                HorizontalAlignment="Center" IsEnabled="{Binding Step3Visible}"
+                                Click="endStreamButton_Click">
+                            <StackPanel>
+                                <TextBlock HorizontalAlignment="Center" Margin="5" FontWeight="Bold">Step 4</TextBlock>
+                                <Image Source="/images/tick.png" MaxHeight="22" MaxWidth="75" />
+                                <TextBlock HorizontalAlignment="Center" Margin="5">End Stream</TextBlock>
+                            </StackPanel>
+                        </Button>
                         <ContentControl
                             Visibility="{Binding Step2Visible, Converter={StaticResource BooleanToVisibility}}">
                             <TextBlock TextWrapping="Wrap">
@@ -86,6 +181,11 @@
                                 click on the the "Step 3" button above.
                             </TextBlock>
                         </ContentControl>
+                    </StackPanel>
+                </xctk:WizardPage>
+            </xctk:Wizard>
+
+            <!--<StackPanel MaxWidth="500" HorizontalAlignment="Center">
                         <ContentControl
                             Visibility="{Binding Step3Visible, Converter={StaticResource BooleanToVisibility}}">
                             <TextBlock TextWrapping="Wrap">
@@ -100,10 +200,7 @@
                                 That's it, you're done with this session, we can start over again. To play it safe, shut me down and start me again.
                             </TextBlock>
                         </ContentControl>
-                    </StackPanel>
-                </ScrollViewer>
-
-            </Grid>
+                    </StackPanel>-->
         </xctk:BusyIndicator>
         <StackPanel VerticalAlignment="Bottom" Grid.Row="1">
             <Separator />
