@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Threading;
 using System.Windows;
 using forte.device.services;
+using Xceed.Wpf.Toolkit.Core;
 
 #endregion
 
@@ -38,22 +39,7 @@ namespace device.ui.pages
             worker.RunWorkerCompleted += (o, args) => AppTitle = $"Forte Autobot v{(string) args.Result}";
             worker.RunWorkerAsync();
 
-            wizard.CurrentPage = StartClassPage;
-        }
-
-        private void startAzureButton_Click(object sender, RoutedEventArgs e)
-        {
-            ExecuteStep2Workflow();
-        }
-
-        private void startStreamButton_Click(object sender, RoutedEventArgs e)
-        {
-            ExecuteStep3Workflow();
-        }
-
-        private void endStreamButton_Click(object sender, RoutedEventArgs e)
-        {
-            ExecuteStep4Workflow();
+            wizard.CurrentPage = StopClassPage;
         }
 
         private void Wizard_Next(object sender, Xceed.Wpf.Toolkit.Core.CancelRoutedEventArgs e)
@@ -66,6 +52,10 @@ namespace device.ui.pages
 
                 case nameof(GetReadyPage):
                     GetReadyPage_Next(sender, e);
+                    break;
+
+                case nameof(StartClassPage):
+                    StartClassPage_Next(sender, e);
                     break;
             }
         }
@@ -96,12 +86,17 @@ namespace device.ui.pages
 
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            Log($"Window size changed to {Width} width and {Height} height");
+            //Log($"Window size changed to {Width} width and {Height} height");
         }
 
         private void StartClassPage_Enter(object sender, RoutedEventArgs e)
         {
             StartClassTimer();
+        }
+
+        private void StartClassPage_OnPause(object sender, System.EventArgs e)
+        {
+            PauseClassTimer();
         }
     }
 }

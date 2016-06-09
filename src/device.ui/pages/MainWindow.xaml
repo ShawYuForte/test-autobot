@@ -14,7 +14,7 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <xctk:BusyIndicator IsBusy="{Binding IsBusy}" Grid.Row="0">
-            <xctk:Wizard FinishButtonClosesWindow="false" Next="Wizard_Next" x:Name="wizard"
+            <xctk:Wizard FinishButtonClosesWindow="false" Next="Wizard_Next" x:Name="wizard" 
                          CancelButtonClosesWindow="False" HelpButtonVisibility="Collapsed" MinHeight="300" Width="600"
                          Cancel="wizard_Cancel">
                 <xctk:WizardPage x:Name="IntroPage" PageType="Exterior"
@@ -34,27 +34,19 @@
                                  Enter="PresetPage_Enter" Leave="PresetPage_Leave">
                     <controls:GetReadyPage />
                 </xctk:WizardPage>
-                <xctk:WizardPage x:Name="StartClassPage" PageType="Interior"
+                <xctk:WizardPage x:Name="StartClassPage" PageType="Interior" 
                                  Title="Ready to Stream" Enter="StartClassPage_Enter"
                                  Description="We are ready to stream, as soon as the time hits start-o-clock."
                                  NextPage="{Binding ElementName=Page2}"
-                                 PreviousPage="{Binding ElementName=GetReadyPage}">
-                    <controls:StartClassPage />
+                                 PreviousPage="{Binding ElementName=StartClassPage}">
+                    <controls:StartClassPage OnPause="StartClassPage_OnPause" />
                 </xctk:WizardPage>
-                <xctk:WizardPage x:Name="Page2" PageType="Interior"
-                                 Title="Page 2"
-                                 Description="This is the second page in the process">
-                    <Button x:Name="startStreamButton" Height="80" VerticalAlignment="Top" Width="80" Margin="10"
-                            HorizontalAlignment="Center"
-                            Click="startStreamButton_Click">
-                        <StackPanel>
-                            <TextBlock HorizontalAlignment="Center" Margin="5" FontWeight="Bold">Step 3</TextBlock>
-                            <Image Source="/images/online.png" MaxHeight="22" MaxWidth="75" />
-                            <TextBlock HorizontalAlignment="Center" Margin="5">Start Stream</TextBlock>
-                        </StackPanel>
-                    </Button>
+                <xctk:WizardPage x:Name="StopClassPage" PageType="Interior" PreviousPage="{Binding ElementName=StopClassPage}"
+                                 Title="Stop the class when done"
+                                 Description="We are going to wait together for the class to end, then wrap up.">
+                    <controls:StopClassPage />
                 </xctk:WizardPage>
-                <xctk:WizardPage x:Name="LastPage" PageType="Interior"
+                <xctk:WizardPage x:Name="LastPage" PageType="Interior" PreviousPage="{Binding ElementName=LastPage}"
                                  Title="Last Page" Description="This is the last page in the process" CanFinish="True">
                     <controls:SummaryPage />
                 </xctk:WizardPage>
