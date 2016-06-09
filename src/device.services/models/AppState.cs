@@ -1,10 +1,14 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.ComponentModel;
 using System.Configuration;
 using AutoMapper;
 using forte.device.Properties;
 using Newtonsoft.Json;
 using PostSharp.Patterns.Model;
+
+#endregion
 
 namespace forte.device.models
 {
@@ -13,8 +17,15 @@ namespace forte.device.models
     {
         static AppState()
         {
+            if (Settings.Default.CallUpgrade)
+            {
+                Settings.Default.Upgrade();
+                Settings.Default.CallUpgrade = false;
+                Settings.Default.Save();
+            }
             Mapper.CreateMap<AppState, AppState>();
-            Instance = JsonConvert.DeserializeObject<AppState>(Settings.Default.State);
+            Instance = JsonConvert.DeserializeObject<AppState>(Settings.Default.State)
+                       ?? new AppState().Reset();
             Instance.Initialized = true;
             Instance.SetDefaultValues();
         }
@@ -72,6 +83,11 @@ namespace forte.device.models
         public DateTime ClassStartTime { get; set; }
 
         /// <summary>
+        ///     Class duration in minutes
+        /// </summary>
+        public int ClassDuration { get; set; }
+
+        /// <summary>
         ///     VMIX preset file path
         /// </summary>
         public string VmixPresetFilePath { get; set; }
@@ -92,7 +108,7 @@ namespace forte.device.models
         public Workflow WorkflowState { get; set; }
 
         /// <summary>
-        /// Currently created program
+        ///     Currently created program
         /// </summary>
         public AzureProgram CurrentProgram { get; set; }
 
@@ -110,7 +126,7 @@ namespace forte.device.models
         /// <summary>
         ///     Reset state
         /// </summary>
-        public void Reset()
+        public AppState Reset()
         {
             var next30MinPoint = DateTime.Now;
             while (next30MinPoint.Minute%30 != 0) next30MinPoint = next30MinPoint.AddMinutes(1);
@@ -119,6 +135,7 @@ namespace forte.device.models
             ClassStartTime = next30MinPoint;
             WorkflowState = Workflow.NotStarted;
             CurrentProgram = null;
+            return this;
         }
 
         private void OnPropertyChanged(object sender, PropertyChangedEventArgs e)

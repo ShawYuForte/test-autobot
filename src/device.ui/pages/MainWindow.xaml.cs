@@ -1,8 +1,11 @@
-﻿using System;
+﻿#region
+
+using System.ComponentModel;
 using System.Threading;
 using System.Windows;
 using forte.device.services;
-using Xceed.Wpf.Toolkit.Core;
+
+#endregion
 
 namespace device.ui.pages
 {
@@ -11,8 +14,8 @@ namespace device.ui.pages
     /// </summary>
     public partial class MainWindow : Window
     {
-        private readonly VMixService _vmixService = new VMixService();
         private readonly AzureService _azureService = new AzureService();
+        private readonly VMixService _vmixService = new VMixService();
         private Timer _timer;
 
         public MainWindow()
@@ -23,19 +26,19 @@ namespace device.ui.pages
 
         private void Log(string message)
         {
-            logTextBlock.AppendText($"{DateTime.Now}: {message}{Environment.NewLine}");
-            logTextBlock.ScrollToEnd();
-        }
-
-        private void loadPresetButton_Click(object sender, RoutedEventArgs e)
-        {
-            LoadPresets();
+            Logger.Log(message);
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             //FetchState();
             //CalculateWorkflowStep();
+            var worker = new BackgroundWorker();
+            worker.DoWork += (o, args) => args.Result = typeof (MainWindow).Assembly.GetName().Version.ToString();
+            worker.RunWorkerCompleted += (o, args) => AppTitle = $"Forte Autobot v{(string) args.Result}";
+            worker.RunWorkerAsync();
+
+            wizard.CurrentPage = StartClassPage;
         }
 
         private void startAzureButton_Click(object sender, RoutedEventArgs e)
@@ -69,12 +72,10 @@ namespace device.ui.pages
 
         private void PresetPage_Enter(object sender, RoutedEventArgs e)
         {
-            
         }
 
         private void PresetPage_Leave(object sender, RoutedEventArgs e)
         {
-
         }
 
         private void SettingsPage_Leave(object sender, RoutedEventArgs e)
@@ -91,6 +92,16 @@ namespace device.ui.pages
                 if (response == MessageBoxResult.No) return;
             }
             AppState.Reset();
+        }
+
+        private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            Log($"Window size changed to {Width} width and {Height} height");
+        }
+
+        private void StartClassPage_Enter(object sender, RoutedEventArgs e)
+        {
+            StartClassTimer();
         }
     }
 }

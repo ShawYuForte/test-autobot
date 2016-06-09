@@ -4,181 +4,48 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
-        xmlns:local="clr-namespace:device.ui"
-        mc:Ignorable="d" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen"
-        DataContext="{Binding RelativeSource={RelativeSource Self}}" Topmost="true" WindowStyle="ToolWindow"
-        Title="{Binding Path=State.Version}" Height="350" Width="535.381" Loaded="Window_Loaded">
-    <Window.Resources>
-        <BooleanToVisibilityConverter x:Key="BooleanToVisibility" />
-        <ControlTemplate x:Key="BulletTemplate" TargetType="{x:Type ContentControl}">
-            <BulletDecorator>
-                <BulletDecorator.Bullet>
-                    <Ellipse Fill="Black" Height="5" Margin="5,0" UseLayoutRounding="True" Width="5"
-                             d:DesignUseLayoutRounding="True" />
-                </BulletDecorator.Bullet>
-                <ContentPresenter Margin="10,0" />
-            </BulletDecorator>
-        </ControlTemplate>
-    </Window.Resources>
+        xmlns:controls="clr-namespace:device.ui.controls"
+        mc:Ignorable="d" WindowStartupLocation="CenterScreen" SizeChanged="Window_SizeChanged"
+        DataContext="{Binding RelativeSource={RelativeSource Self}}" Topmost="true" ResizeMode="CanMinimize"
+        Title="{Binding Path=AppTitle}" Height="530" Width="620" Loaded="Window_Loaded">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <xctk:BusyIndicator IsBusy="{Binding IsBusy}" Grid.Row="0">
-            <xctk:Wizard FinishButtonClosesWindow="false" Next="Wizard_Next" x:Name="wizard" CancelButtonClosesWindow="False"
-                         HelpButtonVisibility="Collapsed" MinHeight="300" Width="600" Cancel="wizard_Cancel">
+            <xctk:Wizard FinishButtonClosesWindow="false" Next="Wizard_Next" x:Name="wizard"
+                         CancelButtonClosesWindow="False" HelpButtonVisibility="Collapsed" MinHeight="300" Width="600"
+                         Cancel="wizard_Cancel">
                 <xctk:WizardPage x:Name="IntroPage" PageType="Exterior"
-                                 Title="Let's start a'streaming" 
+                                 Title="Let's start a'streaming"
                                  Description="I'm going to walk you through streaming, all you need is your mouse fingers.">
-                    <TextBlock TextWrapping="Wrap" MaxWidth="400">
-                        This worklfow takes about 15 mins, make sure you start early enough. You will go through these steps:
-                        <LineBreak />
-                        <LineBreak />
-                        <ContentControl Template="{StaticResource BulletTemplate}">
-                            <TextBlock TextWrapping="Wrap">
-                                (1-2min) Verify configuration settings
-                            </TextBlock>
-                        </ContentControl>
-                        <LineBreak />
-                        <ContentControl Template="{StaticResource BulletTemplate}">
-                            <TextBlock TextWrapping="Wrap">
-                                (4-7min) Load vMix with Forte preset, configure Azure Channel, create Program, start vMix streaming (static image)
-                            </TextBlock>
-                        </ContentControl>
-                        <LineBreak />
-                        <ContentControl Template="{StaticResource BulletTemplate}">
-                            <TextBlock TextWrapping="Wrap">
-                                (2-4min) Start Azure Program, kick off vMix workflow (recording starts here)
-                            </TextBlock>
-                        </ContentControl>
-                        <LineBreak />
-                        <ContentControl Template="{StaticResource BulletTemplate}">
-                            <TextBlock TextWrapping="Wrap">
-                                (2-3min) End vMix workflow, stop Azure Program, kick off Video Processing (on Azure) and give you the video URL
-                            </TextBlock>
-                        </ContentControl>
-                    </TextBlock>
+                    <controls:IntroPage />
                 </xctk:WizardPage>
                 <xctk:WizardPage x:Name="SettingsPage" PageType="Interior"
                                  Title="Confirm Settings" PreviousPage="{Binding ElementName=IntroPage}"
                                  Description="Confirm these settings before moving forward. You only need to confirm the bold settings each time, the other ones you only confirm once (they shouldn't change over time)."
                                  Leave="SettingsPage_Leave">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="150" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="*" />
-                        </Grid.RowDefinitions>
-
-                        <Label Grid.Column="0" Grid.Row="0" FontWeight="Bold">Trainer Name</Label>
-                        <TextBox Grid.Column="1" Grid.Row="0" Text="{Binding AppState.TrainerName}"
-                                 VerticalAlignment="Center" />
-
-                        <Label Grid.Column="0" Grid.Row="1" FontWeight="Bold">Class Start Time</Label>
-                        <xctk:DateTimePicker Grid.Column="1" Grid.Row="1" Value="{Binding AppState.ClassStartTime}" FormatString="dddd, MMMM dd, yyyy hh:mm tt" Format="Custom"
-                                 VerticalAlignment="Center" />
-
-                        <Separator Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"></Separator>
-
-                        <Label Grid.Column="0" Grid.Row="3">AMS Channel Name</Label>
-                        <TextBox Grid.Column="1" Grid.Row="3" Text="{Binding AppState.ChannelName}"
-                                 VerticalAlignment="Center" />
-
-                        <Label Grid.Column="0" Grid.Row="4">AMS Account Name</Label>
-                        <TextBox Grid.Column="1" Grid.Row="4" Text="{Binding AppState.AmsAccountName}"
-                                 VerticalAlignment="Center" />
-
-                        <Label Grid.Column="0" Grid.Row="5">AMS Account Key</Label>
-                        <TextBox Grid.Column="1" Grid.Row="5" Text="{Binding AppState.AmsAccountKey}"
-                                 VerticalAlignment="Center" />
-
-                        <Label Grid.Row="6" Grid.Column="0">VMIX Exe File Path:</Label>
-                        <TextBox Text="{Binding AppState.VmixExecutablePath}"  Grid.Row="6" Grid.Column="1" VerticalAlignment="Center"/>
-                        
-                        <Label Grid.Row="7" Grid.Column="0">VMIX Preset File Path:</Label>
-                        <TextBox Text="{Binding AppState.VmixPresetFilePath}"  Grid.Row="7" Grid.Column="1" VerticalAlignment="Center"/>
-                    </Grid>
+                    <controls:SettingsPage />
                 </xctk:WizardPage>
                 <xctk:WizardPage x:Name="GetReadyPage" PageType="Interior"
                                  Title="Get Ready to Stream" PreviousPage="{Binding ElementName=SettingsPage}"
                                  Description="Now I am going to prepare everything for you to start streaming, click 'Next' when ready."
                                  Enter="PresetPage_Enter" Leave="PresetPage_Leave">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="25" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
-
-                        <TextBlock Grid.Column="0" Grid.ColumnSpan="2">This is what I will do when you click "Next":</TextBlock>
-
-                        <Image Source="/images/vmix.jpg" Grid.Column="0" Grid.Row="1" Margin="5" VerticalAlignment="Center"/>
-                        <TextBlock Grid.Column="1" Grid.Row="1" Margin="5" VerticalAlignment="Center" >1) Start vMix by running "<Run Text="{Binding AppState.VmixExecutablePath}" />"</TextBlock>
-
-                        <Image Source="/images/vmix.jpg" Grid.Column="0" Grid.Row="2" VerticalAlignment="Center" Margin="5"/>
-                        <TextBlock Grid.Column="1" Grid.Row="2" VerticalAlignment="Center" Margin="5">2) Load vMix Presets from "<Run Text="{Binding AppState.VmixPresetFilePath}" />"</TextBlock>
-
-                        <Image Source="/images/azure.png" Grid.Column="0" Grid.Row="3"  VerticalAlignment="Center" Margin="5"/>
-                        <TextBlock Grid.Column="1" Grid.Row="3" VerticalAlignment="Center" Margin="5">3) Start the Azure "<Run Text="{Binding AppState.ChannelName}" />" Channel</TextBlock>
-
-                        <Image Source="/images/azure.png" Grid.Column="0" Grid.Row="4"  VerticalAlignment="Center" Margin="5"/>
-                        <TextBlock Grid.Column="1" Grid.Row="4" VerticalAlignment="Center" Margin="5">4) Create an Azure Program, but not start it</TextBlock>
-
-                        <Image Source="/images/vmix.jpg" Grid.Column="0" Grid.Row="5"  VerticalAlignment="Center" Margin="5"/>
-                        <TextBlock Grid.Column="1" Grid.Row="5" VerticalAlignment="Center" Margin="5">5) Select the static Forte background image, start vMix streaming (not broadcasting yet)</TextBlock>
-
-                        <TextBlock Grid.ColumnSpan="2" Grid.Column="0" Grid.Row="6" TextWrapping="Wrap"><Bold>Remember:</Bold> this doesn't start Azure recording, so you can do this as 
-                            soon as possible, you must be ready for the next step before the class starts</TextBlock>
-
-                    </Grid>
+                    <controls:GetReadyPage />
                 </xctk:WizardPage>
                 <xctk:WizardPage x:Name="StartClassPage" PageType="Interior"
-                                 Title="Page 1"
-                                 Description="This is the first page in the process."
+                                 Title="Ready to Stream" Enter="StartClassPage_Enter"
+                                 Description="We are ready to stream, as soon as the time hits start-o-clock."
                                  NextPage="{Binding ElementName=Page2}"
                                  PreviousPage="{Binding ElementName=GetReadyPage}">
-                    <StackPanel>
-                        <Button x:Name="startAzureButton" Height="80" VerticalAlignment="Top" Width="80" Margin="10"
-                                HorizontalAlignment="Center" IsEnabled="{Binding Step1Visible}"
-                                Click="startAzureButton_Click">
-                            <StackPanel>
-                                <TextBlock HorizontalAlignment="Center" Margin="5" FontWeight="Bold">Step 2</TextBlock>
-                                <Image Source="/images/azure.png" MaxHeight="22" MaxWidth="75" />
-                                <TextBlock HorizontalAlignment="Center" Margin="5">Start Azure</TextBlock>
-                            </StackPanel>
-                        </Button>
-                        <StackPanel Visibility="{Binding Step1Visible, Converter={StaticResource BooleanToVisibility}}">
-                            <TextBlock TextWrapping="Wrap">
-                                <Bold>Step 1 Complete - Presets Verified</Bold><LineBreak />
-                                Presets were verified, the expected inputs are all available. Click on the "Step 2" button to continue!
-                            </TextBlock>
-                        </StackPanel>
-                    </StackPanel>
+                    <controls:StartClassPage />
                 </xctk:WizardPage>
                 <xctk:WizardPage x:Name="Page2" PageType="Interior"
                                  Title="Page 2"
                                  Description="This is the second page in the process">
                     <Button x:Name="startStreamButton" Height="80" VerticalAlignment="Top" Width="80" Margin="10"
-                            HorizontalAlignment="Center" IsEnabled="{Binding Step2Visible}"
+                            HorizontalAlignment="Center"
                             Click="startStreamButton_Click">
                         <StackPanel>
                             <TextBlock HorizontalAlignment="Center" Margin="5" FontWeight="Bold">Step 3</TextBlock>
@@ -188,54 +55,11 @@
                     </Button>
                 </xctk:WizardPage>
                 <xctk:WizardPage x:Name="LastPage" PageType="Interior"
-                                 Title="Last Page"
-                                 Description="This is the last page in the process"
-                                 CanFinish="True">
-                    <StackPanel>
-                        <Button x:Name="endStreamButton" Height="80" VerticalAlignment="Top" Width="80" Margin="10"
-                                HorizontalAlignment="Center" IsEnabled="{Binding Step3Visible}"
-                                Click="endStreamButton_Click">
-                            <StackPanel>
-                                <TextBlock HorizontalAlignment="Center" Margin="5" FontWeight="Bold">Step 4</TextBlock>
-                                <Image Source="/images/tick.png" MaxHeight="22" MaxWidth="75" />
-                                <TextBlock HorizontalAlignment="Center" Margin="5">End Stream</TextBlock>
-                            </StackPanel>
-                        </Button>
-                        <ContentControl
-                            Visibility="{Binding Step2Visible, Converter={StaticResource BooleanToVisibility}}">
-                            <TextBlock TextWrapping="Wrap">
-                                <Bold>Step 2 Complete - Ready to Stream</Bold><LineBreak />
-                                vMix is now ready to stream, but before you do, you must start the Azure Channel and Program. Go to the Azure
-                                Portal now and start the channel, create the program, and start it. When the program is successfully running,
-                                click on the the "Step 3" button above.
-                            </TextBlock>
-                        </ContentControl>
-                    </StackPanel>
+                                 Title="Last Page" Description="This is the last page in the process" CanFinish="True">
+                    <controls:SummaryPage />
                 </xctk:WizardPage>
             </xctk:Wizard>
-
-            <!--<StackPanel MaxWidth="500" HorizontalAlignment="Center">
-                        <ContentControl
-                            Visibility="{Binding Step3Visible, Converter={StaticResource BooleanToVisibility}}">
-                            <TextBlock TextWrapping="Wrap">
-                                <Bold>Step 3 Complete - We Have Live Video</Bold><LineBreak />
-                                Live video is being broadcast, now you wait for the end of the class, when it's over, press the "Step 4" button.
-                            </TextBlock>
-                        </ContentControl>
-                        <ContentControl
-                            Visibility="{Binding Step4Visible, Converter={StaticResource BooleanToVisibility}}">
-                            <TextBlock TextWrapping="Wrap">
-                                <Bold>Session Complete!</Bold><LineBreak />
-                                That's it, you're done with this session, we can start over again. To play it safe, shut me down and start me again.
-                            </TextBlock>
-                        </ContentControl>
-                    </StackPanel>-->
         </xctk:BusyIndicator>
-        <StackPanel VerticalAlignment="Bottom" Grid.Row="1">
-            <Separator />
-            <Label VerticalAlignment="Bottom">Logs:</Label>
-            <TextBox TextWrapping="Wrap" VerticalAlignment="Bottom" IsReadOnly="True" Height="100" Margin="5"
-                     Name="logTextBlock" VerticalScrollBarVisibility="Auto" />
-        </StackPanel>
+        <controls:LogControl x:Name="Logger" VerticalAlignment="Bottom" Grid.Row="1" />
     </Grid>
 </Window>

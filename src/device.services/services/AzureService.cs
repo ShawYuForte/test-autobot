@@ -149,5 +149,12 @@ namespace forte.device.services
             var channel = context.Channels.ToList().FirstOrDefault(ch => ch.Name == AppState.Instance.ChannelName);
             if (channel.State == ChannelState.Running) channel.StopAsync().Wait();
         }
+
+        public void StartProgram()
+        {
+            var context = CreateContext();
+            var program = FindAzureProgram(context, AppState.Instance.CurrentProgram.Id);
+            program.StartAsync().Wait();
+        }
     }
 }

@@ -145,6 +145,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="extensions\ExceptionHandlingExtensions.cs" />
     <Compile Include="extensions\MatchingExtension.cs" />
     <Compile Include="extensions\StringExtensions.cs" />
     <Compile Include="models\AppState.cs" />
