@@ -33,6 +33,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <FilesToIncludeForPublish>AllFilesInProjectFolder</FilesToIncludeForPublish>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -94,10 +95,137 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="install\publish.htm" />
+    <Content Include="install\setup.exe" />
     <Content Include="packages.config" />
     <Content Include="ApplicationInsights.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="install\Application Files\device.ui_1_0_0_2\device.services.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_2\device.ui.application" />
+    <Content Include="install\Application Files\device.ui_1_0_0_2\device.ui.exe.config.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_2\device.ui.exe.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_2\device.ui.exe.manifest" />
+    <Content Include="install\Application Files\device.ui_1_0_0_2\de\Xceed.Wpf.AvalonDock.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_2\es\Xceed.Wpf.AvalonDock.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_2\fr\Xceed.Wpf.AvalonDock.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_2\hu\Xceed.Wpf.AvalonDock.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_2\it\Xceed.Wpf.AvalonDock.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_2\Newtonsoft.Json.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_2\pt-BR\Xceed.Wpf.AvalonDock.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_2\RestSharp.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_2\ro\Xceed.Wpf.AvalonDock.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_2\ru\Xceed.Wpf.AvalonDock.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_2\sv\Xceed.Wpf.AvalonDock.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_2\Xceed.Wpf.AvalonDock.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_2\Xceed.Wpf.AvalonDock.Themes.Aero.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_2\Xceed.Wpf.AvalonDock.Themes.Metro.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_2\Xceed.Wpf.AvalonDock.Themes.VS2010.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_2\Xceed.Wpf.DataGrid.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_2\Xceed.Wpf.Toolkit.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_2\zh-Hans\Xceed.Wpf.AvalonDock.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_3\device.services.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_3\device.ui.application" />
+    <Content Include="install\Application Files\device.ui_1_0_0_3\device.ui.exe.config.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_3\device.ui.exe.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_3\device.ui.exe.manifest" />
+    <Content Include="install\Application Files\device.ui_1_0_0_3\de\Xceed.Wpf.AvalonDock.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_3\es\Xceed.Wpf.AvalonDock.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_3\favicon.ico.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_3\fr\Xceed.Wpf.AvalonDock.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_3\hu\Xceed.Wpf.AvalonDock.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_3\it\Xceed.Wpf.AvalonDock.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_3\Newtonsoft.Json.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_3\pt-BR\Xceed.Wpf.AvalonDock.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_3\RestSharp.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_3\ro\Xceed.Wpf.AvalonDock.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_3\ru\Xceed.Wpf.AvalonDock.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_3\sv\Xceed.Wpf.AvalonDock.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_3\Xceed.Wpf.AvalonDock.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_3\Xceed.Wpf.AvalonDock.Themes.Aero.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_3\Xceed.Wpf.AvalonDock.Themes.Metro.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_3\Xceed.Wpf.AvalonDock.Themes.VS2010.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_3\Xceed.Wpf.DataGrid.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_3\Xceed.Wpf.Toolkit.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_3\zh-Hans\Xceed.Wpf.AvalonDock.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\AutoMapper.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\device.services.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\device.ui.application" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\device.ui.exe.config.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\device.ui.exe.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\device.ui.exe.manifest" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\de\Microsoft.Data.Edm.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\de\Microsoft.Data.OData.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\de\Microsoft.Data.Services.Client.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\de\System.Spatial.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\de\Xceed.Wpf.AvalonDock.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\es\Microsoft.Data.Edm.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\es\Microsoft.Data.OData.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\es\Microsoft.Data.Services.Client.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\es\System.Spatial.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\es\Xceed.Wpf.AvalonDock.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\favicon.ico.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\fr\Microsoft.Data.Edm.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\fr\Microsoft.Data.OData.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\fr\Microsoft.Data.Services.Client.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\fr\System.Spatial.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\fr\Xceed.Wpf.AvalonDock.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\hu\Xceed.Wpf.AvalonDock.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\it\Microsoft.Data.Edm.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\it\Microsoft.Data.OData.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\it\Microsoft.Data.Services.Client.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\it\System.Spatial.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\it\Xceed.Wpf.AvalonDock.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\ja\Microsoft.Data.Edm.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\ja\Microsoft.Data.OData.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\ja\Microsoft.Data.Services.Client.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\ja\System.Spatial.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\KellermanSoftware.Compare-NET-Objects.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\ko\Microsoft.Data.Edm.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\ko\Microsoft.Data.OData.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\ko\Microsoft.Data.Services.Client.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\ko\System.Spatial.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\Microsoft.Azure.KeyVault.Core.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\Microsoft.Data.Edm.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\Microsoft.Data.OData.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\Microsoft.Data.Services.Client.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\Microsoft.Practices.TransientFaultHandling.Core.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\Microsoft.WindowsAzure.MediaServices.Client.Common.BlobTransfer.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\Microsoft.WindowsAzure.MediaServices.Client.Common.FileEncryption.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\Microsoft.WindowsAzure.MediaServices.Client.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\Microsoft.WindowsAzure.MediaServices.Client.Extensions.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\Microsoft.WindowsAzure.Storage.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\Newtonsoft.Json.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\PostSharp.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\PostSharp.Patterns.Common.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\PostSharp.Patterns.Model.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\pt-BR\Xceed.Wpf.AvalonDock.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\RestSharp.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\ro\Xceed.Wpf.AvalonDock.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\ru\Microsoft.Data.Edm.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\ru\Microsoft.Data.OData.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\ru\Microsoft.Data.Services.Client.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\ru\System.Spatial.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\ru\Xceed.Wpf.AvalonDock.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\sv\Xceed.Wpf.AvalonDock.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\System.Spatial.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\Xceed.Wpf.AvalonDock.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\Xceed.Wpf.AvalonDock.Themes.Aero.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\Xceed.Wpf.AvalonDock.Themes.Metro.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\Xceed.Wpf.AvalonDock.Themes.VS2010.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\Xceed.Wpf.DataGrid.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\Xceed.Wpf.Toolkit.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\zh-Hans\Microsoft.Data.Edm.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\zh-Hans\Microsoft.Data.OData.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\zh-Hans\Microsoft.Data.Services.Client.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\zh-Hans\System.Spatial.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\zh-Hans\Xceed.Wpf.AvalonDock.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\zh-Hant\Microsoft.Data.Edm.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\zh-Hant\Microsoft.Data.OData.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\zh-Hant\Microsoft.Data.Services.Client.resources.dll.deploy" />
+    <Content Include="install\Application Files\device.ui_1_0_0_4\zh-Hant\System.Spatial.resources.dll.deploy" />
+    <Content Include="install\device.ui.application" />
+    <None Include="Properties\PublishProfiles\forte-auto-vmix - Web Deploy.pubxml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -113,9 +241,7 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="install\" />
-  </ItemGroup>
+  <ItemGroup />
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>

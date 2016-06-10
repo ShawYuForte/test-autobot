@@ -1,4 +1,6 @@
-﻿using System.Configuration;
+﻿#region
+
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -9,20 +11,46 @@ using forte.device.models;
 using Newtonsoft.Json;
 using RestSharp;
 
+#endregion
+
 namespace forte.device.services
 {
     public class VMixService : Service
     {
         private readonly RestClient _client;
-        private readonly VMixState _presetState;
+        private VMixState _presetState;
 
         public VMixService()
         {
             _client = new RestClient(ConfigurationManager.AppSettings["apiPath"]);
+
+            LoadExpectedPresets();
+        }
+
+        private void LoadExpectedPresets()
+        {
             var path = new FileInfo(Assembly.GetExecutingAssembly().Location).Directory.FullName;
             var expectedStateFile =
                 Path.Combine(path, "data\\expected-state.json");
-            _presetState = JsonConvert.DeserializeObject<VMixState>(File.ReadAllText(expectedStateFile));
+            string expectedStateJson;
+
+            if (File.Exists(expectedStateFile))
+            {
+                expectedStateJson = File.ReadAllText(expectedStateFile);
+            }
+            else
+            {
+                var assembly = Assembly.GetExecutingAssembly();
+                const string resourceName = "forte.device.data.expected-state.json";
+
+                using (var stream = assembly.GetManifestResourceStream(resourceName))
+                using (var reader = new StreamReader(stream))
+                {
+                    expectedStateJson = reader.ReadToEnd();
+                }
+            }
+
+            _presetState = JsonConvert.DeserializeObject<VMixState>(expectedStateJson);
         }
 
         /// <summary>
@@ -122,14 +150,10 @@ namespace forte.device.services
 
         private VMixState CallAndFetchState(string operation, string description)
         {
-            var webRequest = (HttpWebRequest)WebRequest.CreateHttp($"{ConfigurationManager.AppSettings["apiPath"]}{operation}");
-            var response = (HttpWebResponse)webRequest.GetResponse();
+            var webRequest =
+                (HttpWebRequest) WebRequest.CreateHttp($"{ConfigurationManager.AppSettings["apiPath"]}{operation}");
+            var response = (HttpWebResponse) webRequest.GetResponse();
             if (response.StatusCode == HttpStatusCode.OK) return FetchState();
-
-            //var request = new RestRequest(operation, Method.GET);
-            ////var response = _client.Execute<VMixState>(request);
-
-            //if (response.ResponseStatus == ResponseStatus.Completed) return FetchState();
 
             var error = $"Could not {description} ({response.StatusDescription}";
             Log(error);
@@ -155,7 +179,8 @@ namespace forte.device.services
 
         public VMixState StartPlaylist()
         {
-            CallAndFetchState($"/?Function=SelectPlayList&Value={ConfigurationManager.AppSettings["playlist-name"]}", "set playlist");
+            CallAndFetchState($"/?Function=SelectPlayList&Value={ConfigurationManager.AppSettings["playlist-name"]}",
+                "set playlist");
             return CallAndFetchState("/?Function=StartPlayList", "start playlist");
         }
 
