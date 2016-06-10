@@ -1,6 +1,8 @@
 ﻿#region
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -38,33 +40,76 @@ namespace forte.device.services
             var response = CreateProgramAsync();
             response.Wait();
 
+            return response.Result;
+        }
+
+        public AzureProgram FetchProgram()
+        {
+            var name = "live-stream-test";
+            var context = CreateContext();
+            var azureChannel = context.Channels.ToList().FirstOrDefault(c => c.Name == AppState.Instance.ChannelName);
+            var program = context.Programs.ToList().FirstOrDefault(c => c.Name == name);
+            var asset = program.Asset;
+
             return new AzureProgram
             {
-                AssetName = response.Result.Asset.Name,
-                AssetUrl = response.Result.Asset.Uri.ToString(),
-                Name = response.Result.Name,
-                Id = response.Result.Id,
-                AssetId = response.Result.Asset.Id
+                Name = program.Name,
+                AssetId = program.AssetId,
+                AssetName = program.Asset.Name,
+                AssetUrl = program.Asset.Uri.ToString(),
+                Id = program.Id,
+                Running = program.State == ProgramState.Running
             };
         }
 
-        private async Task<IProgram> CreateProgramAsync()
+        private async Task<AzureProgram> CreateProgramAsync()
         {
             var context = CreateContext();
             var azureChannel = context.Channels.ToList().FirstOrDefault(c => c.Name == AppState.Instance.ChannelName);
             var trainerName = AppState.Instance.TrainerName.ToLower().Replace(" ", "");
             // Make sure asset is ready
-            var assetName = $"{AppState.Instance.ClassStartTime.ToString("ddMMyy-HHmm")}-{trainerName}";
+            var assetName = $"{AppState.Instance.ClassStartTime.ToString("MMdd-HHmm")}-{trainerName}";
             var asset = await CreateAndConfigureAssetAsync(context, assetName);
 
             // Make sure program created
-            var options = GetOptionsForProgramCreation(assetName, asset.Id);
-            var program = context.Programs.ToList().FirstOrDefault(c => c.Name == options.Name) ??
-                          await azureChannel.Programs.CreateAsync(options);
+            var program = await azureChannel.Programs.CreateAsync(assetName, TimeSpan.FromHours(2), asset.Id);
 
             var locator = CreateLocatorForAsset(context, program.Asset, program.ArchiveWindowLength);
+            var urls = GetLocatorsInAllStreamingEndpoints(context, asset);
+            string publishUrl = null;
+            if (urls != null)
+            {
+                publishUrl = urls.FirstOrDefault()?.ToString();
+            }
 
-            return program;
+            return new AzureProgram
+            {
+                AssetName = asset.Name,
+                AssetUrl = asset.Uri.ToString(),
+                Name = program.Name,
+                Id = program.Id,
+                AssetId = program.Asset.Id,
+                PublishUrl = publishUrl
+            };
+        }
+
+        public static IList<Uri> GetLocatorsInAllStreamingEndpoints(CloudMediaContext context, IAsset asset)
+        {
+            var locators = asset.Locators.Where(l => l.Type == LocatorType.OnDemandOrigin);
+            var ismFile = asset.AssetFiles.AsEnumerable().FirstOrDefault(a => a.Name.EndsWith(".ism"));
+            var template = new UriTemplate("{contentAccessComponent}/{ismFileName}/manifest");
+            var urls = locators.SelectMany(l =>
+                        context
+                            .StreamingEndpoints
+                            .AsEnumerable()
+                            .Where(se => se.State == StreamingEndpointState.Running)
+                            .Select(
+                                se =>
+                                    template.BindByPosition(new Uri("http://" + se.HostName),
+                                    l.ContentAccessComponent,
+                                        ismFile.Name)))
+                        .ToArray();
+            return urls;
         }
 
         /// <summary>
@@ -81,7 +126,7 @@ namespace forte.device.services
                 AssetDeliveryProtocol.HLS | AssetDeliveryProtocol.SmoothStreaming | AssetDeliveryProtocol.Dash,
                 null);
 
-            asset.DeliveryPolicies.Add(policy);
+            //asset.DeliveryPolicies.Add(policy);
 
             return asset;
         }

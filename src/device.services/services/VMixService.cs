@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
+using System.Threading;
 using forte.device.extensions;
 using forte.device.models;
 using Newtonsoft.Json;
@@ -137,7 +138,9 @@ namespace forte.device.services
 
         public VMixState FadeToPreview()
         {
-            return CallAndFetchState("/?Function=Transition1", "fade to preview");
+            var result = CallAndFetchState("/?Function=Transition1", "fade to preview");
+            Thread.Sleep(2000);
+            return result;
         }
 
         public VMixState ToggleAudio(VMixInput audioInput)
@@ -159,6 +162,11 @@ namespace forte.device.services
         public VMixState StopPlaylist()
         {
             return CallAndFetchState("/?Function=StopPlayList", "stop playlist");
+        }
+
+        public VMixState StopStreaming()
+        {
+            return CallAndFetchState("/?Function=StopStreaming", "stop streaming");
         }
     }
 }

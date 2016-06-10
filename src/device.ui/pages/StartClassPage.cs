@@ -17,7 +17,7 @@ namespace device.ui.pages
             // Wait at least 5 seconds, or the total number of seconds until 5 minutes before the class
             var seconds = Math.Max(5, (AppState.ClassStartTime - DateTime.Now).TotalSeconds - 60 * 5);
 
-            _timer = new System.Threading.Timer(state =>
+            _timer = new Timer(state =>
             {
                 var remaining = seconds;
                 Dispatcher.Invoke(() =>
@@ -101,7 +101,6 @@ namespace device.ui.pages
 
             IsBusy = false;
             wizard.CurrentPage = StopClassPage;
-            
         }
     }
 }

@@ -108,7 +108,7 @@ namespace device.ui.pages
 
         private void LastPage_Enter(object sender, RoutedEventArgs e)
         {
-            if (AppState.CurrentProgram != null) Clipboard.SetText(AppState.CurrentProgram.AssetUrl);
+            if (AppState.CurrentProgram != null) Clipboard.SetText(AppState.CurrentProgram.PublishUrl);
         }
 
         private void wizard_Finish(object sender, RoutedEventArgs e)

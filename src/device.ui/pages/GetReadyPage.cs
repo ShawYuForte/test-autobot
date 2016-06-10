@@ -34,7 +34,7 @@ namespace device.ui.pages
 
         private void StartAzureChannelAndContinue(bool continueOnAlreadyRunning)
         {
-            Log("Stargin azure channel...");
+            Log("Starting azure channel...");
             // Start Azure channel
             _timer = new Timer(state =>
             {
@@ -54,7 +54,7 @@ namespace device.ui.pages
             Log("Azure channel already running...");
 
             var response =
-                MessageBox.Show(
+                MessageBox.Show(this, 
                     "Looks like the Azure channel is already running, I recommend you shut it down first. If you have enough time, definitively recommended." +
                     Environment.NewLine + Environment.NewLine + "Do you want me to stop it for you?",
                     "Channel already running", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);

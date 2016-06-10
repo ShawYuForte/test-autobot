@@ -24,7 +24,8 @@ namespace device.ui.pages
                 if (response == MessageBoxResult.No) return;
             }
 
-            InitializeComponent();
+            IsBusy = true;
+            InitiateClassStopping();
         }
 
         protected void InitiateClassStopping()
@@ -72,8 +73,11 @@ namespace device.ui.pages
             _timer = new Timer(state =>
             {
                 _timer.Dispose();
+                Dispatcher.Invoke(() => Log("Stopping Azure Program..."));
                 _azureService.StopProgram();
-                Dispatcher.Invoke(() => Log("Stopped Azure Program, stopping channel..."));
+                Dispatcher.Invoke(() => Log("Stopping vMix Stream..."));
+                _vmixService.StopStreaming();
+                Dispatcher.Invoke(() => Log("Stopping Azure Channel..."));
                 _azureService.StopChannel();
                 Dispatcher.Invoke(FinishWorkflow);
             }, null, TimeSpan.FromSeconds(0), TimeSpan.FromHours(1));
@@ -82,6 +86,12 @@ namespace device.ui.pages
         protected void FinishWorkflow()
         {
             Log("Stopped Azure channel (watching those $$$s).");
+
+            var vMixProcess = GetVmixProcess();
+            vMixProcess?.Kill();
+            Log("Stopped vMix.");
+
+            IsBusy = false;
             SetWorkflowStep(Workflow.CompletedSession);
             Log("Hooray! You completed a session, nothing else to be done here.");
 

@@ -8,5 +8,6 @@
         public string Id { get; set; }
         public string Name { get; set; }
         public bool Running { get; set; }
+        public string PublishUrl { get; set; }
     }
 }
