@@ -29,12 +29,23 @@ namespace device.ui.pages
         public static readonly DependencyProperty StartClassTimerDisplayProperty =
             DependencyProperty.Register("StartClassTimerDisplay", typeof (string), typeof (MainWindow));
 
+        // Using a DependencyProperty as the backing store for StartupPageImageSource.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty StartupPageImageSourceProperty =
+            DependencyProperty.Register("StartupPageImageSource", typeof (string), typeof (MainWindow),
+                new PropertyMetadata(null));
+
+        public string StartupPageImageSource
+        {
+            get { return (string) GetValue(StartupPageImageSourceProperty); }
+            set { SetValue(StartupPageImageSourceProperty, value); }
+        }
+
         public string StartClassTimerDisplay
         {
             get { return (string) GetValue(StartClassTimerDisplayProperty); }
             set { SetValue(StartClassTimerDisplayProperty, value); }
         }
-        
+
         public string AppTitle
         {
             get { return (string) GetValue(AppTitleProperty); }

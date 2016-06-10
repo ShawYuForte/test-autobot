@@ -1,10 +1,10 @@
 ﻿#region
 
+using System;
 using System.ComponentModel;
 using System.Threading;
 using System.Windows;
 using forte.device.services;
-using Xceed.Wpf.Toolkit.Core;
 
 #endregion
 
@@ -23,6 +23,8 @@ namespace device.ui.pages
         {
             InitializeComponent();
             Log("Initializing...");
+            AppState.Reset();
+            StartupPageImageSource = $"/images/start/start{new Random().Next(1, 3)}.jpg";
         }
 
         private void Log(string message)
@@ -32,14 +34,10 @@ namespace device.ui.pages
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            //FetchState();
-            //CalculateWorkflowStep();
             var worker = new BackgroundWorker();
             worker.DoWork += (o, args) => args.Result = typeof (MainWindow).Assembly.GetName().Version.ToString();
             worker.RunWorkerCompleted += (o, args) => AppTitle = $"Forte Autobot v{(string) args.Result}";
             worker.RunWorkerAsync();
-
-            wizard.CurrentPage = StopClassPage;
         }
 
         private void Wizard_Next(object sender, Xceed.Wpf.Toolkit.Core.CancelRoutedEventArgs e)
@@ -56,6 +54,10 @@ namespace device.ui.pages
 
                 case nameof(StartClassPage):
                     StartClassPage_Next(sender, e);
+                    break;
+
+                case nameof(StopClassPage):
+                    StopClassPage_Next(sender, e);
                     break;
             }
         }
@@ -97,6 +99,26 @@ namespace device.ui.pages
         private void StartClassPage_OnPause(object sender, System.EventArgs e)
         {
             PauseClassTimer();
+        }
+
+        private void StopClassPage_ReadyForNext(object sender, System.EventArgs e)
+        {
+            InitiateClassStopping();
+        }
+
+        private void LastPage_Enter(object sender, RoutedEventArgs e)
+        {
+            if (AppState.CurrentProgram != null) Clipboard.SetText(AppState.CurrentProgram.AssetUrl);
+        }
+
+        private void wizard_Finish(object sender, RoutedEventArgs e)
+        {
+            AppState.Reset();
+        }
+
+        private void TextBlock_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            Log($"Size changed to {e.NewSize.Width} and {e.NewSize.Height}");
         }
     }
 }

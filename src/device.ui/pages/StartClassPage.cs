@@ -10,9 +10,6 @@ using Xceed.Wpf.Toolkit.Core;
 
 namespace device.ui.pages
 {
-    // TODO:
-    //  - Add ability to "Hold" or "Stop"
-    //  - Add instructions
     public partial class MainWindow
     {
         private void StartClassTimer()

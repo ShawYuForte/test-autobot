@@ -1,20 +1,21 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using forte.device.extensions;
 using forte.device.models;
 using Microsoft.WindowsAzure.MediaServices.Client;
 using Microsoft.WindowsAzure.MediaServices.Client.DynamicEncryption;
-using forte.device.extensions;
+
+#endregion
 
 namespace forte.device.services
 {
-    public class AzureService
+    public class AzureService : Service
     {
         private string _mediaServicesEnableEncoding;
-        public event LogDelegate OnLog;
-
-        public delegate void LogDelegate(string message);
 
         private CloudMediaContext CreateContext()
         {
@@ -58,12 +59,18 @@ namespace forte.device.services
 
             // Make sure program created
             var options = GetOptionsForProgramCreation(assetName, asset.Id);
-            var azureProgram = context.Programs.ToList().FirstOrDefault(c => c.Name == options.Name) ??
-                           await azureChannel.Programs.CreateAsync(options);
+            var program = context.Programs.ToList().FirstOrDefault(c => c.Name == options.Name) ??
+                          await azureChannel.Programs.CreateAsync(options);
 
-            return azureProgram;
+            var locator = CreateLocatorForAsset(context, program.Asset, program.ArchiveWindowLength);
+
+            return program;
         }
 
+        /// <summary>
+        ///     Create an asset and configure asset delivery policies.
+        /// </summary>
+        /// <returns></returns>
         private async Task<IAsset> CreateAndConfigureAssetAsync(CloudMediaContext context, string assetName)
         {
             var asset = await context.Assets.CreateAsync(assetName, AssetCreationOptions.None, CancellationToken.None);
@@ -74,8 +81,7 @@ namespace forte.device.services
                 AssetDeliveryProtocol.HLS | AssetDeliveryProtocol.SmoothStreaming | AssetDeliveryProtocol.Dash,
                 null);
 
-            // TODO: adding policy was commented - why? 
-            // asset.DeliveryPolicies.Add(policy);
+            asset.DeliveryPolicies.Add(policy);
 
             return asset;
         }
@@ -96,6 +102,32 @@ namespace forte.device.services
             }
         }
 
+        /// <summary>
+        ///     Create locators in order to be able to publish and stream the video.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="asset"></param>
+        /// <param name="archiveWindowLength"></param>
+        /// <returns></returns>
+        private static ILocator CreateLocatorForAsset(CloudMediaContext context, IAsset asset,
+            TimeSpan archiveWindowLength)
+        {
+            // You cannot create a streaming locator using an AccessPolicy that includes write or delete permissions.            
+            var locator = context.Locators.CreateLocator
+                (
+                    LocatorType.OnDemandOrigin,
+                    asset,
+                    context.AccessPolicies.Create
+                        (
+                            "Live Stream Policy",
+                            archiveWindowLength,
+                            AccessPermissions.Read
+                        )
+                );
+
+            return locator;
+        }
+
         private static ProgramCreationOptions GetOptionsForProgramCreation(string programName, string assetId)
         {
             var options = new ProgramCreationOptions
@@ -103,7 +135,7 @@ namespace forte.device.services
                 Name = programName.Slugify(),
                 Description = programName,
                 // TODO: consider to make archive window length configurable 
-                ArchiveWindowLength = TimeSpan.FromHours(3),
+                ArchiveWindowLength = TimeSpan.FromHours(2),
                 AssetId = assetId
             };
             return options;
@@ -122,11 +154,6 @@ namespace forte.device.services
                 Log($"ERROR: {exception.Message}");
                 return false;
             }
-        }
-
-        void Log(string message)
-        {
-            OnLog?.Invoke(message);
         }
 
         public bool IsChannelRunning()
@@ -155,6 +182,13 @@ namespace forte.device.services
             var context = CreateContext();
             var program = FindAzureProgram(context, AppState.Instance.CurrentProgram.Id);
             program.StartAsync().Wait();
+        }
+
+        public void StopProgram()
+        {
+            var context = CreateContext();
+            var program = FindAzureProgram(context, AppState.Instance.CurrentProgram.Id);
+            program.StopAsync().Wait();
         }
     }
 }

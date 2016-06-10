@@ -24,27 +24,28 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,10">This is what I will do next:</TextBlock>
+        <TextBlock Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,10">Allright, now I'm going to wait for the class to finish, then:</TextBlock>
 
-        <Image Source="/images/clock.png" Grid.Column="0" Grid.Row="1" Margin="5" VerticalAlignment="Center" />
+        <Image Source="/images/vmix.jpg" Grid.Column="0" Grid.Row="1" Margin="5" VerticalAlignment="Center" />
         <TextBlock Grid.Column="1" Grid.Row="1" Margin="5" VerticalAlignment="Center">
-            1) Wait until 5 minutes before the class
+            1) Transition to closing video, and static background image in vMix
         </TextBlock>
 
         <Image Source="/images/azure.png" Grid.Column="0" Grid.Row="2" Margin="5" VerticalAlignment="Center" />
         <TextBlock Grid.Column="1" Grid.Row="2" Margin="5" VerticalAlignment="Center">
-            2) Start the Azure Program I created earlier (<Run Text="{Binding AppState.CurrentProgram.Name}" />)
+            2) Stop the Azure Program (<Run Text="{Binding AppState.CurrentProgram.Name}" />)
         </TextBlock>
 
         <Image Source="/images/vmix.jpg" Grid.Column="0" Grid.Row="3" Margin="5" VerticalAlignment="Center" />
         <TextBlock Grid.Column="1" Grid.Row="3" Margin="5" VerticalAlignment="Center">
-            3) Transition to the live feed in vMIX and kick off the playlist
+            3) Stop the streaming and shut down vMix
         </TextBlock>
 
         <Separator Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Margin="0, 20, 0, 0" />
 
-        <TextBlock Text="{Binding StartClassTimerDisplay}" Grid.ColumnSpan="2" Grid.Column="0" Grid.Row="5"
-                   HorizontalAlignment="Center" Margin="20" FontSize="16" />
+        <TextBlock Text="{Binding CountdownDisplay}" Grid.ColumnSpan="2" Grid.Column="0" Grid.Row="5"
+                   HorizontalAlignment="Center" Margin="20" FontSize="16" 
+                   DataContext="{Binding RelativeSource={RelativeSource AncestorType=local:StopClassPage}}"/>
         <Button Grid.Column="0" Grid.Row="6" Grid.ColumnSpan="2" VerticalAlignment="Bottom" HorizontalAlignment="Left"
                 DataContext="{Binding RelativeSource={RelativeSource AncestorType=local:StopClassPage}}"
                 x:Name="PauseCountdownButton" Click="PauseCountdownButton_Click"

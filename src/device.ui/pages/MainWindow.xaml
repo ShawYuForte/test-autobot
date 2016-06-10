@@ -14,12 +14,15 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <xctk:BusyIndicator IsBusy="{Binding IsBusy}" Grid.Row="0">
-            <xctk:Wizard FinishButtonClosesWindow="false" Next="Wizard_Next" x:Name="wizard" 
+            <xctk:Wizard FinishButtonClosesWindow="false" Next="Wizard_Next" x:Name="wizard" Finish="wizard_Finish"
                          CancelButtonClosesWindow="False" HelpButtonVisibility="Collapsed" MinHeight="300" Width="600"
                          Cancel="wizard_Cancel">
                 <xctk:WizardPage x:Name="IntroPage" PageType="Exterior"
-                                 Title="Let's start a'streaming"
+                                 Title="Let's start a'streaming" 
                                  Description="I'm going to walk you through streaming, all you need is your mouse fingers.">
+                    <xctk:WizardPage.ExteriorPanelContent>
+                        <Image Source="{Binding StartupPageImageSource}" />
+                    </xctk:WizardPage.ExteriorPanelContent>
                     <controls:IntroPage />
                 </xctk:WizardPage>
                 <xctk:WizardPage x:Name="SettingsPage" PageType="Interior"
@@ -34,21 +37,21 @@
                                  Enter="PresetPage_Enter" Leave="PresetPage_Leave">
                     <controls:GetReadyPage />
                 </xctk:WizardPage>
-                <xctk:WizardPage x:Name="StartClassPage" PageType="Interior" 
+                <xctk:WizardPage x:Name="StartClassPage" PageType="Interior" CanSelectPreviousPage="False"
                                  Title="Ready to Stream" Enter="StartClassPage_Enter"
                                  Description="We are ready to stream, as soon as the time hits start-o-clock."
-                                 NextPage="{Binding ElementName=Page2}"
+                                 NextPage="{Binding ElementName=StopClassPage}"
                                  PreviousPage="{Binding ElementName=StartClassPage}">
                     <controls:StartClassPage OnPause="StartClassPage_OnPause" />
                 </xctk:WizardPage>
                 <xctk:WizardPage x:Name="StopClassPage" PageType="Interior" PreviousPage="{Binding ElementName=StopClassPage}"
-                                 Title="Stop the class when done"
+                                 Title="Stop the class when done" NextPage="{Binding ElementName=LastPage}" CanSelectPreviousPage="False"
                                  Description="We are going to wait together for the class to end, then wrap up.">
-                    <controls:StopClassPage />
+                    <controls:StopClassPage ReadyForNext="StopClassPage_ReadyForNext" />
                 </xctk:WizardPage>
-                <xctk:WizardPage x:Name="LastPage" PageType="Interior" PreviousPage="{Binding ElementName=LastPage}"
-                                 Title="Last Page" Description="This is the last page in the process" CanFinish="True">
-                    <controls:SummaryPage />
+                <xctk:WizardPage x:Name="LastPage" PageType="Interior" PreviousPage="{Binding ElementName=LastPage}" Enter="LastPage_Enter" CanCancel="False" CanSelectPreviousPage="False"
+                                 Title="Done and done!" Description="Whew, that was quite a workout... I'm exchausted. Don't forget your url, then click 'Finish'" CanFinish="True">
+                    <controls:SummaryPage Margin="-14, -15, -14, -15"/>
                 </xctk:WizardPage>
             </xctk:Wizard>
         </xctk:BusyIndicator>

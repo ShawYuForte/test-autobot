@@ -1,6 +1,7 @@
 ﻿using System.Configuration;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using forte.device.extensions;
 using forte.device.models;
@@ -9,7 +10,7 @@ using RestSharp;
 
 namespace forte.device.services
 {
-    public class VMixService
+    public class VMixService : Service
     {
         private readonly RestClient _client;
         private readonly VMixState _presetState;
@@ -86,10 +87,7 @@ namespace forte.device.services
         /// <returns></returns>
         public VMixState SetPreview(VMixInput input)
         {
-            var request = new RestRequest($"/?Function=PreviewInput&Input={input.Key}", Method.GET);
-            _client.Execute<VMixState>(request);
-
-            return FetchState();
+            return CallAndFetchState($"/?Function=PreviewInput&Input={input.Key}", "set preview");
         }
 
         /// <summary>
@@ -99,10 +97,7 @@ namespace forte.device.services
         /// <returns></returns>
         public VMixState SetActive(VMixInput input)
         {
-            var request = new RestRequest($"/?Function=ActiveInput&Input={input.Key}", Method.GET);
-            _client.Execute<VMixState>(request);
-
-            return FetchState();
+            return CallAndFetchState($"/?Function=ActiveInput&Input={input.Key}", "set active");
         }
 
         /// <summary>
@@ -112,10 +107,7 @@ namespace forte.device.services
         /// <returns></returns>
         public VMixState SetOverlay(VMixInput input)
         {
-            var request = new RestRequest($"/?Function=OverlayInput1&Input={input.Key}", Method.GET);
-            _client.Execute<VMixState>(request);
-
-            return FetchState();
+            return CallAndFetchState($"/?Function=OverlayInput1&Input={input.Key}", "set overlay");
         }
 
         /// <summary>
@@ -124,52 +116,49 @@ namespace forte.device.services
         /// <returns></returns>
         public VMixState StartStreaming()
         {
-            var request = new RestRequest("/?Function=StartStreaming", Method.GET);
-            _client.Execute<VMixState>(request);
+            return CallAndFetchState("/?Function=StartStreaming", "start streaming");
+        }
 
-            return FetchState();
+        private VMixState CallAndFetchState(string operation, string description)
+        {
+            var webRequest = (HttpWebRequest)WebRequest.CreateHttp($"{ConfigurationManager.AppSettings["apiPath"]}{operation}");
+            var response = (HttpWebResponse)webRequest.GetResponse();
+            if (response.StatusCode == HttpStatusCode.OK) return FetchState();
+
+            //var request = new RestRequest(operation, Method.GET);
+            ////var response = _client.Execute<VMixState>(request);
+
+            //if (response.ResponseStatus == ResponseStatus.Completed) return FetchState();
+
+            var error = $"Could not {description} ({response.StatusDescription}";
+            Log(error);
+            throw new System.Exception(error);
         }
 
         public VMixState FadeToPreview()
         {
-            var request = new RestRequest("/?Function=Transition1", Method.GET);
-            _client.Execute<VMixState>(request);
-
-            return FetchState();
+            return CallAndFetchState("/?Function=Transition1", "fade to preview");
         }
 
         public VMixState ToggleAudio(VMixInput audioInput)
         {
-            var request = new RestRequest($"/?Function=Audio&Input={audioInput.Key}", Method.GET);
-            _client.Execute<VMixState>(request);
-
-            return FetchState();
+            return CallAndFetchState($"/?Function=Audio&Input={audioInput.Key}", "toggle audio");
         }
 
         public VMixState ToggleOverlay(VMixInput overlayInput)
         {
-            var request = new RestRequest($"/?Function=OverlayInput1&Input={overlayInput.Key}", Method.GET);
-            _client.Execute<VMixState>(request);
-
-            return FetchState();
+            return CallAndFetchState($"/?Function=OverlayInput1&Input={overlayInput.Key}", "toggle overlay");
         }
 
         public VMixState StartPlaylist()
         {
-            var request = new RestRequest($"/?Function=SelectPlayList&Value={ConfigurationManager.AppSettings["playlist-name"]}", Method.GET);
-            _client.Execute<VMixState>(request);
-            request = new RestRequest("/?Function=StartPlayList", Method.GET);
-            _client.Execute<VMixState>(request);
-
-            return FetchState();
+            CallAndFetchState($"/?Function=SelectPlayList&Value={ConfigurationManager.AppSettings["playlist-name"]}", "set playlist");
+            return CallAndFetchState("/?Function=StartPlayList", "start playlist");
         }
 
         public VMixState StopPlaylist()
         {
-            var request = new RestRequest("/?Function=StopPlayList", Method.GET);
-            _client.Execute<VMixState>(request);
-
-            return FetchState();
+            return CallAndFetchState("/?Function=StopPlayList", "stop playlist");
         }
     }
 }
