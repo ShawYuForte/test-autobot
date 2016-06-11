@@ -12,6 +12,9 @@ namespace device.ui.pages
 {
     public partial class MainWindow
     {
+        private bool _classStarted = false;
+        private readonly object _classStartedLock = new Object();
+
         private void StartClassTimer()
         {
             // Wait at least 5 seconds, or the total number of seconds until 5 minutes before the class
@@ -46,6 +49,12 @@ namespace device.ui.pages
 
         private void StartAzureProgram()
         {
+            lock (_classStartedLock)
+            {
+                if (_classStarted) return;
+                _classStarted = true;
+            }
+
             IsBusy = true;
             Log("Starting program!");
             StartClassTimerDisplay = "Starting program NOW!";

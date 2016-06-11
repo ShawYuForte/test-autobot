@@ -17,13 +17,10 @@ namespace forte.device.services
 {
     public class AzureService : Service
     {
-        private string _mediaServicesEnableEncoding;
-
         private CloudMediaContext CreateContext()
         {
-            var mediaServicesAccountName = AppState.Instance.AmsAccountName;
-            var mediaServicesAccountKey = AppState.Instance.AmsAccountKey;
-            _mediaServicesEnableEncoding = AppState.Instance.AmsEncoding;
+            var mediaServicesAccountName = AppSettings.Instance.AmsAccountName;
+            var mediaServicesAccountKey = AppSettings.Instance.AmsAccountKey;
 
             // Create and cache the Media Services credentials in a static class variable.
             var cachedCredentials = new MediaServicesCredentials(
@@ -47,7 +44,7 @@ namespace forte.device.services
         {
             var name = "live-stream-test";
             var context = CreateContext();
-            var azureChannel = context.Channels.ToList().FirstOrDefault(c => c.Name == AppState.Instance.ChannelName);
+            var azureChannel = context.Channels.ToList().FirstOrDefault(c => c.Name == AppSettings.Instance.ChannelName);
             var program = context.Programs.ToList().FirstOrDefault(c => c.Name == name);
             var asset = program.Asset;
 
@@ -65,7 +62,7 @@ namespace forte.device.services
         private async Task<AzureProgram> CreateProgramAsync()
         {
             var context = CreateContext();
-            var azureChannel = context.Channels.ToList().FirstOrDefault(c => c.Name == AppState.Instance.ChannelName);
+            var azureChannel = context.Channels.ToList().FirstOrDefault(c => c.Name == AppSettings.Instance.ChannelName);
             var trainerName = AppState.Instance.TrainerName.ToLower().Replace(" ", "");
             // Make sure asset is ready
             var assetName = $"{AppState.Instance.ClassStartTime.ToString("MMdd-HHmm")}-{trainerName}";
@@ -191,7 +188,7 @@ namespace forte.device.services
             try
             {
                 var context = CreateContext();
-                var channel = context.Channels.ToList().FirstOrDefault(ch => ch.Name == AppState.Instance.ChannelName);
+                var channel = context.Channels.ToList().FirstOrDefault(ch => ch.Name == AppSettings.Instance.ChannelName);
                 return channel != null;
             }
             catch (Exception exception)
@@ -204,22 +201,31 @@ namespace forte.device.services
         public bool IsChannelRunning()
         {
             var context = CreateContext();
-            var channel = context.Channels.ToList().FirstOrDefault(ch => ch.Name == AppState.Instance.ChannelName);
+            var channel = context.Channels.ToList().FirstOrDefault(ch => ch.Name == AppSettings.Instance.ChannelName);
             return channel.State == ChannelState.Running;
         }
 
         public void StartChannel()
         {
             var context = CreateContext();
-            var channel = context.Channels.ToList().FirstOrDefault(ch => ch.Name == AppState.Instance.ChannelName);
+            var channel = context.Channels.ToList().FirstOrDefault(ch => ch.Name == AppSettings.Instance.ChannelName);
             if (channel.State == ChannelState.Stopped) channel.StartAsync().Wait();
         }
 
-        public void StopChannel()
+        public bool StopChannel()
         {
             var context = CreateContext();
-            var channel = context.Channels.ToList().FirstOrDefault(ch => ch.Name == AppState.Instance.ChannelName);
-            if (channel.State == ChannelState.Running) channel.StopAsync().Wait();
+            var channel = context.Channels.ToList().FirstOrDefault(ch => ch.Name == AppSettings.Instance.ChannelName);
+            if (channel.State == ChannelState.Running)
+            {
+                if (channel.Programs.ToList().Count(program => program.State != ProgramState.Stopped) > 0)
+                {
+                    Log("Can't shut down your channel, there are other programs running on it!");
+                    return false;
+                } 
+                channel.StopAsync().Wait();
+            }
+            return true;
         }
 
         public void StartProgram()
@@ -234,6 +240,13 @@ namespace forte.device.services
             var context = CreateContext();
             var program = FindAzureProgram(context, AppState.Instance.CurrentProgram.Id);
             program.StopAsync().Wait();
+        }
+
+        public bool ThereAreProgramsRunning()
+        {
+            var context = CreateContext();
+            var channel = context.Channels.ToList().FirstOrDefault(ch => ch.Name == AppSettings.Instance.ChannelName);
+            return channel.Programs.ToList().Count(program => program.State != ProgramState.Stopped) > 0;
         }
     }
 }

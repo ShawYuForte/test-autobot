@@ -43,31 +43,6 @@ namespace forte.device.models
         protected bool Initialized { get; set; }
 
         /// <summary>
-        ///     Specifies whether AMS settings were verified (on Azure)
-        /// </summary>
-        public bool AmsSettingsVerified { get; set; }
-
-        /// <summary>
-        ///     Azure Media Services Account Name
-        /// </summary>
-        public string AmsAccountName { get; set; }
-
-        /// <summary>
-        ///     Azure Media Services Account Key
-        /// </summary>
-        public string AmsAccountKey { get; set; }
-
-        /// <summary>
-        ///     Azure Media Services Channel Encoding
-        /// </summary>
-        public string AmsEncoding { get; set; }
-
-        /// <summary>
-        ///     Azure Media Services Channel Name
-        /// </summary>
-        public string ChannelName { get; set; }
-
-        /// <summary>
         ///     Azure Media Services Program Name
         /// </summary>
         public string ProgramName { get; set; }
@@ -86,16 +61,6 @@ namespace forte.device.models
         ///     Class duration in minutes
         /// </summary>
         public int ClassDuration { get; set; }
-
-        /// <summary>
-        ///     VMIX preset file path
-        /// </summary>
-        public string VmixPresetFilePath { get; set; }
-
-        /// <summary>
-        ///     Path to the VMIX executable
-        /// </summary>
-        public string VmixExecutablePath { get; set; }
 
         /// <summary>
         ///     VMIX runtime, if started by the app
@@ -117,10 +82,6 @@ namespace forte.device.models
         /// </summary>
         protected void SetDefaultValues()
         {
-            if (string.IsNullOrWhiteSpace(VmixPresetFilePath))
-                VmixPresetFilePath = ConfigurationManager.AppSettings["presetFilePath"];
-            if (string.IsNullOrWhiteSpace(VmixExecutablePath))
-                VmixExecutablePath = ConfigurationManager.AppSettings["vmixExeFilePath"];
         }
 
         /// <summary>
@@ -144,17 +105,6 @@ namespace forte.device.models
             var stateString = JsonConvert.SerializeObject(this);
             Settings.Default.State = stateString;
             Settings.Default.Save();
-
-            ResetAzureSettingsConfirmed(e);
-        }
-
-        private void ResetAzureSettingsConfirmed(PropertyChangedEventArgs e)
-        {
-            if (e.PropertyName == nameof(AmsAccountKey) || e.PropertyName == nameof(AmsAccountName) ||
-                e.PropertyName == nameof(ChannelName))
-            {
-                AmsSettingsVerified = false;
-            }
         }
     }
 

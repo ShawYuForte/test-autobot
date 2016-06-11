@@ -1,7 +1,12 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.IO;
 using System.Windows;
+using forte.device.models;
 using Xceed.Wpf.Toolkit.Core;
+
+#endregion
 
 namespace device.ui.pages
 {
@@ -21,6 +26,7 @@ namespace device.ui.pages
         }
 
         #region VerifyClassStartTime
+
         private bool VerifyClassStartTime(CancelRoutedEventArgs e)
         {
             if (AppState.ClassStartTime > DateTime.Now) return true;
@@ -33,49 +39,65 @@ namespace device.ui.pages
             e.Cancel = true;
             return false;
         }
+
         #endregion
 
         #region VerifyVmixSettings
+
         private bool VerifyVmixSettings(CancelRoutedEventArgs e)
         {
-            if (!File.Exists(AppState.VmixExecutablePath))
+            if (!File.Exists(AppSettings.Instance.VmixExecutablePath))
             {
                 e.Cancel = true;
                 MessageBox.Show(
-                    $"VMIX executable file '{AppState.VmixExecutablePath}' does not exist, please verify the file path.",
+                    $"VMIX executable file '{AppSettings.Instance.VmixExecutablePath}' does not exist, please verify the file path.",
                     "Validation failed", MessageBoxButton.OK, MessageBoxImage.Stop);
                 return false;
             }
 
-            if (File.Exists(AppState.VmixPresetFilePath)) return true;
+            if (File.Exists(AppSettings.Instance.VmixPresetFilePath)) return true;
 
             e.Cancel = true;
             MessageBox.Show(
-                $"VMIX preset file '{AppState.VmixPresetFilePath}' does not exist, please verify the file path.",
+                $"VMIX preset file '{AppSettings.Instance.VmixPresetFilePath}' does not exist, please verify the file path.",
                 "Validation failed", MessageBoxButton.OK, MessageBoxImage.Stop);
             return false;
         }
+
         #endregion
 
         #region VerifyRequiredSettings
+
         private bool VerifyRequiredSettings(CancelRoutedEventArgs e)
         {
-            if (!string.IsNullOrWhiteSpace(AppState.AmsAccountKey) &&
-                !string.IsNullOrWhiteSpace(AppState.AmsAccountName) && !string.IsNullOrWhiteSpace(AppState.TrainerName) &&
-                !string.IsNullOrWhiteSpace(AppState.ChannelName) &&
-                !string.IsNullOrWhiteSpace(AppState.VmixPresetFilePath)) return true;
+            var valid = !string.IsNullOrWhiteSpace(AppSettings.Instance.ChannelName) &&
+                        !string.IsNullOrWhiteSpace(AppSettings.Instance.VmixPresetFilePath);
+
+            if (!valid)
+            {
+                MessageBox.Show("Accurate class info is required", "Validation failed", MessageBoxButton.OK,
+                    MessageBoxImage.Stop);
+            }
+            else if (!AppSettings.AreValid())
+            {
+                MessageBox.Show("App settings are not provided, click 'OK' to update them.", "Validation failed",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Stop);
+                new SettingsWindow().ShowDialog();
+            }
+            else return true;
+
             e.Cancel = true;
-            MessageBox.Show("All info on this page is required", "Validation failed", MessageBoxButton.OK,
-                MessageBoxImage.Stop);
             return false;
         }
+
         #endregion
 
         #region VerifyAzureSettings
 
         private bool VerifyAzureSettings(CancelRoutedEventArgs e)
         {
-            if (AppState.AmsSettingsVerified)
+            if (AppSettings.Instance.AmsSettingsVerified)
             {
                 Log("Azure settings already verified during a previous session, skipping verification.");
                 return true;
@@ -85,10 +107,7 @@ namespace device.ui.pages
             _timer = new System.Threading.Timer(state =>
             {
                 _timer.Dispose();
-                _azureService.OnLog += delegate(string message)
-                {
-                    Dispatcher.Invoke(() => Log(message));
-                };
+                _azureService.OnLog += delegate(string message) { Dispatcher.Invoke(() => Log(message)); };
                 if (_azureService.VerifySettings())
                 {
                     Dispatcher.Invoke(OnAzureSettingsVerified);
@@ -103,12 +122,13 @@ namespace device.ui.pages
             e.Cancel = true;
             return false;
         }
+
         #endregion
 
         private void OnAzureSettingsVerified()
         {
             IsBusy = false;
-            AppState.AmsSettingsVerified = true;
+            AppSettings.Instance.AmsSettingsVerified = true;
             wizard.CurrentPage = GetReadyPage;
             Log("Azure Media Service settings verified.");
         }

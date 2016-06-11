@@ -149,6 +149,7 @@
     <Compile Include="extensions\ExceptionHandlingExtensions.cs" />
     <Compile Include="extensions\MatchingExtension.cs" />
     <Compile Include="extensions\StringExtensions.cs" />
+    <Compile Include="models\AppSettings.cs" />
     <Compile Include="models\AppState.cs" />
     <Compile Include="models\AzureProgram.cs" />
     <Compile Include="models\VMixAudio.cs" />

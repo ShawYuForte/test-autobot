@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Threading;
 using forte.device.extensions;
 using forte.device.models;
@@ -18,40 +19,41 @@ namespace forte.device.services
     public class VMixService : Service
     {
         private readonly RestClient _client;
-        private VMixState _presetState;
+        //private VMixState _presetState;
+        private readonly Regex _cameraRegex = new Regex(@"RTSPTCP rtsp:\/\/root:pass@[0-9.]*\/axis-media\/media\.amp");
 
         public VMixService()
         {
             _client = new RestClient(ConfigurationManager.AppSettings["apiPath"]);
 
-            LoadExpectedPresets();
+            //LoadExpectedPresets();
         }
 
-        private void LoadExpectedPresets()
-        {
-            var path = new FileInfo(Assembly.GetExecutingAssembly().Location).Directory.FullName;
-            var expectedStateFile =
-                Path.Combine(path, "data\\expected-state.json");
-            string expectedStateJson;
+        //private void LoadExpectedPresets()
+        //{
+        //    var path = new FileInfo(Assembly.GetExecutingAssembly().Location).Directory.FullName;
+        //    var expectedStateFile =
+        //        Path.Combine(path, "data\\expected-state.json");
+        //    string expectedStateJson;
 
-            if (File.Exists(expectedStateFile))
-            {
-                expectedStateJson = File.ReadAllText(expectedStateFile);
-            }
-            else
-            {
-                var assembly = Assembly.GetExecutingAssembly();
-                const string resourceName = "forte.device.data.expected-state.json";
+        //    if (File.Exists(expectedStateFile))
+        //    {
+        //        expectedStateJson = File.ReadAllText(expectedStateFile);
+        //    }
+        //    else
+        //    {
+        //        var assembly = Assembly.GetExecutingAssembly();
+        //        const string resourceName = "forte.device.data.expected-state.json";
 
-                using (var stream = assembly.GetManifestResourceStream(resourceName))
-                using (var reader = new StreamReader(stream))
-                {
-                    expectedStateJson = reader.ReadToEnd();
-                }
-            }
+        //        using (var stream = assembly.GetManifestResourceStream(resourceName))
+        //        using (var reader = new StreamReader(stream))
+        //        {
+        //            expectedStateJson = reader.ReadToEnd();
+        //        }
+        //    }
 
-            _presetState = JsonConvert.DeserializeObject<VMixState>(expectedStateJson);
-        }
+        //    _presetState = JsonConvert.DeserializeObject<VMixState>(expectedStateJson);
+        //}
 
         /// <summary>
         ///     Fetch state from vMix API
@@ -72,15 +74,28 @@ namespace forte.device.services
         /// <returns></returns>
         private VMixState MatchPresetStateRoles(VMixState state)
         {
-            foreach (var input in state.Inputs)
-            {
-                var presetInput = _presetState.Inputs.FirstOrDefault(i => i.SameAs(input));
-                if (presetInput == null) continue;
-                input.Role = presetInput.Role;
-            }
+            var input = state.Inputs.FirstOrDefault(i => i.Title == AppSettings.Instance.StartupImage);
+            if (input != null) input.Role = InputRole.OpeninStaticImage;
 
-            state.Active = state.Inputs.FirstOrDefault(input => input.Number == state.ActiveNumber);
-            state.Preview = state.Inputs.FirstOrDefault(input => input.Number == state.PreviewNumber);
+            input = state.Inputs.FirstOrDefault(i => i.Title == AppSettings.Instance.StartupVideo);
+            if (input != null) input.Role = InputRole.OpeningVideo;
+
+            input = state.Inputs.FirstOrDefault(i => i.Title == AppSettings.Instance.ClosingImage);
+            if (input != null) input.Role = InputRole.ClosingStaticImage;
+
+            input = state.Inputs.FirstOrDefault(i => i.Title == AppSettings.Instance.ClosingVideo);
+            if (input != null) input.Role = InputRole.ClosingVideo;
+
+            input = state.Inputs.FirstOrDefault(i => i.Title == AppSettings.Instance.OverlayImage);
+            if (input != null) input.Role = InputRole.LogoOverlay;
+
+            input = state.Inputs.FirstOrDefault(i => i.Title.ToLower().Contains("audio") && i.Title.ToLower().Contains("microphone"));
+            if (input != null) input.Role = InputRole.Audio;
+
+            state.Inputs.Where(i => _cameraRegex.IsMatch(i.Title)).ToList().ForEach(i => i.Role = InputRole.Camera);
+
+            state.Active = state.Inputs.FirstOrDefault(i => i.Number == state.ActiveNumber);
+            state.Preview = state.Inputs.FirstOrDefault(i => i.Number == state.PreviewNumber);
 
             return state;
         }
@@ -106,7 +121,13 @@ namespace forte.device.services
         public bool PresetLoaded()
         {
             var state = FetchState();
-            return _presetState.SameAs(state);
+            return state.Inputs.Count(input => input.Role == InputRole.OpeninStaticImage) == 1 &&
+                state.Inputs.Count(input => input.Role == InputRole.OpeningVideo) == 1 &&
+                state.Inputs.Count(input => input.Role == InputRole.ClosingStaticImage) == 1 &&
+                state.Inputs.Count(input => input.Role == InputRole.ClosingVideo) == 1 &&
+                state.Inputs.Count(input => input.Role == InputRole.LogoOverlay) == 1 &&
+                state.Inputs.Count(input => input.Role == InputRole.Audio) == 1 &&
+                state.Inputs.Count(input => input.Role == InputRole.Camera) > 0;
         }
 
         /// <summary>
@@ -151,8 +172,8 @@ namespace forte.device.services
         private VMixState CallAndFetchState(string operation, string description)
         {
             var webRequest =
-                (HttpWebRequest) WebRequest.CreateHttp($"{ConfigurationManager.AppSettings["apiPath"]}{operation}");
-            var response = (HttpWebResponse) webRequest.GetResponse();
+                (HttpWebRequest)WebRequest.CreateHttp($"{ConfigurationManager.AppSettings["apiPath"]}{operation}");
+            var response = (HttpWebResponse)webRequest.GetResponse();
             if (response.StatusCode == HttpStatusCode.OK) return FetchState();
 
             var error = $"Could not {description} ({response.StatusDescription}";

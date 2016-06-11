@@ -14,9 +14,12 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <xctk:BusyIndicator IsBusy="{Binding IsBusy}" Grid.Row="0">
-            <xctk:Wizard FinishButtonClosesWindow="false" Next="Wizard_Next" x:Name="wizard" Finish="wizard_Finish"
-                         CancelButtonClosesWindow="False" HelpButtonVisibility="Collapsed" MinHeight="300" Width="600"
+            <xctk:Wizard FinishButtonClosesWindow="false" Next="Wizard_Next" x:Name="wizard" Finish="wizard_Finish" Help="wizard_Help"
+                         CancelButtonClosesWindow="False" HelpButtonVisibility="Visible" MinHeight="300" Width="600"
                          Cancel="wizard_Cancel">
+                <xctk:Wizard.HelpButtonContent>
+                    <TextBlock>Settings</TextBlock>
+                </xctk:Wizard.HelpButtonContent>
                 <xctk:WizardPage x:Name="IntroPage" PageType="Exterior"
                                  Title="Let's start a'streaming" 
                                  Description="I'm going to walk you through streaming, all you need is your mouse fingers.">

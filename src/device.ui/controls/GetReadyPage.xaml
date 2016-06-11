@@ -26,19 +26,19 @@
         <Image Source="/images/vmix.jpg" Grid.Column="0" Grid.Row="1" Margin="5" VerticalAlignment="Center" />
         <TextBlock Grid.Column="1" Grid.Row="1" Margin="5" VerticalAlignment="Center">
             1) Start vMix by running "
-            <Run Text="{Binding AppState.VmixExecutablePath}" />"
+            <Run Text="{Binding AppSettings.VmixExecutablePath}" />"
         </TextBlock>
 
         <Image Source="/images/vmix.jpg" Grid.Column="0" Grid.Row="2" VerticalAlignment="Center" Margin="5" />
         <TextBlock Grid.Column="1" Grid.Row="2" VerticalAlignment="Center" Margin="5">
             2) Load vMix Presets from "
-            <Run Text="{Binding AppState.VmixPresetFilePath}" />"
+            <Run Text="{Binding AppSettings.VmixPresetFilePath}" />"
         </TextBlock>
 
         <Image Source="/images/azure.png" Grid.Column="0" Grid.Row="3" VerticalAlignment="Center" Margin="5" />
         <TextBlock Grid.Column="1" Grid.Row="3" VerticalAlignment="Center" Margin="5">
             3) Start the Azure "
-            <Run Text="{Binding AppState.ChannelName}" />" Channel
+            <Run Text="{Binding AppSettings.ChannelName}" />" Channel
         </TextBlock>
 
         <Image Source="/images/azure.png" Grid.Column="0" Grid.Row="4" VerticalAlignment="Center" Margin="5" />

@@ -32,6 +32,14 @@ namespace device.ui.pages
 
         #endregion
 
+        private void OtherProgramsRunningError()
+        {
+            IsBusy = false;
+            MessageBox.Show(this,
+                "There are existing programs running, it's not safe to continue. Please go to Azure Portal and turn them off manually, then try again",
+                "Azure Programs Running", MessageBoxButton.OK, MessageBoxImage.Stop);
+        }
+
         private void StartAzureChannelAndContinue(bool continueOnAlreadyRunning)
         {
             Log("Starting azure channel...");
@@ -39,6 +47,13 @@ namespace device.ui.pages
             _timer = new Timer(state =>
             {
                 _timer.Dispose();
+
+                if (_azureService.ThereAreProgramsRunning())
+                {
+                    Dispatcher.Invoke(OtherProgramsRunningError);
+                    return;
+                }
+
                 if (!continueOnAlreadyRunning && _azureService.IsChannelRunning())
                 {
                     Dispatcher.Invoke(StopAzureChannelAndContinue);
@@ -54,7 +69,7 @@ namespace device.ui.pages
             Log("Azure channel already running...");
 
             var response =
-                MessageBox.Show(this, 
+                MessageBox.Show(this,
                     "Looks like the Azure channel is already running, I recommend you shut it down first. If you have enough time, definitively recommended." +
                     Environment.NewLine + Environment.NewLine + "Do you want me to stop it for you?",
                     "Channel already running", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
@@ -106,10 +121,12 @@ namespace device.ui.pages
                 }
                 else
                 {
-                    Dispatcher.Invoke(() => Log($"Waiting to verify preset is loaded (been waiting for {(int)watch.Elapsed.TotalSeconds} s)..."));
+                    Dispatcher.Invoke(
+                        () =>
+                            Log(
+                                $"Waiting to verify preset is loaded (been waiting for {(int) watch.Elapsed.TotalSeconds} s)..."));
                 }
             }, null, waitFor, repeatAfter);
-
         }
 
         private void CreateAzureProgramAndContinue()
@@ -186,7 +203,7 @@ namespace device.ui.pages
             }
             var vMixProcess = Process.Start(new ProcessStartInfo
             {
-                FileName = AppState.VmixExecutablePath,
+                FileName = AppSettings.Instance.VmixExecutablePath,
                 WindowStyle = ProcessWindowStyle.Hidden
             });
 
@@ -213,11 +230,11 @@ namespace device.ui.pages
 
         private Process GetVmixProcess()
         {
-            FileSystemInfo fileInfo = new FileInfo(AppState.VmixExecutablePath);
+            FileSystemInfo fileInfo = new FileInfo(AppSettings.Instance.VmixExecutablePath);
             var sExeName = fileInfo.Name.Replace(fileInfo.Extension, "");
 
             var existingProcess = Process.GetProcessesByName(sExeName).FirstOrDefault();
-            
+
             return existingProcess;
         }
 

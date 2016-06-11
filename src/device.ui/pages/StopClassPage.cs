@@ -13,6 +13,9 @@ namespace device.ui.pages
 {
     public partial class MainWindow
     {
+        private bool _classStopped = false;
+        private readonly object _classStoppedLock = new Object();
+
         private void StopClassPage_Next(object sender, CancelRoutedEventArgs cancelRoutedEventArgs)
         {
             cancelRoutedEventArgs.Cancel = true;
@@ -30,6 +33,12 @@ namespace device.ui.pages
 
         protected void InitiateClassStopping()
         {
+            lock (_classStoppedLock)
+            {
+                if (_classStopped) return;
+                _classStopped = true;
+            }
+
             var closingVideo = State.Inputs.Single(input => input.Role == InputRole.ClosingVideo);
             _vmixService.SetPreview(closingVideo);
             Log("Placed closing video in preview.");
@@ -78,15 +87,14 @@ namespace device.ui.pages
                 Dispatcher.Invoke(() => Log("Stopping vMix Stream..."));
                 _vmixService.StopStreaming();
                 Dispatcher.Invoke(() => Log("Stopping Azure Channel..."));
-                _azureService.StopChannel();
+                if (_azureService.StopChannel())
+                    Dispatcher.Invoke(() => Log("Stopped Azure channel (watching those $$$s)."));
                 Dispatcher.Invoke(FinishWorkflow);
             }, null, TimeSpan.FromSeconds(0), TimeSpan.FromHours(1));
         }
 
         protected void FinishWorkflow()
         {
-            Log("Stopped Azure channel (watching those $$$s).");
-
             var vMixProcess = GetVmixProcess();
             vMixProcess?.Kill();
             Log("Stopped vMix.");

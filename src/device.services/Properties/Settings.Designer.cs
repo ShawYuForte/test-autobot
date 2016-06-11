@@ -46,5 +46,17 @@ namespace forte.device.Properties {
                 this["CallUpgrade"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string AppSettings {
+            get {
+                return ((string)(this["AppSettings"]));
+            }
+            set {
+                this["AppSettings"] = value;
+            }
+        }
     }
 }

@@ -120,5 +120,11 @@ namespace device.ui.pages
         {
             Log($"Size changed to {e.NewSize.Width} and {e.NewSize.Height}");
         }
+
+        private void wizard_Help(object sender, RoutedEventArgs e)
+        {
+            var settingsPage = new SettingsWindow();
+            settingsPage.ShowDialog();
+        }
     }
 }
