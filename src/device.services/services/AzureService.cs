@@ -17,6 +17,8 @@ namespace forte.device.services
 {
     public class AzureService : Service
     {
+        private const double DaysInTenYears = 3650;
+
         private CloudMediaContext CreateContext()
         {
             var mediaServicesAccountName = AppSettings.Instance.AmsAccountName;
@@ -71,7 +73,7 @@ namespace forte.device.services
             // Make sure program created
             var program = await azureChannel.Programs.CreateAsync(assetName, TimeSpan.FromHours(2), asset.Id);
 
-            var locator = CreateLocatorForAsset(context, program.Asset, program.ArchiveWindowLength);
+            var locator = CreateLocatorForAsset(context, program.Asset, TimeSpan.FromDays(DaysInTenYears));
             var urls = GetLocatorsInAllStreamingEndpoints(context, asset);
             string publishUrl = null;
             if (urls != null)
