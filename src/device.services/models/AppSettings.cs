@@ -6,6 +6,7 @@ using System.IO;
 using AutoMapper;
 using forte.device.Properties;
 using Newtonsoft.Json;
+using PostSharp.Patterns.Contracts;
 using PostSharp.Patterns.Model;
 
 #endregion
@@ -127,6 +128,32 @@ namespace forte.device.models
         [Description("Overlay logo image")]
         public string OverlayImage { get; set; }
 
+        /// <summary>
+        /// How many minutes before class start to start the channel
+        /// </summary>
+        [Category("Azure")]
+        [DisplayName("Start channel before")]
+        [Description("Start channel this minutes before class starts (min 15)")]
+        [Range(15, int.MaxValue)]
+        public int StartChannelMinutesBefore { get; set; }
+
+        /// <summary>
+        /// How many minutes before class to start the program
+        /// </summary>
+        [Category("Azure")]
+        [DisplayName("Start program before")]
+        [Description("Start program this minutes before class starts (min 3)")]
+        [Range(3, int.MaxValue)]
+        public int StartProgramMinutesBefore { get; set; }
+
+        /// <summary>
+        /// Full studio name
+        /// </summary>
+        [Category("Streaming")]
+        [DisplayName("Studio name")]
+        [Description("Full studio name")]
+        public string StudioName { get; set; }
+
         public AppSettings Copy()
         {
             return Mapper.Map(this, new AppSettings());
@@ -147,7 +174,9 @@ namespace forte.device.models
                    !string.IsNullOrWhiteSpace(StartupVideo) &&
                    !string.IsNullOrWhiteSpace(ClosingVideo) &&
                    !string.IsNullOrWhiteSpace(ClosingImage) &&
-                   !string.IsNullOrWhiteSpace(OverlayImage);
+                   !string.IsNullOrWhiteSpace(OverlayImage) && 
+                   StartChannelMinutesBefore > 15 &&
+                   StartProgramMinutesBefore > 3;
         }
 
         /// <summary>
@@ -169,6 +198,10 @@ namespace forte.device.models
                 ClosingImage = "logo_girl_warrior_stance.jpg";
             if (string.IsNullOrWhiteSpace(OverlayImage))
                 OverlayImage = "overlay_1280_720.png";
+            if (StartChannelMinutesBefore <= 0)
+                StartChannelMinutesBefore = 15;
+            if (StartProgramMinutesBefore <= 0)
+                StartProgramMinutesBefore = 3;
         }
 
         private void OnPropertyChanged(object sender, PropertyChangedEventArgs e)

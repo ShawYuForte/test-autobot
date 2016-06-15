@@ -46,12 +46,7 @@ namespace forte.device.models
         ///     Azure Media Services Program Name
         /// </summary>
         public string ProgramName { get; set; }
-
-        /// <summary>
-        ///     Name of the trainer being recorded (used for asset naming)
-        /// </summary>
-        public string TrainerName { get; set; }
-
+        
         /// <summary>
         ///     Class start time
         /// </summary>
@@ -76,6 +71,11 @@ namespace forte.device.models
         ///     Currently created program
         /// </summary>
         public AzureProgram CurrentProgram { get; set; }
+
+        /// <summary>
+        /// Name of the class being streamed
+        /// </summary>
+        public string ClassName { get; set; }
 
         /// <summary>
         ///     Sets the default values for fields that are not specified

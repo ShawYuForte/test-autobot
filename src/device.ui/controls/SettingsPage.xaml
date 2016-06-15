@@ -15,21 +15,28 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <Label Grid.Column="0" Grid.Row="0" VerticalAlignment="Bottom" HorizontalAlignment="Right">Trainer Name:</Label>
-        <TextBox Grid.Column="1" Grid.Row="0" Text="{Binding AppState.TrainerName}"
-                 VerticalAlignment="Bottom" />
+        <Label Grid.Column="0" Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Right">Studio Name:</Label>
+        <Label Grid.Column="1" Grid.Row="1" Content="{Binding AppSettings.StudioName}" FontWeight="Bold"
+                 VerticalAlignment="Center" />
 
-        <Label Grid.Column="0" Grid.Row="1" HorizontalAlignment="Right">Class Start Time:</Label>
-        <xctk:DateTimePicker Grid.Column="1" Grid.Row="1" Value="{Binding AppState.ClassStartTime}"
+        <Label Grid.Column="0" Grid.Row="2" VerticalAlignment="Center" HorizontalAlignment="Right">Class Name:</Label>
+        <TextBox Grid.Column="1" Grid.Row="2" Text="{Binding AppState.ClassName}"
+                 VerticalAlignment="Center" />
+
+        <Label Grid.Column="0" Grid.Row="3" HorizontalAlignment="Right">Class Start Time:</Label>
+        <xctk:DateTimePicker Grid.Column="1" Grid.Row="3" Value="{Binding AppState.ClassStartTime}"
                              FormatString="dddd, MMMM dd, yyyy hh:mm tt" Format="Custom"
                              VerticalAlignment="Center" />
 
-        <Label Grid.Column="0" Grid.Row="2" VerticalAlignment="Top" HorizontalAlignment="Right">Class Duration (mins):</Label>
-        <xctk:SingleUpDown Grid.Column="1" Grid.Row="2" Value="{Binding AppState.ClassDuration}"
-                           VerticalAlignment="Top" />
+        <Label Grid.Column="0" Grid.Row="4" VerticalAlignment="Center" HorizontalAlignment="Right">Class Duration (mins):</Label>
+        <xctk:SingleUpDown Grid.Column="1" Grid.Row="4" Value="{Binding AppState.ClassDuration}"
+                           VerticalAlignment="Center" />
 
     </Grid>
 </UserControl>

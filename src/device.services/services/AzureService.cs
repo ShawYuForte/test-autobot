@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using forte.device.extensions;
@@ -65,9 +66,10 @@ namespace forte.device.services
         {
             var context = CreateContext();
             var azureChannel = context.Channels.ToList().FirstOrDefault(c => c.Name == AppSettings.Instance.ChannelName);
-            var trainerName = AppState.Instance.TrainerName.ToLower().Replace(" ", "");
             // Make sure asset is ready
-            var assetName = $"{AppState.Instance.ClassStartTime.ToString("MMdd-HHmm")}-{trainerName}";
+            var studioAcronym = ToAcronym(AppSettings.Instance.StudioName);
+            var className = AppState.Instance.ClassName.Replace(" ", "");
+            var assetName = $"{AppState.Instance.ClassStartTime.ToString("MMdd-HHmm")}-{studioAcronym}{className}";
             var asset = await CreateAndConfigureAssetAsync(context, assetName);
 
             // Make sure program created
@@ -90,6 +92,21 @@ namespace forte.device.services
                 AssetId = program.Asset.Id,
                 PublishUrl = publishUrl
             };
+        }
+
+        private static string ToAcronym(string input)
+        {
+            var buffer = new StringBuilder();
+
+            var words = input.Split(' ');
+
+            foreach (var word in words)
+            {
+                if (string.IsNullOrWhiteSpace(word)) continue;
+                buffer.Append(word.ToUpper().Substring(0, 1));
+            }
+
+            return buffer.ToString();
         }
 
         public static IList<Uri> GetLocatorsInAllStreamingEndpoints(CloudMediaContext context, IAsset asset)
