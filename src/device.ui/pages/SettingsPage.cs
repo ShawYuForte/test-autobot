@@ -32,7 +32,7 @@ namespace device.ui.pages
             if (AppState.ClassStartTime > DateTime.Now) return true;
 
             var response =
-                MessageBox.Show(
+                MessageBox.Show(this,
                     "You have specified a class time in the past. While it doesn't matter to me, the asset will be created with a date in the past. Are you sure you want to continue?",
                     "Confirm", MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (response != MessageBoxResult.No) return true;
@@ -49,7 +49,7 @@ namespace device.ui.pages
             if (!File.Exists(AppSettings.Instance.VmixExecutablePath))
             {
                 e.Cancel = true;
-                MessageBox.Show(
+                MessageBox.Show(this,
                     $"VMIX executable file '{AppSettings.Instance.VmixExecutablePath}' does not exist, please verify the file path.",
                     "Validation failed", MessageBoxButton.OK, MessageBoxImage.Stop);
                 return false;
@@ -58,7 +58,7 @@ namespace device.ui.pages
             if (File.Exists(AppSettings.Instance.VmixPresetFilePath)) return true;
 
             e.Cancel = true;
-            MessageBox.Show(
+            MessageBox.Show(this,
                 $"VMIX preset file '{AppSettings.Instance.VmixPresetFilePath}' does not exist, please verify the file path.",
                 "Validation failed", MessageBoxButton.OK, MessageBoxImage.Stop);
             return false;
@@ -76,12 +76,12 @@ namespace device.ui.pages
 
             if (!valid)
             {
-                MessageBox.Show("Accurate class info is required", "Validation failed", MessageBoxButton.OK,
+                MessageBox.Show(this, "Accurate class info is required", "Validation failed", MessageBoxButton.OK,
                     MessageBoxImage.Stop);
             }
             else if (!AppSettings.AreValid())
             {
-                MessageBox.Show("App settings are not provided, click 'OK' to update them.", "Validation failed",
+                MessageBox.Show(this, "App settings are not provided, click 'OK' to update them.", "Validation failed",
                     MessageBoxButton.OK,
                     MessageBoxImage.Stop);
                 new SettingsWindow().ShowDialog();
@@ -108,7 +108,7 @@ namespace device.ui.pages
             _timer = new System.Threading.Timer(state =>
             {
                 _timer.Dispose();
-                _azureService.OnLog += delegate(string message) { Dispatcher.Invoke(() => Log(message)); };
+                _azureService.OnLog += delegate (string message) { Dispatcher.Invoke(() => Log(message)); };
                 if (_azureService.VerifySettings())
                 {
                     Dispatcher.Invoke(OnAzureSettingsVerified);

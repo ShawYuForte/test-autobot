@@ -3,6 +3,7 @@
 using System;
 using System.Windows;
 using System.Windows.Controls;
+using forte.device.services;
 
 #endregion
 
@@ -10,6 +11,10 @@ namespace device.ui.controls
 {
     public abstract class PageControl : UserControl
     {
+        protected readonly AzureService _azureService = new AzureService();
+        protected readonly VMixService _vmixService = new VMixService();
+
+
         public delegate void LogEventDelegate(string message);
 
         public abstract void Process();
@@ -49,6 +54,17 @@ namespace device.ui.controls
         protected Window GetParentWindow()
         {
             return Window.GetWindow(this);
+        }
+
+        protected void ShowInfoMessageBox(string message, string title = "Info")
+        {
+            MessageBox.Show(GetParentWindow(), message, title,
+                MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        protected void ShowWarningMessageBox(string message, string title = "Warning")
+        {
+            MessageBox.Show(GetParentWindow(), message, title,
+                MessageBoxButton.OK, MessageBoxImage.Warning);
         }
     }
 }

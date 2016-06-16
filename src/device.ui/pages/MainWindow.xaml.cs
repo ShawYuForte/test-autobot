@@ -81,7 +81,7 @@ namespace device.ui.pages
         {
             if (AppState.WorkflowState != forte.device.models.Workflow.NotStarted)
             {
-                var response = MessageBox.Show("Start over?", "Confirm", MessageBoxButton.YesNo,
+                var response = MessageBox.Show(this, "Start over?", "Confirm", MessageBoxButton.YesNo,
                     MessageBoxImage.Question);
                 if (response == MessageBoxResult.No) return;
             }
@@ -131,8 +131,8 @@ namespace device.ui.pages
 
         private void WizardGetReadyPage_OnDone(object sender, EventArgs e)
         {
-            IsBusy = false;
-            wizard.CurrentPage = StartClassPage;
+            wizard.CurrentPage = WaitForChannelStartPage;
+            Log("Auto advancing to next step, waiting for channel to start.");
         }
 
         private void WizardGetReadyPage_OnError(object sender, EventArgs e)
@@ -148,6 +148,22 @@ namespace device.ui.pages
         private void WizarPage_OnNotBusy(object sender, EventArgs e)
         {
             IsBusy = false;
+        }
+
+        private void WizardWaitForChannelStartPage_OnDone(object sender, EventArgs e)
+        {
+            Log("Auto advancing to next step, waiting for class to start.");
+            wizard.CurrentPage = StartClassPage;
+        }
+
+        private void WizardWaitForChannelStartPage_OnError(object sender, EventArgs e)
+        {
+
+        }
+
+        private void WaitForChannelStartPage_Enter(object sender, RoutedEventArgs e)
+        {
+            WizardWaitForChannelStartPage.Process();
         }
     }
 }

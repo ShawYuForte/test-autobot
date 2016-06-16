@@ -2,7 +2,6 @@
 
 using System;
 using System.ComponentModel;
-using System.Configuration;
 using AutoMapper;
 using forte.device.Properties;
 using Newtonsoft.Json;
@@ -46,7 +45,7 @@ namespace forte.device.models
         ///     Azure Media Services Program Name
         /// </summary>
         public string ProgramName { get; set; }
-        
+
         /// <summary>
         ///     Class start time
         /// </summary>
@@ -70,10 +69,20 @@ namespace forte.device.models
         /// <summary>
         ///     Currently created program
         /// </summary>
+        public VMixState CurrentVmixState { get; set; }
+
+        /// <summary>
+        ///     Currently created program
+        /// </summary>
         public AzureProgram CurrentProgram { get; set; }
 
         /// <summary>
-        /// Name of the class being streamed
+        ///     Specify whether Azure channel is running
+        /// </summary>
+        public bool AzureChannelRunning { get; set; }
+
+        /// <summary>
+        ///     Name of the class being streamed
         /// </summary>
         public string ClassName { get; set; }
 

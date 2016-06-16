@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:controls="clr-namespace:device.ui.controls"
+        xmlns:pages="clr-namespace:device.ui.controls.pages"
         mc:Ignorable="d" WindowStartupLocation="CenterScreen" SizeChanged="Window_SizeChanged"
         DataContext="{Binding RelativeSource={RelativeSource Self}}" Topmost="true" ResizeMode="CanMinimize"
         Title="{Binding Path=AppTitle}" Height="530" Width="620" Loaded="Window_Loaded">
@@ -26,19 +27,26 @@
                     <xctk:WizardPage.ExteriorPanelContent>
                         <Image Source="{Binding StartupPageImageSource}" />
                     </xctk:WizardPage.ExteriorPanelContent>
-                    <controls:IntroPage />
+                    <pages:IntroPage />
                 </xctk:WizardPage>
                 <xctk:WizardPage x:Name="SettingsPage" PageType="Interior"
                                  Title="Confirm Settings" PreviousPage="{Binding ElementName=IntroPage}"
                                  Description="Confirm these settings before moving forward. You only need to confirm the bold settings each time, the other ones you only confirm once (they shouldn't change over time)."
                                  Leave="SettingsPage_Leave">
-                    <controls:SettingsPage />
+                    <pages:SettingsPage />
                 </xctk:WizardPage>
                 <xctk:WizardPage x:Name="GetReadyPage" PageType="Interior"
                                  Title="Get Ready to Stream" PreviousPage="{Binding ElementName=SettingsPage}"
                                  Description="Now I am going to prepare everything for you to start streaming, click 'Next' when ready."
                                  Enter="PresetPage_Enter" Leave="PresetPage_Leave">
-                    <controls:GetReadyPage x:Name="WizardGetReadyPage" OnDone="WizardGetReadyPage_OnDone" OnError="WizardGetReadyPage_OnError" OnLog="Log"
+                    <pages:GetReadyPage x:Name="WizardGetReadyPage" OnDone="WizardGetReadyPage_OnDone" OnError="WizardGetReadyPage_OnError" OnLog="Log"
+                                           OnBusy="WizardPage_OnBusy" OnNotBusy="WizarPage_OnNotBusy" />
+                </xctk:WizardPage>
+                <xctk:WizardPage x:Name="WaitForChannelStartPage" PageType="Interior" CanSelectPreviousPage="False" CanSelectNextPage="False" CanHelp="False" CanCancel="False"
+                                 Title="Waiting to start channel" PreviousPage="{Binding ElementName=GetReadyPage}"
+                                 Description="Hurry up and wait, I'll kick off closer to class start time."
+                                 Enter="WaitForChannelStartPage_Enter">
+                    <pages:WaitForChannelStartPage x:Name="WizardWaitForChannelStartPage" OnDone="WizardWaitForChannelStartPage_OnDone"  OnError="WizardWaitForChannelStartPage_OnError"  OnLog="Log"
                                            OnBusy="WizardPage_OnBusy" OnNotBusy="WizarPage_OnNotBusy" />
                 </xctk:WizardPage>
                 <xctk:WizardPage x:Name="StartClassPage" PageType="Interior" CanSelectPreviousPage="False"
@@ -46,16 +54,16 @@
                                  Description="We are ready to stream, as soon as the time hits start-o-clock."
                                  NextPage="{Binding ElementName=StopClassPage}"
                                  PreviousPage="{Binding ElementName=StartClassPage}">
-                    <controls:StartClassPage OnPause="StartClassPage_OnPause" />
+                    <pages:StartClassPage OnPause="StartClassPage_OnPause" />
                 </xctk:WizardPage>
                 <xctk:WizardPage x:Name="StopClassPage" PageType="Interior" PreviousPage="{Binding ElementName=StopClassPage}"
                                  Title="Stop the class when done" NextPage="{Binding ElementName=LastPage}" CanSelectPreviousPage="False"
                                  Description="We are going to wait together for the class to end, then wrap up.">
-                    <controls:StopClassPage ReadyForNext="StopClassPage_ReadyForNext" />
+                    <pages:StopClassPage ReadyForNext="StopClassPage_ReadyForNext" />
                 </xctk:WizardPage>
                 <xctk:WizardPage x:Name="LastPage" PageType="Interior" PreviousPage="{Binding ElementName=LastPage}" Enter="LastPage_Enter" CanCancel="False" CanSelectPreviousPage="False"
                                  Title="Done and done!" Description="Whew, that was quite a workout... I'm exchausted. Don't forget your url, then click 'Finish'" CanFinish="True">
-                    <controls:SummaryPage Margin="-14, -15, -14, -15"/>
+                    <pages:SummaryPage Margin="-14, -15, -14, -15"/>
                 </xctk:WizardPage>
             </xctk:Wizard>
         </xctk:BusyIndicator>

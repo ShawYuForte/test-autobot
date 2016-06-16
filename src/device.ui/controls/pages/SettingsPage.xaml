@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="device.ui.controls.SettingsPage"
+﻿<UserControl x:Class="device.ui.controls.pages.SettingsPage"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"

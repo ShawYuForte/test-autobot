@@ -132,11 +132,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="controls\GetReadyPage.xaml">
+    <Page Include="controls\pages\GetReadyPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="controls\IntroPage.xaml">
+    <Page Include="controls\pages\IntroPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -144,19 +144,23 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="controls\SettingsPage.xaml">
+    <Page Include="controls\pages\SettingsPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="controls\StartClassPage.xaml">
+    <Page Include="controls\pages\StartClassPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="controls\StopClassPage.xaml">
+    <Page Include="controls\pages\StopClassPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="controls\SummaryPage.xaml">
+    <Page Include="controls\pages\SummaryPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="controls\pages\WaitForChannelStartPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -171,29 +175,31 @@
     <Compile Include="controls\Countdown.xaml.cs">
       <DependentUpon>Countdown.xaml</DependentUpon>
     </Compile>
-    <Compile Include="controls\GetReadyPage.xaml.cs">
+    <Compile Include="controls\pages\GetReadyPage.xaml.cs">
       <DependentUpon>GetReadyPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="controls\IntroPage.xaml.cs">
+    <Compile Include="controls\pages\IntroPage.xaml.cs">
       <DependentUpon>IntroPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="controls\LogControl.xaml.cs">
       <DependentUpon>LogControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="controls\PageControl.cs" />
-    <Compile Include="controls\SettingsPage.xaml.cs">
+    <Compile Include="controls\pages\SettingsPage.xaml.cs">
       <DependentUpon>SettingsPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="controls\StartClassPage.xaml.cs">
+    <Compile Include="controls\pages\StartClassPage.xaml.cs">
       <DependentUpon>StartClassPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="controls\StopClassPage.xaml.cs">
+    <Compile Include="controls\pages\StopClassPage.xaml.cs">
       <DependentUpon>StopClassPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="controls\SummaryPage.xaml.cs">
+    <Compile Include="controls\pages\SummaryPage.xaml.cs">
       <DependentUpon>SummaryPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="pages\GetReadyPage.cs" />
+    <Compile Include="controls\pages\WaitForChannelStartPage.xaml.cs">
+      <DependentUpon>WaitForChannelStartPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="pages\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>

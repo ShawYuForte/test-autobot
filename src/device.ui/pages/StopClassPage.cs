@@ -22,7 +22,7 @@ namespace device.ui.pages
 
             if (AppState.ClassStartTime.AddMinutes(AppState.ClassDuration) > DateTime.Now)
             {
-                var response = MessageBox.Show("Class has not ended yet, are you sure you want to stop the stream?", "Confirm",
+                var response = MessageBox.Show(this,"Class has not ended yet, are you sure you want to stop the stream?", "Confirm",
                     MessageBoxButton.YesNo, MessageBoxImage.Warning);
                 if (response == MessageBoxResult.No) return;
             }

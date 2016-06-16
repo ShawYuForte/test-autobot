@@ -1,9 +1,10 @@
-﻿<UserControl x:Class="device.ui.controls.SummaryPage"
+﻿<UserControl x:Class="device.ui.controls.pages.SummaryPage"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:device.ui.controls"
+             xmlns:pages="clr-namespace:device.ui.controls.pages"
              mc:Ignorable="d" Margin="0"
              d:DesignHeight="300" d:DesignWidth="300">
     <Grid>
@@ -18,7 +19,7 @@
         </Grid.RowDefinitions>
 
         <Image Source="{Binding FinishImageSource}" Opacity="0.7" Grid.Column="0" Grid.ColumnSpan="2"
-               DataContext="{Binding RelativeSource={RelativeSource AncestorType=local:SummaryPage}}"
+               DataContext="{Binding RelativeSource={RelativeSource AncestorType=pages:SummaryPage}}"
                SizeChanged="Image_SizeChanged" />
 
         <Label Grid.Row="1" Grid.Column="0" HorizontalAlignment="Right" FontWeight="Bold">Program Url:</Label>

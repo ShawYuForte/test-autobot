@@ -138,7 +138,7 @@ namespace forte.device.services
             var counter = 1;
             while (context.Assets.ToList().Any(a => a.Name == safeAssetName))
             {
-                safeAssetName = $"{assetName}.{counter++}";
+                safeAssetName = $"{assetName}-{counter++}";
             }
 
             var asset = await context.Assets.CreateAsync(safeAssetName, AssetCreationOptions.None, CancellationToken.None);

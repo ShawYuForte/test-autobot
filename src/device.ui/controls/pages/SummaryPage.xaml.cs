@@ -7,7 +7,7 @@ using System.Windows.Controls;
 
 #endregion
 
-namespace device.ui.controls
+namespace device.ui.controls.pages
 {
     /// <summary>
     ///     Interaction logic for SummaryPage.xaml

@@ -9,7 +9,7 @@ using forte.device.models;
 
 #endregion
 
-namespace device.ui.controls
+namespace device.ui.controls.pages
 {
     /// <summary>
     ///     Interaction logic for StopClassPage.xaml
