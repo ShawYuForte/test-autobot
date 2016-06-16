@@ -70,7 +70,8 @@ namespace device.ui.pages
 
         private bool VerifyRequiredSettings(CancelRoutedEventArgs e)
         {
-            var valid = !string.IsNullOrWhiteSpace(AppSettings.Instance.ChannelName) &&
+            var valid = !string.IsNullOrWhiteSpace(AppState.ClassName) &&
+                        !string.IsNullOrWhiteSpace(AppSettings.Instance.ChannelName) &&
                         !string.IsNullOrWhiteSpace(AppSettings.Instance.VmixPresetFilePath);
 
             if (!valid)

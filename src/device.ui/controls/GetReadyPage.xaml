@@ -25,32 +25,29 @@
 
         <Image Source="/images/vmix.jpg" Grid.Column="0" Grid.Row="1" Margin="5" VerticalAlignment="Center" />
         <TextBlock Grid.Column="1" Grid.Row="1" Margin="5" VerticalAlignment="Center">
-            1) Start vMix by running "
-            <Run Text="{Binding AppSettings.VmixExecutablePath}" />"
+            1) Start vMix by running "<Run Text="{Binding AppSettings.VmixExecutablePath}" />"
         </TextBlock>
 
         <Image Source="/images/vmix.jpg" Grid.Column="0" Grid.Row="2" VerticalAlignment="Center" Margin="5" />
         <TextBlock Grid.Column="1" Grid.Row="2" VerticalAlignment="Center" Margin="5">
-            2) Load vMix Presets from "
-            <Run Text="{Binding AppSettings.VmixPresetFilePath}" />"
+            2) Load vMix Presets from "<Run Text="{Binding AppSettings.VmixPresetFilePath}" />"
         </TextBlock>
 
         <Image Source="/images/azure.png" Grid.Column="0" Grid.Row="3" VerticalAlignment="Center" Margin="5" />
         <TextBlock Grid.Column="1" Grid.Row="3" VerticalAlignment="Center" Margin="5">
-            3) Start the Azure "
-            <Run Text="{Binding AppSettings.ChannelName}" />" Channel
+            3) Create an Azure Program, but not start it
         </TextBlock>
 
         <Image Source="/images/azure.png" Grid.Column="0" Grid.Row="4" VerticalAlignment="Center" Margin="5" />
-        <TextBlock Grid.Column="1" Grid.Row="4" VerticalAlignment="Center" Margin="5">4) Create an Azure Program, but not start it</TextBlock>
+        <TextBlock Grid.Column="1" Grid.Row="4" VerticalAlignment="Center" Margin="5">4) Wait until <Run Text="{Binding AppSettings.StartChannelMinutesBefore}" /> before the class starts, 
+            then start the Azure "<Run Text="{Binding AppSettings.ChannelName}" />" Channel</TextBlock>
 
         <Image Source="/images/vmix.jpg" Grid.Column="0" Grid.Row="5" VerticalAlignment="Center" Margin="5" />
         <TextBlock Grid.Column="1" Grid.Row="5" VerticalAlignment="Center" Margin="5">5) Select the static Forte background image, start vMix streaming (not broadcasting yet)</TextBlock>
 
-        <TextBlock Grid.ColumnSpan="2" Grid.Column="0" Grid.Row="6" TextWrapping="Wrap">
-            <Bold>Remember:</Bold> this doesn't start Azure recording, so you can do this as
-            soon as possible, you must be ready for the next step before the class starts
-        </TextBlock>
+        <local:Countdown Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" OnStop="StartChannelCountdown_OnStop" 
+                         EventName="Channel setup" CountdownTo="{Binding AppState.ClassStartTime}" StartOnRender="True"
+                         x:Name="StartChannelCountdown"></local:Countdown>
 
     </Grid>
 </UserControl>

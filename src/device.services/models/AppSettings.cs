@@ -175,8 +175,8 @@ namespace forte.device.models
                    !string.IsNullOrWhiteSpace(ClosingVideo) &&
                    !string.IsNullOrWhiteSpace(ClosingImage) &&
                    !string.IsNullOrWhiteSpace(OverlayImage) && 
-                   StartChannelMinutesBefore > 15 &&
-                   StartProgramMinutesBefore > 3;
+                   StartChannelMinutesBefore >= 15 &&
+                   StartProgramMinutesBefore >= 3;
         }
 
         /// <summary>

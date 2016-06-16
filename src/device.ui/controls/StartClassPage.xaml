@@ -6,9 +6,6 @@
              xmlns:local="clr-namespace:device.ui.controls"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
-    <UserControl.Resources>
-        <BooleanToVisibilityConverter x:Key="BoolToVis"></BooleanToVisibilityConverter>
-    </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="25" />
@@ -43,19 +40,7 @@
 
         <Separator Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Margin="0, 20, 0, 0" />
 
-        <TextBlock Text="{Binding StartClassTimerDisplay}" Grid.ColumnSpan="2" Grid.Column="0" Grid.Row="5"
-                   HorizontalAlignment="Center" Margin="20" FontSize="16" />
-        <Button Grid.Column="0" Grid.Row="6" Grid.ColumnSpan="2" VerticalAlignment="Bottom" HorizontalAlignment="Left" 
-                DataContext="{Binding RelativeSource={RelativeSource AncestorType=local:StartClassPage}}"
-                x:Name="PauseCountdownButton" Click="PauseCountdownButton_Click" Visibility="{Binding Path=ShowPauseButton, Converter={StaticResource BoolToVis}}">
-            <StackPanel Orientation="Horizontal">
-                <Image Source="/images/pause.png" Margin="5" VerticalAlignment="Center" MaxWidth="20" />
-                <TextBlock VerticalAlignment="Center" Margin="5">Stop Countdown</TextBlock>
-            </StackPanel>
-        </Button>
-        <TextBlock Grid.Row="6" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Bottom" FontSize="10"
-                   Margin="10">
-            Click Next if you don't want to wait.
-        </TextBlock>
+        <local:Countdown Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" OnStop="Countdown_OnStop"></local:Countdown>
+
     </Grid>
 </UserControl>

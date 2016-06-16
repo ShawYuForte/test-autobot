@@ -18,7 +18,7 @@ namespace device.ui.pages
         private void StartClassTimer()
         {
             // Wait at least 5 seconds, or the total number of seconds until 5 minutes before the class
-            var seconds = Math.Max(5, (AppState.ClassStartTime - DateTime.Now).TotalSeconds - 60 * 5);
+            var seconds = Math.Max(5, (AppState.ClassStartTime - DateTime.Now).TotalSeconds - AppSettings.StartProgramMinutesBefore * 60);
 
             _timer = new Timer(state =>
             {
