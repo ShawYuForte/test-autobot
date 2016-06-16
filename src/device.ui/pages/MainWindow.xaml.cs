@@ -49,7 +49,9 @@ namespace device.ui.pages
                     break;
 
                 case nameof(GetReadyPage):
-                    GetReadyPage_Next(sender, e);
+                    //GetReadyPage_Next(sender, e);
+                    WizardGetReadyPage.Process();
+                    IsBusy = e.Cancel = true;
                     break;
 
                 case nameof(StartClassPage):
@@ -125,6 +127,27 @@ namespace device.ui.pages
         {
             var settingsPage = new SettingsWindow();
             settingsPage.ShowDialog();
+        }
+
+        private void WizardGetReadyPage_OnDone(object sender, EventArgs e)
+        {
+            IsBusy = false;
+            wizard.CurrentPage = StartClassPage;
+        }
+
+        private void WizardGetReadyPage_OnError(object sender, EventArgs e)
+        {
+            IsBusy = false;
+        }
+
+        private void WizardPage_OnBusy(object sender, EventArgs e)
+        {
+            IsBusy = true;
+        }
+
+        private void WizarPage_OnNotBusy(object sender, EventArgs e)
+        {
+            IsBusy = false;
         }
     }
 }

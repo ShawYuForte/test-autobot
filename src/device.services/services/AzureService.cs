@@ -73,7 +73,7 @@ namespace forte.device.services
             var asset = await CreateAndConfigureAssetAsync(context, assetName);
 
             // Make sure program created
-            var program = await azureChannel.Programs.CreateAsync(assetName, TimeSpan.FromHours(2), asset.Id);
+            var program = await azureChannel.Programs.CreateAsync(asset.Name, TimeSpan.FromHours(2), asset.Id);
 
             var locator = CreateLocatorForAsset(context, program.Asset, TimeSpan.FromDays(DaysInTenYears));
             var urls = GetLocatorsInAllStreamingEndpoints(context, asset);
@@ -134,13 +134,20 @@ namespace forte.device.services
         /// <returns></returns>
         private async Task<IAsset> CreateAndConfigureAssetAsync(CloudMediaContext context, string assetName)
         {
-            var asset = await context.Assets.CreateAsync(assetName, AssetCreationOptions.None, CancellationToken.None);
+            var safeAssetName = assetName;
+            var counter = 1;
+            while (context.Assets.ToList().Any(a => a.Name == safeAssetName))
+            {
+                safeAssetName = $"{assetName}.{counter++}";
+            }
 
-            var policy = await context.AssetDeliveryPolicies.CreateAsync(
-                "Clear Policy",
-                AssetDeliveryPolicyType.NoDynamicEncryption,
-                AssetDeliveryProtocol.HLS | AssetDeliveryProtocol.SmoothStreaming | AssetDeliveryProtocol.Dash,
-                null);
+            var asset = await context.Assets.CreateAsync(safeAssetName, AssetCreationOptions.None, CancellationToken.None);
+
+            //var policy = await context.AssetDeliveryPolicies.CreateAsync(
+            //    "Clear Policy",
+            //    AssetDeliveryPolicyType.NoDynamicEncryption,
+            //    AssetDeliveryProtocol.HLS | AssetDeliveryProtocol.SmoothStreaming | AssetDeliveryProtocol.Dash,
+            //    null);
 
             //asset.DeliveryPolicies.Add(policy);
 

@@ -1,15 +1,13 @@
 ﻿#region
 
 using System.Configuration;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
-using forte.device.extensions;
 using forte.device.models;
-using Newtonsoft.Json;
 using RestSharp;
 
 #endregion
@@ -18,42 +16,13 @@ namespace forte.device.services
 {
     public class VMixService : Service
     {
-        private readonly RestClient _client;
-        //private VMixState _presetState;
         private readonly Regex _cameraRegex = new Regex(@"RTSPTCP rtsp:\/\/root:pass@[0-9.]*\/axis-media\/media\.amp");
+        private readonly RestClient _client;
 
         public VMixService()
         {
             _client = new RestClient(ConfigurationManager.AppSettings["apiPath"]);
-
-            //LoadExpectedPresets();
         }
-
-        //private void LoadExpectedPresets()
-        //{
-        //    var path = new FileInfo(Assembly.GetExecutingAssembly().Location).Directory.FullName;
-        //    var expectedStateFile =
-        //        Path.Combine(path, "data\\expected-state.json");
-        //    string expectedStateJson;
-
-        //    if (File.Exists(expectedStateFile))
-        //    {
-        //        expectedStateJson = File.ReadAllText(expectedStateFile);
-        //    }
-        //    else
-        //    {
-        //        var assembly = Assembly.GetExecutingAssembly();
-        //        const string resourceName = "forte.device.data.expected-state.json";
-
-        //        using (var stream = assembly.GetManifestResourceStream(resourceName))
-        //        using (var reader = new StreamReader(stream))
-        //        {
-        //            expectedStateJson = reader.ReadToEnd();
-        //        }
-        //    }
-
-        //    _presetState = JsonConvert.DeserializeObject<VMixState>(expectedStateJson);
-        //}
 
         /// <summary>
         ///     Fetch state from vMix API
@@ -89,7 +58,9 @@ namespace forte.device.services
             input = state.Inputs.FirstOrDefault(i => i.Title == AppSettings.Instance.OverlayImage);
             if (input != null) input.Role = InputRole.LogoOverlay;
 
-            input = state.Inputs.FirstOrDefault(i => i.Title.ToLower().Contains("audio") && i.Title.ToLower().Contains("microphone"));
+            input =
+                state.Inputs.FirstOrDefault(
+                    i => i.Title.ToLower().Contains("audio") && i.Title.ToLower().Contains("microphone"));
             if (input != null) input.Role = InputRole.Audio;
 
             state.Inputs.Where(i => _cameraRegex.IsMatch(i.Title)).ToList().ForEach(i => i.Role = InputRole.Camera);
@@ -122,13 +93,27 @@ namespace forte.device.services
         {
             var state = FetchState();
             return state.Inputs.Count(input => input.Role == InputRole.OpeninStaticImage) == 1 &&
-                state.Inputs.Count(input => input.Role == InputRole.OpeningVideo) == 1 &&
-                state.Inputs.Count(input => input.Role == InputRole.ClosingStaticImage) == 1 &&
-                state.Inputs.Count(input => input.Role == InputRole.ClosingVideo) == 1 &&
-                state.Inputs.Count(input => input.Role == InputRole.LogoOverlay) == 1 &&
-                state.Inputs.Count(input => input.Role == InputRole.Audio) == 1 &&
-                state.Inputs.Count(input => input.Role == InputRole.Camera) > 0;
+                   state.Inputs.Count(input => input.Role == InputRole.OpeningVideo) == 1 &&
+                   state.Inputs.Count(input => input.Role == InputRole.ClosingStaticImage) == 1 &&
+                   state.Inputs.Count(input => input.Role == InputRole.ClosingVideo) == 1 &&
+                   state.Inputs.Count(input => input.Role == InputRole.LogoOverlay) == 1 &&
+                   state.Inputs.Count(input => input.Role == InputRole.Audio) == 1 &&
+                   state.Inputs.Count(input => input.Role == InputRole.Camera) > 0;
         }
+
+        #region GetVmixProcess
+
+        public Process GetVmixProcess()
+        {
+            FileSystemInfo fileInfo = new FileInfo(AppSettings.Instance.VmixExecutablePath);
+            var sExeName = fileInfo.Name.Replace(fileInfo.Extension, "");
+
+            var existingProcess = Process.GetProcessesByName(sExeName).FirstOrDefault();
+
+            return existingProcess;
+        }
+
+        #endregion
 
         /// <summary>
         ///     Set the preview window to the specified input
@@ -172,8 +157,8 @@ namespace forte.device.services
         private VMixState CallAndFetchState(string operation, string description)
         {
             var webRequest =
-                (HttpWebRequest)WebRequest.CreateHttp($"{ConfigurationManager.AppSettings["apiPath"]}{operation}");
-            var response = (HttpWebResponse)webRequest.GetResponse();
+                (HttpWebRequest) WebRequest.CreateHttp($"{ConfigurationManager.AppSettings["apiPath"]}{operation}");
+            var response = (HttpWebResponse) webRequest.GetResponse();
             if (response.StatusCode == HttpStatusCode.OK) return FetchState();
 
             var error = $"Could not {description} ({response.StatusDescription}";

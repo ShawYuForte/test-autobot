@@ -95,7 +95,7 @@ namespace device.ui.pages
 
         protected void FinishWorkflow()
         {
-            var vMixProcess = GetVmixProcess();
+            var vMixProcess = _vmixService.GetVmixProcess();
             vMixProcess?.Kill();
             Log("Stopped vMix.");
 

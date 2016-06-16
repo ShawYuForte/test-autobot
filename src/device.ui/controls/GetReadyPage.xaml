@@ -1,10 +1,11 @@
-﻿<UserControl x:Class="device.ui.controls.GetReadyPage"
+﻿<local:PageControl x:Class="device.ui.controls.GetReadyPage"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:device.ui.controls"
              mc:Ignorable="d"
+             DataContext="{Binding RelativeSource={RelativeSource Self}}"
              d:DesignHeight="300" d:DesignWidth="300">
     <Grid>
         <Grid.ColumnDefinitions>
@@ -45,9 +46,15 @@
         <Image Source="/images/vmix.jpg" Grid.Column="0" Grid.Row="5" VerticalAlignment="Center" Margin="5" />
         <TextBlock Grid.Column="1" Grid.Row="5" VerticalAlignment="Center" Margin="5">5) Select the static Forte background image, start vMix streaming (not broadcasting yet)</TextBlock>
 
-        <local:Countdown Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" OnStop="StartChannelCountdown_OnStop" 
-                         EventName="Channel setup" CountdownTo="{Binding AppState.ClassStartTime}" StartOnRender="True"
+        <local:Countdown Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2" Visibility="{Binding ShowCountdown}" CanStop="False" 
+                         OnStop="StartChannelCountdown_OnStop" OnExpire="StartChannelCountdown_OnExpire"
+                         EventName="Channel setup" CountdownTo="{Binding StartChannelAt}" 
                          x:Name="StartChannelCountdown"></local:Countdown>
 
+        <TextBlock Grid.ColumnSpan="2" Grid.Column="0" Grid.Row="6" TextWrapping="Wrap" Visibility="{Binding ShowFootnote}">
+            <Bold>Remember:</Bold> this doesn't start Azure recording, so you can do this as
+            soon as possible, you must be ready for the next step before the class starts
+        </TextBlock>
+
     </Grid>
-</UserControl>
+</local:PageControl>

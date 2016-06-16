@@ -51,6 +51,7 @@ namespace device.ui.controls
         }
 
         public string EventName { get; set; }
+        public bool CanStop { get; set; }
 
         public string FootnoteText
         {
@@ -93,7 +94,7 @@ namespace device.ui.controls
                 _countdownStarted = true;
             }
 
-            ShowStopButton = true;
+            ShowStopButton = CanStop;
             _timer = new Timer(state =>
             {
                 var expired = false;
@@ -116,7 +117,7 @@ namespace device.ui.controls
 
         private void DisplayCountdownText()
         {
-            var timeRemaining = CountdownTo - DateTime.Now;
+            var timeRemaining = CountdownTo.Subtract(DateTime.Now);
 
             if (timeRemaining.TotalSeconds < 0)
             {

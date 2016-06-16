@@ -38,7 +38,8 @@
                                  Title="Get Ready to Stream" PreviousPage="{Binding ElementName=SettingsPage}"
                                  Description="Now I am going to prepare everything for you to start streaming, click 'Next' when ready."
                                  Enter="PresetPage_Enter" Leave="PresetPage_Leave">
-                    <controls:GetReadyPage />
+                    <controls:GetReadyPage x:Name="WizardGetReadyPage" OnDone="WizardGetReadyPage_OnDone" OnError="WizardGetReadyPage_OnError" OnLog="Log"
+                                           OnBusy="WizardPage_OnBusy" OnNotBusy="WizarPage_OnNotBusy" />
                 </xctk:WizardPage>
                 <xctk:WizardPage x:Name="StartClassPage" PageType="Interior" CanSelectPreviousPage="False"
                                  Title="Ready to Stream" Enter="StartClassPage_Enter"

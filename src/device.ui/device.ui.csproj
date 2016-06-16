@@ -180,6 +180,7 @@
     <Compile Include="controls\LogControl.xaml.cs">
       <DependentUpon>LogControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="controls\PageControl.cs" />
     <Compile Include="controls\SettingsPage.xaml.cs">
       <DependentUpon>SettingsPage.xaml</DependentUpon>
     </Compile>
