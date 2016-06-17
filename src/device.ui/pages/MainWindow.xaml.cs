@@ -55,7 +55,8 @@ namespace device.ui.pages
                     break;
 
                 case nameof(StartClassPage):
-                    StartClassPage_Next(sender, e);
+                    //StartClassPage_Next(sender, e);
+                    
                     break;
 
                 case nameof(StopClassPage):
@@ -95,12 +96,7 @@ namespace device.ui.pages
 
         private void StartClassPage_Enter(object sender, RoutedEventArgs e)
         {
-            StartClassTimer();
-        }
-
-        private void StartClassPage_OnPause(object sender, System.EventArgs e)
-        {
-            PauseClassTimer();
+            WizardStartClassPage.Process();
         }
 
         private void StopClassPage_ReadyForNext(object sender, System.EventArgs e)
@@ -137,7 +133,6 @@ namespace device.ui.pages
 
         private void WizardGetReadyPage_OnError(object sender, EventArgs e)
         {
-            IsBusy = false;
         }
 
         private void WizardPage_OnBusy(object sender, EventArgs e)
@@ -164,6 +159,17 @@ namespace device.ui.pages
         private void WaitForChannelStartPage_Enter(object sender, RoutedEventArgs e)
         {
             WizardWaitForChannelStartPage.Process();
+        }
+
+        private void WizardStartClassPage_OnError(object sender, EventArgs e)
+        {
+
+        }
+
+        private void WizardStartClassPage_OnDone(object sender, EventArgs e)
+        {
+            Log("Auto advancing to next step, waiting for class to end.");
+            wizard.CurrentPage = StopClassPage;
         }
     }
 }

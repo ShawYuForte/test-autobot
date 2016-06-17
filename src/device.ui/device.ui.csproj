@@ -216,7 +216,6 @@
     <Compile Include="pages\SettingsWindow.xaml.cs">
       <DependentUpon>SettingsWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="pages\StartClassPage.cs" />
     <Compile Include="pages\StopClassPage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>

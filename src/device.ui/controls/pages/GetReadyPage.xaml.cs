@@ -189,14 +189,13 @@ namespace device.ui.controls.pages
                 return;
             }
 
-            StartupVmix();
-
             // Delay loading preset because vMix loads slowly
             _vmixTimer = new Timer(state =>
             {
                 _vmixTimer.Dispose();
+                Dispatcher.Invoke(StartupVmix);
                 Dispatcher.Invoke(LoadVmixPresets);
-            }, null, TimeSpan.FromSeconds(5), TimeSpan.FromDays(1));
+            }, null, TimeSpan.FromSeconds(0), TimeSpan.FromDays(1));
         }
         #endregion
 
@@ -216,6 +215,12 @@ namespace device.ui.controls.pages
                     MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 _vmixFailed = true;
                 return;
+            }
+
+            while (string.IsNullOrWhiteSpace(vMixProcess.MainWindowTitle))
+            {
+                Thread.Sleep(100);
+                vMixProcess.Refresh();
             }
 
             AppState.VmixRuntime = new VmixRuntime

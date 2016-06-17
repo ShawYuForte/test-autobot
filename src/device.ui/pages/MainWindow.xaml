@@ -15,14 +15,15 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <xctk:BusyIndicator IsBusy="{Binding IsBusy}" Grid.Row="0">
-            <xctk:Wizard FinishButtonClosesWindow="false" Next="Wizard_Next" x:Name="wizard" Finish="wizard_Finish" Help="wizard_Help"
+            <xctk:Wizard FinishButtonClosesWindow="false" Next="Wizard_Next" x:Name="wizard" Finish="wizard_Finish"
+                         Help="wizard_Help"
                          CancelButtonClosesWindow="False" HelpButtonVisibility="Visible" MinHeight="300" Width="600"
                          Cancel="wizard_Cancel">
                 <xctk:Wizard.HelpButtonContent>
                     <TextBlock>Settings</TextBlock>
                 </xctk:Wizard.HelpButtonContent>
                 <xctk:WizardPage x:Name="IntroPage" PageType="Exterior"
-                                 Title="Let's start a'streaming" 
+                                 Title="Let's start a'streaming"
                                  Description="I'm going to walk you through streaming, all you need is your mouse fingers.">
                     <xctk:WizardPage.ExteriorPanelContent>
                         <Image Source="{Binding StartupPageImageSource}" />
@@ -39,31 +40,42 @@
                                  Title="Get Ready to Stream" PreviousPage="{Binding ElementName=SettingsPage}"
                                  Description="Now I am going to prepare everything for you to start streaming, click 'Next' when ready."
                                  Enter="PresetPage_Enter" Leave="PresetPage_Leave">
-                    <pages:GetReadyPage x:Name="WizardGetReadyPage" OnDone="WizardGetReadyPage_OnDone" OnError="WizardGetReadyPage_OnError" OnLog="Log"
-                                           OnBusy="WizardPage_OnBusy" OnNotBusy="WizarPage_OnNotBusy" />
+                    <pages:GetReadyPage x:Name="WizardGetReadyPage" OnDone="WizardGetReadyPage_OnDone"
+                                        OnError="WizardGetReadyPage_OnError" OnLog="Log"
+                                        OnBusy="WizardPage_OnBusy" OnNotBusy="WizarPage_OnNotBusy" />
                 </xctk:WizardPage>
-                <xctk:WizardPage x:Name="WaitForChannelStartPage" PageType="Interior" CanSelectPreviousPage="False" CanSelectNextPage="False" CanHelp="False" CanCancel="False"
+                <xctk:WizardPage x:Name="WaitForChannelStartPage" PageType="Interior" CanSelectPreviousPage="False"
+                                 CanSelectNextPage="False" CanHelp="False" CanCancel="False"
                                  Title="Waiting to start channel" PreviousPage="{Binding ElementName=GetReadyPage}"
                                  Description="Hurry up and wait, I'll kick off closer to class start time."
                                  Enter="WaitForChannelStartPage_Enter">
-                    <pages:WaitForChannelStartPage x:Name="WizardWaitForChannelStartPage" OnDone="WizardWaitForChannelStartPage_OnDone"  OnError="WizardWaitForChannelStartPage_OnError"  OnLog="Log"
-                                           OnBusy="WizardPage_OnBusy" OnNotBusy="WizarPage_OnNotBusy" />
+                    <pages:WaitForChannelStartPage x:Name="WizardWaitForChannelStartPage"
+                                                   OnDone="WizardWaitForChannelStartPage_OnDone"
+                                                   OnError="WizardWaitForChannelStartPage_OnError" OnLog="Log"
+                                                   OnBusy="WizardPage_OnBusy" OnNotBusy="WizarPage_OnNotBusy" />
                 </xctk:WizardPage>
                 <xctk:WizardPage x:Name="StartClassPage" PageType="Interior" CanSelectPreviousPage="False"
                                  Title="Ready to Stream" Enter="StartClassPage_Enter"
                                  Description="We are ready to stream, as soon as the time hits start-o-clock."
                                  NextPage="{Binding ElementName=StopClassPage}"
                                  PreviousPage="{Binding ElementName=StartClassPage}">
-                    <pages:StartClassPage OnPause="StartClassPage_OnPause" />
+                    <pages:StartClassPage x:Name="WizardStartClassPage" OnLog="Log" OnBusy="WizardPage_OnBusy"
+                                          OnNotBusy="WizarPage_OnNotBusy"
+                                          OnError="WizardStartClassPage_OnError" OnDone="WizardStartClassPage_OnDone" />
                 </xctk:WizardPage>
-                <xctk:WizardPage x:Name="StopClassPage" PageType="Interior" PreviousPage="{Binding ElementName=StopClassPage}"
-                                 Title="Stop the class when done" NextPage="{Binding ElementName=LastPage}" CanSelectPreviousPage="False"
+                <xctk:WizardPage x:Name="StopClassPage" PageType="Interior"
+                                 PreviousPage="{Binding ElementName=StopClassPage}"
+                                 Title="Stop the class when done" NextPage="{Binding ElementName=LastPage}"
+                                 CanSelectPreviousPage="False"
                                  Description="We are going to wait together for the class to end, then wrap up.">
                     <pages:StopClassPage ReadyForNext="StopClassPage_ReadyForNext" />
                 </xctk:WizardPage>
-                <xctk:WizardPage x:Name="LastPage" PageType="Interior" PreviousPage="{Binding ElementName=LastPage}" Enter="LastPage_Enter" CanCancel="False" CanSelectPreviousPage="False"
-                                 Title="Done and done!" Description="Whew, that was quite a workout... I'm exchausted. Don't forget your url, then click 'Finish'" CanFinish="True">
-                    <pages:SummaryPage Margin="-14, -15, -14, -15"/>
+                <xctk:WizardPage x:Name="LastPage" PageType="Interior" PreviousPage="{Binding ElementName=LastPage}"
+                                 Enter="LastPage_Enter" CanCancel="False" CanSelectPreviousPage="False"
+                                 Title="Done and done!"
+                                 Description="Whew, that was quite a workout... I'm exchausted. Don't forget your url, then click 'Finish'"
+                                 CanFinish="True">
+                    <pages:SummaryPage Margin="-14, -15, -14, -15" />
                 </xctk:WizardPage>
             </xctk:Wizard>
         </xctk:BusyIndicator>
