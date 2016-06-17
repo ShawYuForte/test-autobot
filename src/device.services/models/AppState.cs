@@ -105,6 +105,7 @@ namespace forte.device.models
             ClassStartTime = next30MinPoint;
             WorkflowState = Workflow.NotStarted;
             CurrentProgram = null;
+            AzureChannelRunning = false;
             return this;
         }
 

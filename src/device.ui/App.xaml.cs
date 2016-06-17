@@ -1,5 +1,6 @@
 ﻿#region
 
+using System;
 using System.Windows;
 using forte.device.extensions;
 
@@ -15,6 +16,15 @@ namespace device.ui
         public App() : base()
         {
             this.Dispatcher.UnhandledException += OnDispatcherUnhandledException;
+
+            var currentDomain = AppDomain.CurrentDomain;
+            currentDomain.UnhandledException += OnAppDomainUnhandledException;
+        }
+
+        private void OnAppDomainUnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            string errorMessage = $"An unrecoverable exception occurred: {e.ExceptionObject.InnerMessage(true)}";
+            MessageBox.Show(errorMessage, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
         private void OnDispatcherUnhandledException(object sender,

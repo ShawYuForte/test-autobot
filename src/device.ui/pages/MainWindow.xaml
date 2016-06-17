@@ -66,9 +66,10 @@
                 <xctk:WizardPage x:Name="StopClassPage" PageType="Interior"
                                  PreviousPage="{Binding ElementName=StopClassPage}"
                                  Title="Stop the class when done" NextPage="{Binding ElementName=LastPage}"
-                                 CanSelectPreviousPage="False"
+                                 CanSelectPreviousPage="False" Enter="StopClassPage_Enter"
                                  Description="We are going to wait together for the class to end, then wrap up.">
-                    <pages:StopClassPage ReadyForNext="StopClassPage_ReadyForNext" />
+                    <pages:StopClassPage x:Name="WizardStopClassPage" OnLog="Log" OnBusy="WizardPage_OnBusy"
+                                          OnNotBusy="WizarPage_OnNotBusy" OnDone="WizardStopClassPage_OnDone" />
                 </xctk:WizardPage>
                 <xctk:WizardPage x:Name="LastPage" PageType="Interior" PreviousPage="{Binding ElementName=LastPage}"
                                  Enter="LastPage_Enter" CanCancel="False" CanSelectPreviousPage="False"

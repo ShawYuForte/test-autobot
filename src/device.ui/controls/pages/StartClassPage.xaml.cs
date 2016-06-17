@@ -89,7 +89,7 @@ namespace device.ui.controls.pages
 
             // Turn on audio (possibly fade)
             var audioInput = AppState.Instance.CurrentVmixState.Inputs.Single(input => input.Role == InputRole.Audio);
-            _vmixService.ToggleAudio(audioInput);
+            _vmixService.TurnAudioOn(audioInput);
             Log("Turned audio on.");
 
             // Add logo overlay

@@ -10,7 +10,7 @@
     <Grid>
         <controls:Countdown CanStop="False"
                             OnStop="StartChannelCountdown_OnStop" OnExpire="StartChannelCountdown_OnExpire"
-                            EventName="Channel setup" CountdownTo="{Binding StartChannelAt}" VerticalAlignment="Bottom"
+                            EventName="Channel setup starting" CountdownTo="{Binding StartChannelAt}" VerticalAlignment="Bottom"
                             HorizontalAlignment="Center"
                             x:Name="StartChannelCountdown" />
 

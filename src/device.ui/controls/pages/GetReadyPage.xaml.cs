@@ -2,6 +2,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Windows;
@@ -45,6 +46,8 @@ namespace device.ui.controls.pages
 
         public override void Process()
         {
+            SetBusy();
+
             // Start vMix
             SetUpVmix();
             SetUpAzure();
@@ -193,7 +196,7 @@ namespace device.ui.controls.pages
             _vmixTimer = new Timer(state =>
             {
                 _vmixTimer.Dispose();
-                Dispatcher.Invoke(StartupVmix);
+                StartupVmix();
                 Dispatcher.Invoke(LoadVmixPresets);
             }, null, TimeSpan.FromSeconds(0), TimeSpan.FromDays(1));
         }
@@ -211,8 +214,9 @@ namespace device.ui.controls.pages
 
             if (vMixProcess == null)
             {
+                Dispatcher.Invoke(() =>
                 MessageBox.Show(GetParentWindow(), "Could not start vMix, no error info was provided, sorry :(", "I failed",
-                    MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                    MessageBoxButton.OK, MessageBoxImage.Exclamation));
                 _vmixFailed = true;
                 return;
             }
@@ -229,7 +233,7 @@ namespace device.ui.controls.pages
                 StartTime = vMixProcess.StartTime
             };
 
-            Log("vMix started.");
+            Dispatcher.Invoke(() => Log("vMix started."));
         }
 
         #endregion
@@ -300,6 +304,10 @@ namespace device.ui.controls.pages
                     _vmixReady = true;
                     Log("Loaded vMix preset!");
                     DoneIfReady();
+
+                    // Turn off audio (just in case it's on)
+                    var audioInput = AppState.Instance.CurrentVmixState.Inputs.Single(input => input.Role == InputRole.Audio);
+                    _vmixService.TurnAudioOff(audioInput);
                 });
             }, null, waitFor, repeatAfter);
         }

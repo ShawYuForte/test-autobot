@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Threading;
 using System.Windows;
 using forte.device.services;
+using Xceed.Wpf.Toolkit.Core;
 
 #endregion
 
@@ -51,7 +52,7 @@ namespace device.ui.pages
                 case nameof(GetReadyPage):
                     //GetReadyPage_Next(sender, e);
                     WizardGetReadyPage.Process();
-                    IsBusy = e.Cancel = true;
+                    e.Cancel = true;
                     break;
 
                 case nameof(StartClassPage):
@@ -97,11 +98,6 @@ namespace device.ui.pages
         private void StartClassPage_Enter(object sender, RoutedEventArgs e)
         {
             WizardStartClassPage.Process();
-        }
-
-        private void StopClassPage_ReadyForNext(object sender, System.EventArgs e)
-        {
-            InitiateClassStopping();
         }
 
         private void LastPage_Enter(object sender, RoutedEventArgs e)
@@ -170,6 +166,22 @@ namespace device.ui.pages
         {
             Log("Auto advancing to next step, waiting for class to end.");
             wizard.CurrentPage = StopClassPage;
+        }
+
+        private void StopClassPage_Next(object sender, CancelRoutedEventArgs cancelRoutedEventArgs)
+        {
+            cancelRoutedEventArgs.Cancel = true;
+            WizardStopClassPage.ForceContinue();
+        }
+
+        private void WizardStopClassPage_OnDone(object sender, EventArgs e)
+        {
+            wizard.CurrentPage = LastPage;
+        }
+
+        private void StopClassPage_Enter(object sender, RoutedEventArgs e)
+        {
+            WizardStopClassPage.Process();
         }
     }
 }

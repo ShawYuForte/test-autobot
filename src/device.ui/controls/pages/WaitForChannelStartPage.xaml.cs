@@ -89,6 +89,7 @@ namespace device.ui.controls.pages
             {
                 _azureTimer.Dispose();
                 _azureService.StartChannel();
+                Dispatcher.Invoke(() => Log("Azure channel started."));
                 AppState.Instance.AzureChannelRunning = true;
                 Dispatcher.Invoke(callback);
             }, null, TimeSpan.FromSeconds(0), TimeSpan.FromDays(1));

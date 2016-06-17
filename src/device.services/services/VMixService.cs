@@ -173,9 +173,14 @@ namespace forte.device.services
             return result;
         }
 
-        public VMixState ToggleAudio(VMixInput audioInput)
+        public VMixState TurnAudioOn(VMixInput audioInput)
         {
-            return CallAndFetchState($"/?Function=Audio&Input={audioInput.Key}", "toggle audio");
+            return CallAndFetchState($"/?Function=AudioOn&Input={audioInput.Key}", "audio on");
+        }
+
+        public VMixState TurnAudioOff(VMixInput audioInput)
+        {
+            return CallAndFetchState($"/?Function=AudioOff&Input={audioInput.Key}", "audio off");
         }
 
         public VMixState ToggleOverlay(VMixInput overlayInput)

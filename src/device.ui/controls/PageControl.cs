@@ -11,11 +11,10 @@ namespace device.ui.controls
 {
     public abstract class PageControl : UserControl
     {
+        public delegate void LogEventDelegate(string message);
+
         protected readonly AzureService _azureService = new AzureService();
         protected readonly VMixService _vmixService = new VMixService();
-
-
-        public delegate void LogEventDelegate(string message);
 
         public abstract void Process();
 
@@ -61,10 +60,19 @@ namespace device.ui.controls
             MessageBox.Show(GetParentWindow(), message, title,
                 MessageBoxButton.OK, MessageBoxImage.Information);
         }
+
         protected void ShowWarningMessageBox(string message, string title = "Warning")
         {
             MessageBox.Show(GetParentWindow(), message, title,
                 MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+
+        protected MessageBoxResult ShowQuestionMessageBox(string message, string title = "Question",
+            MessageBoxButton messageBoxButton = MessageBoxButton.YesNo,
+            MessageBoxImage messageBoxImage = MessageBoxImage.Question)
+        {
+            return MessageBox.Show(GetParentWindow(), message, title,
+                messageBoxButton, messageBoxImage);
         }
     }
 }

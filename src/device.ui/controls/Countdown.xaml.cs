@@ -131,7 +131,7 @@ namespace device.ui.controls
             buffer.Append($"{timeRemaining.Seconds.ToString().PadLeft(2, '0')}");
 
             DisplayText =
-                string.IsNullOrWhiteSpace(EventName) ? buffer.ToString() : $"{EventName} starts in {buffer}";
+                string.IsNullOrWhiteSpace(EventName) ? buffer.ToString() : $"{EventName} in {buffer}";
         }
 
         private void CounterExpired()

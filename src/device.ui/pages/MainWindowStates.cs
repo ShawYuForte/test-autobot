@@ -1,6 +1,9 @@
-﻿using System.Linq;
+﻿#region
+
 using System.Windows;
 using forte.device.models;
+
+#endregion
 
 namespace device.ui.pages
 {
