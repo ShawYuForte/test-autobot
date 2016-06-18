@@ -22,7 +22,7 @@
                 <xctk:Wizard.HelpButtonContent>
                     <TextBlock>Settings</TextBlock>
                 </xctk:Wizard.HelpButtonContent>
-                <xctk:WizardPage x:Name="IntroPage" PageType="Exterior"
+                <xctk:WizardPage x:Name="IntroPage" PageType="Exterior" CanFinish="False"
                                  Title="Let's start a'streaming"
                                  Description="I'm going to walk you through streaming, all you need is your mouse fingers.">
                     <xctk:WizardPage.ExteriorPanelContent>
@@ -30,13 +30,13 @@
                     </xctk:WizardPage.ExteriorPanelContent>
                     <pages:IntroPage />
                 </xctk:WizardPage>
-                <xctk:WizardPage x:Name="SettingsPage" PageType="Interior"
+                <xctk:WizardPage x:Name="SettingsPage" PageType="Interior" CanFinish="False"
                                  Title="Confirm Settings" PreviousPage="{Binding ElementName=IntroPage}"
                                  Description="Confirm these settings before moving forward. You only need to confirm the bold settings each time, the other ones you only confirm once (they shouldn't change over time)."
                                  Leave="SettingsPage_Leave">
                     <pages:SettingsPage />
                 </xctk:WizardPage>
-                <xctk:WizardPage x:Name="GetReadyPage" PageType="Interior"
+                <xctk:WizardPage x:Name="GetReadyPage" PageType="Interior" CanFinish="False"
                                  Title="Get Ready to Stream" PreviousPage="{Binding ElementName=SettingsPage}"
                                  Description="Now I am going to prepare everything for you to start streaming, click 'Next' when ready."
                                  Enter="PresetPage_Enter" Leave="PresetPage_Leave">
@@ -45,7 +45,7 @@
                                         OnBusy="WizardPage_OnBusy" OnNotBusy="WizarPage_OnNotBusy" />
                 </xctk:WizardPage>
                 <xctk:WizardPage x:Name="WaitForChannelStartPage" PageType="Interior" CanSelectPreviousPage="False"
-                                 CanSelectNextPage="False" CanHelp="False" CanCancel="False"
+                                 CanSelectNextPage="False" CanHelp="False" CanCancel="False" CanFinish="False"
                                  Title="Waiting to start channel" PreviousPage="{Binding ElementName=GetReadyPage}"
                                  Description="Hurry up and wait, I'll kick off closer to class start time."
                                  Enter="WaitForChannelStartPage_Enter">
@@ -55,7 +55,7 @@
                                                    OnBusy="WizardPage_OnBusy" OnNotBusy="WizarPage_OnNotBusy" />
                 </xctk:WizardPage>
                 <xctk:WizardPage x:Name="StartClassPage" PageType="Interior" CanSelectPreviousPage="False"
-                                 Title="Ready to Stream" Enter="StartClassPage_Enter"
+                                 Title="Ready to Stream" Enter="StartClassPage_Enter" CanFinish="False"
                                  Description="We are ready to stream, as soon as the time hits start-o-clock."
                                  NextPage="{Binding ElementName=StopClassPage}"
                                  PreviousPage="{Binding ElementName=StartClassPage}">
@@ -63,7 +63,7 @@
                                           OnNotBusy="WizarPage_OnNotBusy"
                                           OnError="WizardStartClassPage_OnError" OnDone="WizardStartClassPage_OnDone" />
                 </xctk:WizardPage>
-                <xctk:WizardPage x:Name="StopClassPage" PageType="Interior"
+                <xctk:WizardPage x:Name="StopClassPage" PageType="Interior" CanFinish="False"
                                  PreviousPage="{Binding ElementName=StopClassPage}"
                                  Title="Stop the class when done" NextPage="{Binding ElementName=LastPage}"
                                  CanSelectPreviousPage="False" Enter="StopClassPage_Enter"

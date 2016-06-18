@@ -59,7 +59,7 @@ namespace device.ui.pages
                     args.Result = typeof(MainWindow).Assembly.GetName().Version.ToString();
                 }
             };
-            worker.RunWorkerCompleted += (o, args) => AppTitle = $"Forte Autobot v{(string) args.Result}";
+            worker.RunWorkerCompleted += (o, args) => AppTitle = $"Forte Autobot v{(string)args.Result}";
             worker.RunWorkerAsync();
         }
 
@@ -79,7 +79,7 @@ namespace device.ui.pages
 
                 case nameof(StartClassPage):
                     //StartClassPage_Next(sender, e);
-                    
+
                     break;
 
                 case nameof(StopClassPage):
@@ -103,13 +103,25 @@ namespace device.ui.pages
 
         private void wizard_Cancel(object sender, RoutedEventArgs e)
         {
-            if (AppState.WorkflowState != forte.device.models.Workflow.NotStarted)
+            MessageBoxResult response;
+            if (AppState.WorkflowState == forte.device.models.Workflow.NotStarted ||
+                AppState.WorkflowState == forte.device.models.Workflow.SettingsConfirmed)
             {
-                var response = MessageBox.Show(this, "Start over?", "Confirm", MessageBoxButton.YesNo,
+                response = MessageBox.Show(this, "Seriously? You want me to go away?", "Confirm", MessageBoxButton.YesNo,
                     MessageBoxImage.Question);
                 if (response == MessageBoxResult.No) return;
             }
+            else
+            {
+                response = MessageBox.Show(this,
+                    "At this point, I can't undo what I've done, I can just close myself. Do you want me to close?",
+                    "Confirm", MessageBoxButton.YesNo,
+                    MessageBoxImage.Question);
+                if (response == MessageBoxResult.No) return;
+            }
+
             AppState.Reset();
+            Close();
         }
 
         private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -130,6 +142,7 @@ namespace device.ui.pages
         private void wizard_Finish(object sender, RoutedEventArgs e)
         {
             AppState.Reset();
+            Close();
         }
 
         private void TextBlock_SizeChanged(object sender, SizeChangedEventArgs e)
