@@ -13,8 +13,8 @@ namespace device.ui.controls
     {
         public delegate void LogEventDelegate(string message);
 
-        protected readonly AzureService _azureService = new AzureService();
-        protected readonly VMixService _vmixService = new VMixService();
+        protected readonly AzureService _azureService = AzureService.Instance;
+        protected readonly VMixService _vmixService = VMixService.Instance;
 
         public abstract void Process();
 

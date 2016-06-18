@@ -107,6 +107,7 @@ namespace device.ui.controls.pages
         private void OtherProgramsRunningError()
         {
             _azureFailed = true;
+            SetNotBusy();
             Fail("Could not continue!");
             MessageBox.Show(GetParentWindow(),
                 "There are existing programs running, it's not safe to continue. Please go to Azure Portal and turn them off manually, then try again",
@@ -133,13 +134,14 @@ namespace device.ui.controls.pages
                     return;
 
                 case MessageBoxResult.Yes:
-                    Log("Stopping it first...");
+                    Log("Stopping Azure Channel (from previous run)...");
                     // Stop Azure channel
                     _azureTimer = new Timer(state =>
                     {
                         _azureTimer.Dispose();
                         _azureService.StopChannel();
                         AppState.AzureChannelRunning = false;
+                        Dispatcher.Invoke(() => Log("Stopped Azure channel."));
                         Dispatcher.Invoke(() => callback?.Invoke());
                     }, null, TimeSpan.FromSeconds(0), TimeSpan.FromDays(1));
                     break;
@@ -279,8 +281,8 @@ namespace device.ui.controls.pages
         private void LoadVmixPresets()
         {
             // Load vMix presets
-            var waitFor = TimeSpan.FromSeconds(30);
-            var repeatAfter = TimeSpan.FromSeconds(20);
+            var waitFor = TimeSpan.FromSeconds(10);
+            var repeatAfter = TimeSpan.FromSeconds(5);
 
             var watch = new Stopwatch();
             watch.Start();
@@ -305,9 +307,9 @@ namespace device.ui.controls.pages
                     Log("Loaded vMix preset!");
                     DoneIfReady();
 
-                    // Turn off audio (just in case it's on)
-                    var audioInput = AppState.Instance.CurrentVmixState.Inputs.Single(input => input.Role == InputRole.Audio);
-                    _vmixService.TurnAudioOff(audioInput);
+                    // Turn off audio and overlay (just in case they're on)
+                    _vmixService.TurnAudioOff();
+                    _vmixService.TurnOverlayOff();
                 });
             }, null, waitFor, repeatAfter);
         }
@@ -321,20 +323,6 @@ namespace device.ui.controls.pages
             {
                 if (!_azureReady || !_vmixReady) return;
             }
-
-            //if (!_vmixReady)
-            //{
-            //    Log("Waiting for vMix...");
-            //    _azureTimer = new Timer(state =>
-            //    {
-            //        if (!_vmixReady) return;
-            //        DoneIfReady();
-            //        _azureTimer.Dispose();
-            //    }, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
-            //    return;
-            //}
-
-            //ShowFootnote = Visibility.Collapsed;
 
             SetNotBusy();
             Done();

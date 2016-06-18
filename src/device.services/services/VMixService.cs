@@ -19,7 +19,9 @@ namespace forte.device.services
         private readonly Regex _cameraRegex = new Regex(@"RTSPTCP rtsp:\/\/root:pass@[0-9.]*\/axis-media\/media\.amp");
         private readonly RestClient _client;
 
-        public VMixService()
+        public static VMixService Instance { get; } = new VMixService();
+
+        private VMixService() : base("vMix")
         {
             _client = new RestClient(ConfigurationManager.AppSettings["apiPath"]);
         }
@@ -173,19 +175,30 @@ namespace forte.device.services
             return result;
         }
 
-        public VMixState TurnAudioOn(VMixInput audioInput)
+        public VMixState TurnAudioOn()
         {
+            var audioInput = AppState.Instance.CurrentVmixState.Inputs.Single(input => input.Role == InputRole.Audio);
             return CallAndFetchState($"/?Function=AudioOn&Input={audioInput.Key}", "audio on");
         }
 
-        public VMixState TurnAudioOff(VMixInput audioInput)
+        public VMixState TurnAudioOff()
         {
+            var audioInput = AppState.Instance.CurrentVmixState.Inputs.Single(input => input.Role == InputRole.Audio);
             return CallAndFetchState($"/?Function=AudioOff&Input={audioInput.Key}", "audio off");
         }
 
-        public VMixState ToggleOverlay(VMixInput overlayInput)
+        public VMixState TurnOverlayOn()
         {
-            return CallAndFetchState($"/?Function=OverlayInput1&Input={overlayInput.Key}", "toggle overlay");
+            var overlayInput =
+                AppState.Instance.CurrentVmixState.Inputs.Single(input => input.Role == InputRole.LogoOverlay);
+            return CallAndFetchState($"/?Function=OverlayInput1In&Input={overlayInput.Key}", "turn overlay on");
+        }
+
+        public VMixState TurnOverlayOff()
+        {
+            var overlayInput =
+                AppState.Instance.CurrentVmixState.Inputs.Single(input => input.Role == InputRole.LogoOverlay);
+            return CallAndFetchState($"/?Function=OverlayInput1Off&Input={overlayInput.Key}", "turn overlay off");
         }
 
         public VMixState StartPlaylist()

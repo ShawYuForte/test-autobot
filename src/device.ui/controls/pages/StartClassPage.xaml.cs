@@ -88,13 +88,11 @@ namespace device.ui.controls.pages
             Log("Switched to camera 1 video.");
 
             // Turn on audio (possibly fade)
-            var audioInput = AppState.Instance.CurrentVmixState.Inputs.Single(input => input.Role == InputRole.Audio);
-            _vmixService.TurnAudioOn(audioInput);
+            _vmixService.TurnAudioOn();
             Log("Turned audio on.");
 
             // Add logo overlay
-            var overlayInput = AppState.Instance.CurrentVmixState.Inputs.Single(input => input.Role == InputRole.LogoOverlay);
-            _vmixService.ToggleOverlay(overlayInput);
+            _vmixService.TurnOverlayOn();
             Log("Turned logo overlay on.");
 
             // Activate playlist
@@ -111,8 +109,13 @@ namespace device.ui.controls.pages
         public override void Process()
         {
             // Wait at least 5 seconds, or the total number of seconds until 5 minutes before the class
-            StartProgramAt = AppState.Instance.ClassStartTime.AddMinutes(-1 * AppSettings.Instance.StartProgramMinutesBefore * 60);
-            if (StartProgramAt < DateTime.Now) StartProgramAt = DateTime.Now.AddSeconds(5);
+            StartProgramAt = AppState.Instance.ClassStartTime.AddMinutes(-1 * AppSettings.Instance.StartProgramMinutesBefore);
+            Log($"Will start program at {StartProgramAt}...");
+            if (DateTime.Compare(StartProgramAt, DateTime.Now) < 0)
+            {
+                Log("Looks like I'm running behind, I'll start in 5 seconds...");
+                StartProgramAt = DateTime.Now.AddSeconds(5);
+            }
             ProgramStartCountdown.Start();
         }
 

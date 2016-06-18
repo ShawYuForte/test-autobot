@@ -36,35 +36,14 @@ namespace device.ui.controls.pages
             set { SetValue(StopProgramAtProperty, value); }
         }
 
-        private void StartTimer()
-        {
-            //var classStartTime = AppState.Instance.ClassStartTime;
-            //var classDuration = AppState.Instance.ClassDuration;
-            //var classEndTime = AppState.Instance.ClassStartTime.AddMinutes(classDuration);
-            //var countDownSeconds = (classEndTime - DateTime.Now).TotalSeconds;
-
-            //_timer = new Timer(state =>
-            //{
-            //    var timespanToEnd = TimeSpan.FromSeconds(countDownSeconds);
-            //    var message =
-            //        $"Class ending in {timespanToEnd.Hours} h : {timespanToEnd.Minutes} m : {timespanToEnd.Seconds} s";
-            //    Dispatcher.Invoke(() => CountdownDisplay = message);
-            //    if (countDownSeconds-- > 0) return;
-            //    _timer.Dispose();
-            //    Dispatcher.Invoke(InitiateReadyForNext);
-            //}, null, TimeSpan.FromSeconds(0), TimeSpan.FromSeconds(1));
-        }
-
         public void PauseCountdownButton_Click(object source, RoutedEventArgs e)
         {
-            //ShowPauseButton = false;
-            //_timer.Dispose();
-            //CountdownDisplay = "Timer stopped, you must manually click 'Next' when ready!";
         }
 
         public override void Process()
         {
             StopProgramAt = AppState.Instance.ClassStartTime.AddMinutes(AppState.Instance.ClassDuration);
+            Log($"Will stop program / class at {StopProgramAt}...");
             ClassEndCountdown.Start();
         }
 
@@ -88,14 +67,11 @@ namespace device.ui.controls.pages
             Log("Placed closing video in preview.");
 
             // Turn off audio (possibly fade)
-            var audioInput = AppState.Instance.CurrentVmixState.Inputs.Single(input => input.Role == InputRole.Audio);
-            _vmixService.TurnAudioOff(audioInput);
+            _vmixService.TurnAudioOff();
             Log("Turned audio off.");
 
             // Remove logo overlay
-            var overlayInput =
-                AppState.Instance.CurrentVmixState.Inputs.Single(input => input.Role == InputRole.LogoOverlay);
-            _vmixService.ToggleOverlay(overlayInput);
+            _vmixService.TurnOverlayOff();
             Log("Turned logo overlay off.");
 
             // Stop playlist
@@ -135,6 +111,8 @@ namespace device.ui.controls.pages
                 Dispatcher.Invoke(() => Log("Stopping Azure Channel..."));
                 if (_azureService.StopChannel())
                     Dispatcher.Invoke(() => Log("Stopped Azure channel (watching those $$$s)."));
+                if (_azureService.ProcessAsset())
+                    Dispatcher.Invoke(() => Log("Kicked off job to process assess to adaptive stream."));
                 Dispatcher.Invoke(FinishWorkflow);
             }, null, TimeSpan.FromSeconds(0), TimeSpan.FromHours(1));
         }

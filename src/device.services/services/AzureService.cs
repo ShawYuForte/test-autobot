@@ -1,7 +1,6 @@
 ﻿#region
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,7 +9,6 @@ using System.Threading.Tasks;
 using forte.device.extensions;
 using forte.device.models;
 using Microsoft.WindowsAzure.MediaServices.Client;
-using Microsoft.WindowsAzure.MediaServices.Client.DynamicEncryption;
 
 #endregion
 
@@ -19,6 +17,12 @@ namespace forte.device.services
     public class AzureService : Service
     {
         private const double DaysInTenYears = 3650;
+
+        public static AzureService Instance { get; } = new AzureService();
+
+        private AzureService() : base("Azure")
+        {
+        }
 
         private CloudMediaContext CreateContext()
         {
@@ -76,12 +80,7 @@ namespace forte.device.services
             var program = await azureChannel.Programs.CreateAsync(asset.Name, TimeSpan.FromHours(2), asset.Id);
 
             var locator = CreateLocatorForAsset(context, program.Asset, TimeSpan.FromDays(DaysInTenYears));
-            var urls = GetLocatorsInAllStreamingEndpoints(context, asset);
-            string publishUrl = null;
-            if (urls != null)
-            {
-                publishUrl = urls.FirstOrDefault()?.ToString();
-            }
+            var publishUrl = GetFirstLocatorUrl(context, asset);
 
             return new AzureProgram
             {
@@ -109,23 +108,23 @@ namespace forte.device.services
             return buffer.ToString();
         }
 
-        public static IList<Uri> GetLocatorsInAllStreamingEndpoints(CloudMediaContext context, IAsset asset)
+        public static string GetFirstLocatorUrl(CloudMediaContext context, IAsset asset)
         {
             var locators = asset.Locators.Where(l => l.Type == LocatorType.OnDemandOrigin);
             var ismFile = asset.AssetFiles.AsEnumerable().FirstOrDefault(a => a.Name.EndsWith(".ism"));
             var template = new UriTemplate("{contentAccessComponent}/{ismFileName}/manifest");
             var urls = locators.SelectMany(l =>
-                        context
-                            .StreamingEndpoints
-                            .AsEnumerable()
-                            .Where(se => se.State == StreamingEndpointState.Running)
-                            .Select(
-                                se =>
-                                    template.BindByPosition(new Uri("http://" + se.HostName),
-                                    l.ContentAccessComponent,
-                                        ismFile.Name)))
-                        .ToArray();
-            return urls;
+                context
+                    .StreamingEndpoints
+                    .AsEnumerable()
+                    .Where(se => se.State == StreamingEndpointState.Running)
+                    .Select(
+                        se =>
+                            template.BindByPosition(new Uri("http://" + se.HostName),
+                                l.ContentAccessComponent,
+                                ismFile.Name)))
+                .ToArray();
+            return urls.FirstOrDefault()?.ToString();
         }
 
         /// <summary>
@@ -141,7 +140,8 @@ namespace forte.device.services
                 safeAssetName = $"{assetName}-{counter++}";
             }
 
-            var asset = await context.Assets.CreateAsync(safeAssetName, AssetCreationOptions.None, CancellationToken.None);
+            var asset =
+                await context.Assets.CreateAsync(safeAssetName, AssetCreationOptions.None, CancellationToken.None);
 
             //var policy = await context.AssetDeliveryPolicies.CreateAsync(
             //    "Clear Policy",
@@ -214,7 +214,8 @@ namespace forte.device.services
             try
             {
                 var context = CreateContext();
-                var channel = context.Channels.ToList().FirstOrDefault(ch => ch.Name == AppSettings.Instance.ChannelName);
+                var channel = context.Channels.ToList()
+                    .FirstOrDefault(ch => ch.Name == AppSettings.Instance.ChannelName);
                 return channel != null;
             }
             catch (Exception exception)
@@ -248,7 +249,7 @@ namespace forte.device.services
                 {
                     Log("Can't shut down your channel, there are other programs running on it!");
                     return false;
-                } 
+                }
                 channel.StopAsync().Wait();
             }
             return true;
@@ -272,7 +273,52 @@ namespace forte.device.services
         {
             var context = CreateContext();
             var channel = context.Channels.ToList().FirstOrDefault(ch => ch.Name == AppSettings.Instance.ChannelName);
+            // ReSharper disable once RemoveToList.2
             return channel.Programs.ToList().Count(program => program.State != ProgramState.Stopped) > 0;
+        }
+
+        /// <summary>
+        ///     Process generated asset to multiple bitrates (adaptive)
+        /// </summary>
+        /// <returns></returns>
+        public bool ProcessAsset()
+        {
+            var context = CreateContext();
+            IMediaProcessor processor = null;
+            IAsset asset = null;
+            IJob job = null;
+            var processorName = "Media Encoder Standard";
+
+            if (!TryExecute(() => processor = context.MediaProcessors.Where(p => p.Name == processorName).
+                ToList().OrderBy(p => new Version(p.Version)).LastOrDefault())) return false;
+
+            if (!TryExecute(() => asset =
+                    context.Assets.ToList()
+                        .FirstOrDefault(a => a.Id == AppState.Instance.CurrentProgram.AssetId)))
+                return false;
+
+            var jobName = $"{processorName} processing of {asset.Name}";
+            if (!TryExecute(() => job = context.Jobs.Create(jobName, 10))) return false;
+
+            string taskName = $"{processorName} v{processor.Version} processing {asset.Name}";
+
+            var task = job.Tasks.AddNew(taskName, processor, "H264 Multiple Bitrate 720p", TaskOptions.None);
+            task.InputAssets.Add(asset);
+
+            // Add an output asset to contain the results of the job.  
+            string assetName = $"{asset.Name}-Adaptive";
+            task.OutputAssets.AddNew(assetName, AssetCreationOptions.None);
+
+            if (!TryExecute(() => job.Submit(), "Submitting Azure Job")) return false;
+
+            TryExecute(() =>
+            {
+                var outputAsset = context.Assets.ToList().First(a => a.Name == assetName);
+                CreateLocatorForAsset(context, outputAsset, TimeSpan.FromDays(DaysInTenYears));
+                //AppState.Instance.CurrentProgram.PublishUrl = GetFirstLocatorUrl(context, outputAsset);
+            }, "Creating publish url for adaptive asset.");
+
+            return true;
         }
     }
 }

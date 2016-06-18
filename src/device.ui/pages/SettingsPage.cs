@@ -76,12 +76,12 @@ namespace device.ui.pages
 
             if (!valid)
             {
-                MessageBox.Show(this, "Accurate class info is required", "Validation failed", MessageBoxButton.OK,
+                MessageBox.Show(this, "Accurate and complete class info is required", "Validation failed", MessageBoxButton.OK,
                     MessageBoxImage.Stop);
             }
             else if (!AppSettings.AreValid())
             {
-                MessageBox.Show(this, "App settings are not provided, click 'OK' to update them.", "Validation failed",
+                MessageBox.Show(this, $"App settings are not valid:\n\r\n\r{AppSettings.GetFirstInvalidProperty()}.", "Validation failed",
                     MessageBoxButton.OK,
                     MessageBoxImage.Stop);
                 new SettingsWindow().ShowDialog();
@@ -108,7 +108,6 @@ namespace device.ui.pages
             _timer = new System.Threading.Timer(state =>
             {
                 _timer.Dispose();
-                _azureService.OnLog += delegate (string message) { Dispatcher.Invoke(() => Log(message)); };
                 if (_azureService.VerifySettings())
                 {
                     Dispatcher.Invoke(OnAzureSettingsVerified);

@@ -2,6 +2,7 @@
 
 using System;
 using System.ComponentModel;
+using System.Deployment.Application;
 using System.Threading;
 using System.Windows;
 using forte.device.services;
@@ -16,8 +17,8 @@ namespace device.ui.pages
     /// </summary>
     public partial class MainWindow : Window
     {
-        private readonly AzureService _azureService = new AzureService();
-        private readonly VMixService _vmixService = new VMixService();
+        private readonly AzureService _azureService = AzureService.Instance;
+        private readonly VMixService _vmixService = VMixService.Instance;
         private Timer _timer;
 
         public MainWindow()
@@ -26,6 +27,9 @@ namespace device.ui.pages
             Log("Initializing...");
             AppState.Reset();
             StartupPageImageSource = $"/images/start/start{new Random().Next(1, 3)}.jpg";
+
+            _azureService.OnLog += delegate (string message) { Dispatcher.Invoke(() => Log(message)); };
+            _vmixService.OnLog += delegate (string message) { Dispatcher.Invoke(() => Log(message)); };
         }
 
         private void Log(string message)
@@ -36,7 +40,25 @@ namespace device.ui.pages
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             var worker = new BackgroundWorker();
-            worker.DoWork += (o, args) => args.Result = typeof (MainWindow).Assembly.GetName().Version.ToString();
+            worker.DoWork += (o, args) =>
+            {
+                try
+                {
+                    if (ApplicationDeployment.IsNetworkDeployed)
+                    {
+                        var deployment = ApplicationDeployment.CurrentDeployment;
+                        args.Result = deployment.CurrentVersion.ToString();
+                    }
+                    else
+                    {
+                        args.Result = typeof(MainWindow).Assembly.GetName().Version.ToString();
+                    }
+                }
+                catch (Exception)
+                {
+                    args.Result = typeof(MainWindow).Assembly.GetName().Version.ToString();
+                }
+            };
             worker.RunWorkerCompleted += (o, args) => AppTitle = $"Forte Autobot v{(string) args.Result}";
             worker.RunWorkerAsync();
         }

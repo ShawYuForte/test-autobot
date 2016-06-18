@@ -24,7 +24,6 @@ namespace device.ui.controls.pages
         public static readonly DependencyProperty StartChannelAtProperty =
             DependencyProperty.Register("StartChannelAt", typeof (DateTime), typeof (GetReadyPage));
 
-
         private Timer _azureTimer;
 
         public WaitForChannelStartPage()
@@ -108,6 +107,7 @@ namespace device.ui.controls.pages
                 return;
             }
 
+            Log($"Will start channel at {StartChannelAt}.");
             StartChannelCountdown.Start();
         }
 
