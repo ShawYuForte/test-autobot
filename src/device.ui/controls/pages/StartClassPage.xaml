@@ -44,7 +44,7 @@
         <Separator Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Margin="0, 20, 0, 0" />
 
         <local:Countdown x:Name="ProgramStartCountdown" Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2"
-                         CountdownTo="{Binding StartProgramAt}" CanStop="False" EventName="Starting program"
+                         CanStop="False" EventName="Starting program" 
                          OnStop="Countdown_OnStop" OnExpire="Countdown_OnExpire"></local:Countdown>
 
     </Grid>

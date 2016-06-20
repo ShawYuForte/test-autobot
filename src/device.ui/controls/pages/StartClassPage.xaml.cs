@@ -116,7 +116,7 @@ namespace device.ui.controls.pages
                 Log("Looks like I'm running behind, I'll start in 5 seconds...");
                 StartProgramAt = DateTime.Now.AddSeconds(5);
             }
-            ProgramStartCountdown.Start();
+            ProgramStartCountdown.Start(StartProgramAt);
         }
 
         private void Countdown_OnExpire(object sender, EventArgs e)

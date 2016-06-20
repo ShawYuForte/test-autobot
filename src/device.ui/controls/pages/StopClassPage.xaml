@@ -45,7 +45,7 @@
         <Separator Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Margin="0, 20, 0, 0" />
 
         <local:Countdown x:Name="ClassEndCountdown" Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2"
-                         CountdownTo="{Binding StopProgramAt}" CanStop="False" EventName="Class ending"
+                         CanStop="False" EventName="Class ending"
                          OnExpire="ClassEndCountdown_OnExpire" />
 
     </Grid>

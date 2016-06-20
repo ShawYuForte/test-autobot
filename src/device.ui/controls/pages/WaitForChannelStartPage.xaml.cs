@@ -108,7 +108,7 @@ namespace device.ui.controls.pages
             }
 
             Log($"Will start channel at {StartChannelAt}.");
-            StartChannelCountdown.Start();
+            StartChannelCountdown.Start(StartChannelAt);
         }
 
         private bool PreviewOpeningVideo()
@@ -150,6 +150,11 @@ namespace device.ui.controls.pages
             _vmixService.SetActive(backgroundImageInput);
             Log($"Set the active input to '{backgroundImageInput.Title}'.");
             return true;
+        }
+
+        private void StartChannelCountdown_OnLog(string message)
+        {
+            Log(message);
         }
     }
 }

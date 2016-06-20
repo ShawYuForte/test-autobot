@@ -44,7 +44,7 @@ namespace device.ui.controls.pages
         {
             StopProgramAt = AppState.Instance.ClassStartTime.AddMinutes(AppState.Instance.ClassDuration);
             Log($"Will stop program / class at {StopProgramAt}...");
-            ClassEndCountdown.Start();
+            ClassEndCountdown.Start(StopProgramAt);
         }
 
         private void ClassEndCountdown_OnExpire(object sender, EventArgs e)

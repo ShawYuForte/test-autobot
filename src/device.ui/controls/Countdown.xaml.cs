@@ -26,11 +26,6 @@ namespace device.ui.controls
             DependencyProperty.Register("FootnoteText", typeof(string), typeof(Countdown),
                 new PropertyMetadata("Click stop to stop the counter (manual mode)"));
 
-        // Using a DependencyProperty as the backing store for CountdownTo.  This enables animation, styling, binding, etc...
-        public static readonly DependencyProperty CountdownToProperty =
-            DependencyProperty.Register("CountdownTo", typeof(DateTime), typeof(Countdown),
-                new PropertyMetadata(DateTime.Now.AddMinutes(5)));
-
         // Using a DependencyProperty as the backing store for DisplayText.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty DisplayTextProperty =
             DependencyProperty.Register("DisplayText", typeof(string), typeof(Countdown));
@@ -43,11 +38,28 @@ namespace device.ui.controls
         private readonly object _countdownStartedLock = new Object();
 
         private Timer _timer;
+        public event LogEventDelegate OnLog;
+        public delegate void LogEventDelegate(string message);
 
         public Countdown()
         {
             InitializeComponent();
             DisplayText = "Countdown";
+
+            IsVisibleChanged += Countdown_IsVisibleChanged;
+        }
+
+        protected void Log(string message)
+        {
+            //OnLog?.Invoke(message);
+        }
+
+        private void Countdown_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if ((bool)e.NewValue == false)
+            {
+                _timer?.Dispose();
+            }
         }
 
         public string EventName { get; set; }
@@ -59,10 +71,9 @@ namespace device.ui.controls
             set { SetValue(FootnoteTextProperty, value); }
         }
 
-        public DateTime CountdownTo
+        private DateTime CountdownTo
         {
-            get { return (DateTime)GetValue(CountdownToProperty); }
-            set { SetValue(CountdownToProperty, value); }
+            get; set;
         }
 
         public string DisplayText
@@ -79,14 +90,7 @@ namespace device.ui.controls
             set { SetValue(ShowStopButtonProperty, value); }
         }
 
-        protected override void OnRender(DrawingContext drawingContext)
-        {
-            base.OnRender(drawingContext);
-
-            if (StartOnRender) Start();
-        }
-
-        public void Start()
+        public void Start(DateTime countdownTo)
         {
             lock (_countdownStartedLock)
             {
@@ -94,6 +98,7 @@ namespace device.ui.controls
                 _countdownStarted = true;
             }
 
+            CountdownTo = countdownTo;
             ShowStopButton = CanStop;
             _timer = new Timer(state =>
             {
@@ -136,6 +141,7 @@ namespace device.ui.controls
 
         private void CounterExpired()
         {
+            DisplayText = "Time's up!";
             ShowStopButton = false;
             OnExpire?.Invoke(this, EventArgs.Empty);
         }

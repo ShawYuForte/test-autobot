@@ -8,9 +8,9 @@
              mc:Ignorable="d"
              d:DesignHeight="300" d:DesignWidth="300">
     <Grid>
-        <controls:Countdown CanStop="False"
+        <controls:Countdown CanStop="False" OnLog="StartChannelCountdown_OnLog"
                             OnStop="StartChannelCountdown_OnStop" OnExpire="StartChannelCountdown_OnExpire"
-                            EventName="Channel setup starting" CountdownTo="{Binding StartChannelAt}" VerticalAlignment="Bottom"
+                            EventName="Channel setup starting" VerticalAlignment="Bottom"
                             HorizontalAlignment="Center"
                             x:Name="StartChannelCountdown" />
 
