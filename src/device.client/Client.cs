@@ -15,8 +15,7 @@ namespace device.client
 {
     public class Client
     {
-        private CancellationTokenSource _cancellationTokenSource;
-        private ClientWebSocket _socket;
+        private HubConnection _hubConnection;
 
         public delegate void MessageReceivedDelegate(string message);
 
@@ -24,36 +23,19 @@ namespace device.client
 
         public async Task Connect()
         {
-            var hubConnection = new HubConnection(ConfigurationManager.AppSettings["server:url"]);
-            IHubProxy stockTickerHubProxy = hubConnection.CreateHubProxy("DeviceInteractionHub");
-            stockTickerHubProxy.On("Hello", () => OnMessageReceived("Server said hello"));
-            await hubConnection.Start();
+             _hubConnection = new HubConnection(ConfigurationManager.AppSettings["server:url"]);
+            IHubProxy stockTickerHubProxy = _hubConnection.CreateHubProxy("DeviceInteractionHub");
+            stockTickerHubProxy.On("Hello", () =>
+            {
+                OnMessageReceived("Server said hello");
+            });
+            await _hubConnection.Start();
         }
 
         public void Disconnect()
         {
-            _cancellationTokenSource.Cancel();
-        }
-
-        private void Listen()
-        {
-            Task.Factory.StartNew(
-                async () =>
-                {
-                    var rcvBytes = new byte[128];
-                    var rcvBuffer = new ArraySegment<byte>(rcvBytes);
-                    while (true)
-                    {
-                        var rcvResult =
-                            await _socket.ReceiveAsync(rcvBuffer, _cancellationTokenSource.Token);
-                        var msgBytes = rcvBuffer
-                            .Skip(rcvBuffer.Offset)
-                            .Take(rcvResult.Count).ToArray();
-                        var message = Encoding.UTF8.GetString(msgBytes);
-                        OnMessageReceived(message);
-                    }
-                }, _cancellationTokenSource.Token, TaskCreationOptions.LongRunning,
-                TaskScheduler.Default);
+            //_cancellationTokenSource.Cancel();
+            _hubConnection.Dispose();
         }
 
         private void OnMessageReceived(string message)
@@ -63,13 +45,6 @@ namespace device.client
 
         public async Task Send(string message)
         {
-            var sendBytes = Encoding.UTF8.GetBytes(message);
-            var sendBuffer = new ArraySegment<byte>(sendBytes);
-            await _socket.SendAsync(
-                sendBuffer,
-                WebSocketMessageType.Text,
-                endOfMessage: true,
-                cancellationToken: _cancellationTokenSource.Token);
         }
     }
 }
