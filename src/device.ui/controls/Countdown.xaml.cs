@@ -131,7 +131,7 @@ namespace device.ui.controls
             }
 
             var buffer = new StringBuilder();
-            buffer.Append($"{timeRemaining.Hours.ToString().PadLeft(2, '0')}:");
+            buffer.Append($"{timeRemaining.TotalHours.ToString("F0").PadLeft(2, '0')}:");
             buffer.Append($"{timeRemaining.Minutes.ToString().PadLeft(2, '0')}:");
             buffer.Append($"{timeRemaining.Seconds.ToString().PadLeft(2, '0')}");
 
