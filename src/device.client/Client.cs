@@ -20,14 +20,19 @@ namespace device.client
         public delegate void MessageReceivedDelegate(string message);
 
         public event MessageReceivedDelegate MessageReceived;
+        private IHubProxy _stockTickerHubProxy;
 
         public async Task Connect()
         {
              _hubConnection = new HubConnection(ConfigurationManager.AppSettings["server:url"]);
-            IHubProxy stockTickerHubProxy = _hubConnection.CreateHubProxy("DeviceInteractionHub");
-            stockTickerHubProxy.On("Hello", () =>
+             _stockTickerHubProxy = _hubConnection.CreateHubProxy("DeviceInteractionHub");
+            _stockTickerHubProxy.On("Hello", (message) =>
             {
-                OnMessageReceived("Server said hello");
+                OnMessageReceived($"Server said {message}");
+            });
+            _stockTickerHubProxy.On("RequestState", (deviceId) =>
+            {
+                OnMessageReceived($"Server requested state for device id {deviceId}");
             });
             await _hubConnection.Start();
         }
@@ -45,6 +50,7 @@ namespace device.client
 
         public async Task Send(string message)
         {
+            await _stockTickerHubProxy.Invoke("SendHello", message);
         }
     }
 }

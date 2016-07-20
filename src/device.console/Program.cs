@@ -8,25 +8,20 @@ namespace device.console
     {
         private static void Main(string[] args)
         {
-            var anon = new
+            Console.Write("Starting client connection... ");
+            var client = new Client();
+            client.MessageReceived += Client_MessageReceived;
+            client.Connect().Wait();
+            Console.WriteLine("Done!");
+
+            Console.WriteLine("Waiting...");
+            string input;
+
+            while (!string.IsNullOrWhiteSpace(input = Console.ReadLine()))
             {
-                Name = "Anonymous"
-            };
-            var str = JsonConvert.SerializeObject(anon);
-            Console.WriteLine(str);
-            var back = JsonConvert.DeserializeAnonymousType(str, new { Name = "" });
-            var dyn = JsonConvert.DeserializeObject<dynamic>(str);
-            Console.WriteLine(back.Name);
-            Console.WriteLine(dyn.Name);
-            Console.ReadLine();
-
-            //Console.Write("Starting client connection... ");
-            //var client = new Client();
-            //client.MessageReceived += Client_MessageReceived;
-            //client.Connect().Wait();
-            //Console.WriteLine("Done!");
-
-            //Console.WriteLine("Waiting...");
+                Console.WriteLine($"Sending '{input}'");
+                client.Send(input).Wait();
+            }
             //Console.ReadLine();
         }
 
