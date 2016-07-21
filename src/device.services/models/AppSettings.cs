@@ -26,19 +26,19 @@ namespace forte.devices.models
 
         static AppSettings()
         {
-            if (Settings.Default.CallUpgrade)
-            {
-                Settings.Default.Upgrade();
-                Settings.Default.CallUpgrade = false;
-                Settings.Default.Save();
-            }
+            //if (Settings.Default.CallUpgrade)
+            //{
+            //    Settings.Default.Upgrade();
+            //    Settings.Default.CallUpgrade = false;
+            //    Settings.Default.Save();
+            //}
 
 #pragma warning disable CS0618 // Type or member is obsolete
             Mapper.CreateMap<AppSettings, AppSettings>();
 #pragma warning restore CS0618 // Type or member is obsolete
 
-            Instance = JsonConvert.DeserializeObject<AppSettings>(Settings.Default.AppSettings)
-                       ?? new AppSettings();
+            //Instance = JsonConvert.DeserializeObject<AppSettings>(Settings.Default.AppSettings)
+            //           ?? new AppSettings();
             Instance.SetDefaultValues();
             Instance.Initialized = true;
         }
@@ -250,8 +250,8 @@ namespace forte.devices.models
         {
             if (!Initialized) return;
             var settingsString = JsonConvert.SerializeObject(this);
-            Settings.Default.AppSettings = settingsString;
-            Settings.Default.Save();
+            //Settings.Default.AppSettings = settingsString;
+            //Settings.Default.Save();
 
             ResetAzureSettingsConfirmed(e);
         }

@@ -11,10 +11,12 @@ namespace forte.devices.services
     {
         private readonly RestClient _client;
         private readonly IDeviceRepository _deviceRepository;
+        private readonly IStreamingClient _streamingClient;
 
-        public DeviceManager(IDeviceRepository deviceRepository)
+        public DeviceManager(IDeviceRepository deviceRepository, IStreamingClient streamingClient)
         {
             _deviceRepository = deviceRepository;
+            _streamingClient = streamingClient;
             var settings = _deviceRepository.GetSettings();
             _client = new RestClient(settings.ApiPath);
         }
@@ -25,6 +27,7 @@ namespace forte.devices.services
         public void PublishState()
         {
             throw new NotImplementedException();
+            var clientState = _streamingClient.GetState();
             // TODO
             // 1. Get latest from streaming client
             // 2. Post to client

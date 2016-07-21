@@ -17,15 +17,15 @@ namespace forte.devices.models
     {
         static AppState()
         {
-            if (Settings.Default.CallUpgrade)
-            {
-                Settings.Default.Upgrade();
-                Settings.Default.CallUpgrade = false;
-                Settings.Default.Save();
-            }
-            Mapper.CreateMap<AppState, AppState>();
-            Instance = JsonConvert.DeserializeObject<AppState>(Settings.Default.State)
-                       ?? new AppState().Reset();
+            //if (Settings.Default.CallUpgrade)
+            //{
+            //    Settings.Default.Upgrade();
+            //    Settings.Default.CallUpgrade = false;
+            //    Settings.Default.Save();
+            //}
+            //Mapper.CreateMap<AppState, AppState>();
+            //Instance = JsonConvert.DeserializeObject<AppState>(Settings.Default.State)
+            //           ?? new AppState().Reset();
             Instance.Initialized = true;
             Instance.SetDefaultValues();
         }
@@ -114,8 +114,8 @@ namespace forte.devices.models
         {
             if (!Initialized) return;
             var stateString = JsonConvert.SerializeObject(this);
-            Settings.Default.State = stateString;
-            Settings.Default.Save();
+            //Settings.Default.State = stateString;
+            //Settings.Default.Save();
         }
     }
 

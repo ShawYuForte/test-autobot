@@ -40,12 +40,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="models\Audio.cs" />
+    <Compile Include="models\DeviceState.cs" />
     <Compile Include="models\Input.cs" />
     <Compile Include="models\InputRole.cs" />
+    <Compile Include="models\Settings.cs" />
+    <Compile Include="models\StreamingClientState.cs" />
     <Compile Include="models\StreamingPreset.cs" />
     <Compile Include="models\VideoStreamModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="services\IDeviceManager.cs" />
+    <Compile Include="services\ISettingsProvider.cs" />
     <Compile Include="services\IStreamingClient.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
