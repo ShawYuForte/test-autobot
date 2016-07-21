@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using forte.device.models;
+using forte.devices.models;
 using KellermanSoftware.CompareNetObjects;
 
 namespace forte.device.extensions

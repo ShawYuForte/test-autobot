@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using forte.device.extensions;
 using forte.device.models;
+using forte.devices.models;
 using Microsoft.WindowsAzure.MediaServices.Client;
 
 #endregion

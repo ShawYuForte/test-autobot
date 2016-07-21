@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using forte.device.models;
+using forte.devices.models;
 
 namespace device.ui.pages
 {

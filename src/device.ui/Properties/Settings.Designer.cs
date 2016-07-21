@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace device.ui.Properties {
+namespace forte.devices.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]

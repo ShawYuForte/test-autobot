@@ -2,6 +2,7 @@
 
 using System.Windows;
 using forte.device.models;
+using forte.devices.models;
 
 #endregion
 

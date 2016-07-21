@@ -6,6 +6,7 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using forte.device.models;
+using forte.devices.models;
 using Xceed.Wpf.Toolkit.Core;
 
 #endregion

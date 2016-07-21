@@ -3,13 +3,14 @@
 using System;
 using System.ComponentModel;
 using AutoMapper;
+using forte.device.models;
 using forte.device.Properties;
 using Newtonsoft.Json;
 using PostSharp.Patterns.Model;
 
 #endregion
 
-namespace forte.device.models
+namespace forte.devices.models
 {
     [NotifyPropertyChanged]
     public class AppState

@@ -7,7 +7,7 @@
     <ProjectGuid>{EE82A4F2-712F-4E3D-B1AA-DAC254E33AA6}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>device.client</RootNamespace>
+    <RootNamespace>forte.devices</RootNamespace>
     <AssemblyName>device.client</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

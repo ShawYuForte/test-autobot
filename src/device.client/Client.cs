@@ -51,6 +51,7 @@ namespace device.client
         public async Task Send(string message)
         {
             await _stockTickerHubProxy.Invoke("SendHello", message);
+            await _stockTickerHubProxy.Invoke("RequestState", Guid.Parse("602687aa-37bd-4e92-b0f8-05feffb4a1e0"));
         }
     }
 }

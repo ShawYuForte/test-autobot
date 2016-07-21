@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "device.services", "device.services\device.services.csproj", "{A848959A-23E7-41E6-83B2-9A047BAF6FA5}"
 EndProject
@@ -14,6 +14,33 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "device.ws", "device.ws\device.ws.csproj", "{9429A2F9-B2CA-43E9-B0DC-A346644A63D1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "device.console", "device.console\device.console.csproj", "{9EBCDF44-1594-4688-86D7-243FFDE8D884}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{D249166B-EB6B-4A4F-AE01-7665DA4202A9}"
+EndProject
+Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "docs", "..\docs\", "{19413059-8740-4BDF-9E9F-D8B9AFF56602}"
+	ProjectSection(WebsiteProperties) = preProject
+		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.0"
+		Debug.AspNetCompiler.VirtualPath = "/localhost_4179"
+		Debug.AspNetCompiler.PhysicalPath = "..\docs\"
+		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_4179\"
+		Debug.AspNetCompiler.Updateable = "true"
+		Debug.AspNetCompiler.ForceOverwrite = "true"
+		Debug.AspNetCompiler.FixedNames = "false"
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.VirtualPath = "/localhost_4179"
+		Release.AspNetCompiler.PhysicalPath = "..\docs\"
+		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_4179\"
+		Release.AspNetCompiler.Updateable = "true"
+		Release.AspNetCompiler.ForceOverwrite = "true"
+		Release.AspNetCompiler.FixedNames = "false"
+		Release.AspNetCompiler.Debug = "False"
+		VWDPort = "4179"
+		SlnRelativePath = "..\docs\"
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "device.sdk", "device.sdk\device.sdk.csproj", "{4FC451CA-14C1-46DA-95FF-5C177463CFD4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "device.client.vmix", "device.client.vmix\device.client.vmix.csproj", "{BD82769B-E2B9-47D8-9962-AB7844548496}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,9 +72,24 @@ Global
 		{9EBCDF44-1594-4688-86D7-243FFDE8D884}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9EBCDF44-1594-4688-86D7-243FFDE8D884}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9EBCDF44-1594-4688-86D7-243FFDE8D884}.Release|Any CPU.Build.0 = Release|Any CPU
+		{19413059-8740-4BDF-9E9F-D8B9AFF56602}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{19413059-8740-4BDF-9E9F-D8B9AFF56602}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{19413059-8740-4BDF-9E9F-D8B9AFF56602}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{19413059-8740-4BDF-9E9F-D8B9AFF56602}.Release|Any CPU.Build.0 = Debug|Any CPU
+		{4FC451CA-14C1-46DA-95FF-5C177463CFD4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4FC451CA-14C1-46DA-95FF-5C177463CFD4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4FC451CA-14C1-46DA-95FF-5C177463CFD4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4FC451CA-14C1-46DA-95FF-5C177463CFD4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BD82769B-E2B9-47D8-9962-AB7844548496}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BD82769B-E2B9-47D8-9962-AB7844548496}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BD82769B-E2B9-47D8-9962-AB7844548496}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BD82769B-E2B9-47D8-9962-AB7844548496}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{19413059-8740-4BDF-9E9F-D8B9AFF56602} = {D249166B-EB6B-4A4F-AE01-7665DA4202A9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		EnterpriseLibraryConfigurationToolBinariesPath = packages\TransientFaultHandling.Core.5.1.1209.1\lib\NET4

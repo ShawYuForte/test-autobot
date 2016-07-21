@@ -7,7 +7,7 @@
     <ProjectGuid>{519883EC-EFEC-4964-ABCD-40DC51C2B5FB}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>device.ui</RootNamespace>
+    <RootNamespace>forte.devices</RootNamespace>
     <AssemblyName>device.ui</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

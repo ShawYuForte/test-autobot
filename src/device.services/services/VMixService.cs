@@ -8,6 +8,7 @@ using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading;
 using forte.device.models;
+using forte.devices.models;
 using RestSharp;
 
 #endregion
@@ -60,10 +61,14 @@ namespace forte.device.services
             input = state.Inputs.FirstOrDefault(i => i.Title == AppSettings.Instance.OverlayImage);
             if (input != null) input.Role = InputRole.LogoOverlay;
 
-            input =
-                state.Inputs.FirstOrDefault(
-                    i => i.Title.ToLower().Contains("audio") && i.Title.ToLower().Contains("microphone"));
-            if (input != null) input.Role = InputRole.Audio;
+            var audioInputs =
+                state.Inputs.Where(
+                    i => (i.Title.ToLower().Contains("audio") && i.Title.ToLower().Contains("microphone")) ||
+                    i.Title.ToLower() == "microphone" || i.Title.ToLower() == "music");
+            foreach (var audioInput in audioInputs)
+            {
+                audioInput.Role = InputRole.Audio;
+            }
 
             state.Inputs.Where(i => _cameraRegex.IsMatch(i.Title)).ToList().ForEach(i => i.Role = InputRole.Camera);
 
@@ -78,12 +83,11 @@ namespace forte.device.services
         /// </summary>
         public void LoadPreset()
         {
-            var request =
-                new RestRequest($"/?Function=OpenPreset&Value={ConfigurationManager.AppSettings["presetFilePath"]}",
-                    Method.GET)
-                {
-                    Timeout = 1
-                };
+            var requestUrl = $"/?Function=OpenPreset&Value={AppSettings.Instance.VmixPresetFilePath}";
+            var request = new RestRequest(requestUrl, Method.GET)
+            {
+                Timeout = 1
+            };
             _client.Execute<VMixState>(request);
         }
 
@@ -99,7 +103,7 @@ namespace forte.device.services
                    state.Inputs.Count(input => input.Role == InputRole.ClosingStaticImage) == 1 &&
                    state.Inputs.Count(input => input.Role == InputRole.ClosingVideo) == 1 &&
                    state.Inputs.Count(input => input.Role == InputRole.LogoOverlay) == 1 &&
-                   state.Inputs.Count(input => input.Role == InputRole.Audio) == 1 &&
+                   state.Inputs.Count(input => input.Role == InputRole.Audio) >= 1 &&
                    state.Inputs.Count(input => input.Role == InputRole.Camera) > 0;
         }
 
@@ -153,14 +157,27 @@ namespace forte.device.services
         /// <returns></returns>
         public VMixState StartStreaming()
         {
-            return CallAndFetchState("/?Function=StartStreaming", "start streaming");
+            var state = CallAndFetchState("/?Function=StartStreaming", "start streaming");
+
+            return state;
+        }
+
+        /// <summary>
+        ///     Start streaming to the already selected channel
+        /// </summary>
+        /// <returns></returns>
+        public VMixState StartRecording()
+        {
+            var state = CallAndFetchState("/?Function=StartRecording", "start recording");
+
+            return state;
         }
 
         private VMixState CallAndFetchState(string operation, string description)
         {
             var webRequest =
-                (HttpWebRequest) WebRequest.CreateHttp($"{ConfigurationManager.AppSettings["apiPath"]}{operation}");
-            var response = (HttpWebResponse) webRequest.GetResponse();
+                (HttpWebRequest)WebRequest.CreateHttp($"{ConfigurationManager.AppSettings["apiPath"]}{operation}");
+            var response = (HttpWebResponse)webRequest.GetResponse();
             if (response.StatusCode == HttpStatusCode.OK) return FetchState();
 
             var error = $"Could not {description} ({response.StatusDescription}";
@@ -177,14 +194,24 @@ namespace forte.device.services
 
         public VMixState TurnAudioOn()
         {
-            var audioInput = AppState.Instance.CurrentVmixState.Inputs.Single(input => input.Role == InputRole.Audio);
-            return CallAndFetchState($"/?Function=AudioOn&Input={audioInput.Key}", "audio on");
+            var audioInputs = AppState.Instance.CurrentVmixState.Inputs.Where(input => input.Role == InputRole.Audio).ToList();
+            VMixState state = null;
+            foreach (var audioInput in audioInputs)
+            {
+                state = CallAndFetchState($"/?Function=AudioOn&Input={audioInput.Key}", "audio on");
+            }
+            return state;
         }
 
         public VMixState TurnAudioOff()
         {
-            var audioInput = AppState.Instance.CurrentVmixState.Inputs.Single(input => input.Role == InputRole.Audio);
-            return CallAndFetchState($"/?Function=AudioOff&Input={audioInput.Key}", "audio off");
+            var audioInputs = AppState.Instance.CurrentVmixState.Inputs.Where(input => input.Role == InputRole.Audio).ToList();
+            VMixState state = null;
+            foreach (var audioInput in audioInputs)
+            {
+                state = CallAndFetchState($"/?Function=AudioOff&Input={audioInput.Key}", "audio off");
+            }
+            return state;
         }
 
         public VMixState TurnOverlayOn()
@@ -216,6 +243,11 @@ namespace forte.device.services
         public VMixState StopStreaming()
         {
             return CallAndFetchState("/?Function=StopStreaming", "stop streaming");
+        }
+
+        public VMixState StopRecording()
+        {
+            return CallAndFetchState("/?Function=StopRecording", "stop recording");
         }
     }
 }

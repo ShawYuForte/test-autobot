@@ -5,12 +5,11 @@ using System.Configuration;
 using AutoMapper;
 using forte.device.Properties;
 using Newtonsoft.Json;
-using PostSharp.Patterns.Contracts;
 using PostSharp.Patterns.Model;
 
 #endregion
 
-namespace forte.device.models
+namespace forte.devices.models
 {
     [NotifyPropertyChanged]
     public class AppSettings
