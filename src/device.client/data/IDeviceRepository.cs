@@ -1,5 +1,7 @@
 ﻿using System;
 using forte.devices.entities;
+using forte.devices.models;
+using Settings = forte.devices.entities.Settings;
 
 namespace forte.devices.data
 {
@@ -37,5 +39,17 @@ namespace forte.devices.data
         /// <param name="videoStream"></param>
         /// <returns></returns>
         VideoStream SaveVideoStream(VideoStream videoStream);
+
+        /// <summary>
+        ///     Get device state from the database
+        /// </summary>
+        /// <returns></returns>
+        StreamingDeviceState GetDeviceState();
+
+        /// <summary>
+        /// Save streaming device state
+        /// </summary>
+        /// <param name="deviceState"></param>
+        void Save(StreamingDeviceState deviceState);
     }
 }

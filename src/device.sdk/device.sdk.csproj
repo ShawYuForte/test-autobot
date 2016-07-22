@@ -57,7 +57,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="models\Audio.cs" />
-    <Compile Include="models\DeviceConfig.cs" />
+    <Compile Include="models\StreamingDeviceConfig.cs" />
     <Compile Include="models\DeviceState.cs" />
     <Compile Include="models\Input.cs" />
     <Compile Include="models\InputRole.cs" />

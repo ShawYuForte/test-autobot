@@ -7,7 +7,6 @@ using forte.devices.entities;
 using forte.devices.models;
 using Microsoft.AspNet.SignalR.Client;
 using RestSharp;
-using DeviceConfig = forte.devices.models.DeviceConfig;
 using Settings = forte.devices.models.Settings;
 
 namespace forte.devices.services
@@ -19,8 +18,8 @@ namespace forte.devices.services
         private readonly RestClient _client;
         private readonly IDeviceRepository _deviceRepository;
 
-        private readonly IDeviceManager _deviceManager;
         private readonly IStreamingClient _streamingClient;
+        private readonly Guid _deviceId;
 
         private HubConnection _hubConnection;
 
@@ -32,6 +31,7 @@ namespace forte.devices.services
             _streamingClient = streamingClient;
             var settings = _deviceRepository.GetSettings();
             _client = new RestClient(settings.ApiPath);
+            _deviceId = GetDeviceConfig().DeviceId;
         }
 
         /// <summary>
@@ -39,14 +39,15 @@ namespace forte.devices.services
         /// </summary>
         public void PublishState()
         {
-            var clientState = _streamingClient.GetState();
-            var request = new RestRequest("", Method.POST);
-            request.AddBody(clientState);
+            var deviceState = FetchDeviceAndClientState();
+            var request = new RestRequest($"{_deviceId}/state", Method.POST);
+            request.AddBody(deviceState);
             var response = _client.Execute(request);
 
-            // TODO
-            // 1. Get latest from streaming client
-            // 2. Post to client
+            if (response.ResponseStatus != ResponseStatus.Completed)
+            {
+                // Log error
+            }
         }
 
         /// <summary>
@@ -84,25 +85,31 @@ namespace forte.devices.services
             return ClientModule.Registrar.CreateMapper().Map<Settings>(settings);
         }
 
-        public DeviceConfig GetConfig()
+        public StreamingDeviceConfig GetConfig()
         {
             var deviceConfig = _deviceRepository.GetDeviceConfig();
-            return ClientModule.Registrar.CreateMapper().Map<DeviceConfig>(deviceConfig);
+            return ClientModule.Registrar.CreateMapper().Map<StreamingDeviceConfig>(deviceConfig);
         }
 
         public event services.MessageReceivedDelegate MessageReceived;
 
-        public async Task Connect()
+        public void Connect()
         {
-            _hubConnection = new HubConnection(ConfigurationManager.AppSettings["server:url"]);
+            var serverUrl = ConfigurationManager.AppSettings["server:url"];
+            OnMessageReceived($"Connecting to {serverUrl}");
+            _hubConnection = new HubConnection(serverUrl);
             _stockTickerHubProxy = _hubConnection.CreateHubProxy("DeviceInteractionHub");
-            _stockTickerHubProxy.On("Hello", message => { OnMessageReceived($"Server said {message}"); });
+            _stockTickerHubProxy.On("Hello", message =>
+            {
+                OnMessageReceived($"Server said {message}");
+                PublishState();
+            });
             _stockTickerHubProxy.On("RequestState", deviceId =>
             {
                 OnMessageReceived($"Server requested state for device id {deviceId}");
-                _deviceManager.PublishState();
+                PublishState();
             });
-            await _hubConnection.Start();
+            _hubConnection.Start().Wait();
         }
 
         public void Disconnect()
@@ -115,6 +122,29 @@ namespace forte.devices.services
         {
             await _stockTickerHubProxy.Invoke("SendHello", message);
             await _stockTickerHubProxy.Invoke("RequestState", Guid.Parse("602687aa-37bd-4e92-b0f8-05feffb4a1e0"));
+        }
+
+        private StreamingDeviceConfig GetDeviceConfig()
+        {
+            return
+                ClientModule.Registrar.CreateMapper().Map<StreamingDeviceConfig>(_deviceRepository.GetDeviceConfig()) ??
+                new StreamingDeviceConfig();
+        }
+
+        public StreamingDeviceState FetchDeviceAndClientState()
+        {
+            var clientState = _streamingClient.GetState();
+            var deviceState = _deviceRepository.GetDeviceState();
+            deviceState.Recording = clientState?.Recording ?? false;
+            deviceState.StateCapturedOn = DateTime.UtcNow;
+            deviceState.Streaming = clientState?.Streaming ?? false;
+            _deviceRepository.Save(deviceState);
+            return GetState();
+        }
+
+        private StreamingDeviceState GetState()
+        {
+            return _deviceRepository.GetDeviceState();
         }
 
         private VideoStreamModel DownloadStreamInformation(Guid videoStreamId)

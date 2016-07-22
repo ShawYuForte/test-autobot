@@ -16,7 +16,7 @@ namespace forte.devices
 
             var deviceManager = container.Resolve<IDeviceManager>();
             deviceManager.MessageReceived += Client_MessageReceived;
-            deviceManager.Connect().Wait();
+            deviceManager.Connect();
             Console.WriteLine("Done!");
 
             Console.WriteLine("Waiting...");

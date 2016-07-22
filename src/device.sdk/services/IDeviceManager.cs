@@ -34,7 +34,7 @@ namespace forte.devices.services
         /// Get device config
         /// </summary>
         /// <returns></returns>
-        DeviceConfig GetConfig();
+        StreamingDeviceConfig GetConfig();
 
         /// <summary>
         /// Message has been received from the server
@@ -45,7 +45,7 @@ namespace forte.devices.services
         /// Explicitly connect to the server
         /// </summary>
         /// <returns></returns>
-        Task Connect();
+        void Connect();
 
         /// <summary>
         /// Explicitly disconnect from the server

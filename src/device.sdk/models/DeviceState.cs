@@ -2,17 +2,12 @@
 
 namespace forte.devices.models
 {
-    public class DeviceState
+    public class StreamingDeviceState
     {
         /// <summary>
-        ///     Unique identifier for this device
+        ///     Device unique identifier
         /// </summary>
-        public Guid Id { get; set; }
-
-        /// <summary>
-        ///     Identifier for studio where the device is located
-        /// </summary>
-        public Guid StudioId { get; set; }
+        public Guid DeviceId { get; set; }
 
         /// <summary>
         ///     UTC date and time when the device state was last captured

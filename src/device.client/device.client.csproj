@@ -90,6 +90,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="data\configs\DeviceStateEntityConfig.cs" />
     <Compile Include="data\configs\DeviceEntityConfig.cs" />
     <Compile Include="data\DeviceDbContext.cs" />
     <Compile Include="data\DeviceRepository.cs" />

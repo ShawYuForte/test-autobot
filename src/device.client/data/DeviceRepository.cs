@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Data.Entity;
 using System.Linq;
 using forte.devices.entities;
+using forte.devices.models;
+using Settings = forte.devices.entities.Settings;
 
 namespace forte.devices.data
 {
@@ -32,6 +35,35 @@ namespace forte.devices.data
         public VideoStream SaveVideoStream(VideoStream videoStream)
         {
             throw new NotImplementedException();
+        }
+
+        public StreamingDeviceState GetDeviceState()
+        {
+            using (var dbContext = new DeviceDbContext())
+            {
+                return dbContext.DeviceState.FirstOrDefault();
+            }
+        }
+
+        public void Save(StreamingDeviceState deviceState)
+        {
+            using (var dbContext = new DeviceDbContext())
+            {
+                deviceState.StateCapturedOn = DateTime.UtcNow;
+
+                var existing = dbContext.DeviceState.Count();
+                if (existing > 0)
+                {
+                    dbContext.DeviceState.Attach(deviceState);
+                    dbContext.Entry(deviceState).State = EntityState.Modified;
+                }
+                else
+                {
+                    dbContext.DeviceState.Add(deviceState);
+                }
+
+                dbContext.SaveChanges();
+            }
         }
     }
 }

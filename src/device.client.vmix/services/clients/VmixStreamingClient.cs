@@ -21,6 +21,7 @@ namespace forte.devices.services.clients
             var request = new RestRequest("", Method.GET);
             var response = _client.Execute<VmixState>(request);
 
+            if (response.ResponseStatus != ResponseStatus.Completed) return null;
             var vmixState = MatchPresetStateRoles(response.Data);
             return VmixClientModule.Registrar.CreateMapper().Map<StreamingClientState>(vmixState);
         }

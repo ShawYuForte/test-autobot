@@ -11,6 +11,7 @@ namespace forte.devices
         public static class Registrar
         {
             private static IMapper _mapper;
+            private static readonly object MapperLock = new object();
 
             public static void RegisterDependencies(IUnityContainer container)
             {
@@ -19,7 +20,7 @@ namespace forte.devices
 
             public static IMapper CreateMapper()
             {
-                lock (_mapper)
+                lock (MapperLock)
                 {
                     if (_mapper != null) return _mapper;
                     var config = new MapperConfiguration(ConfigureMapper);
