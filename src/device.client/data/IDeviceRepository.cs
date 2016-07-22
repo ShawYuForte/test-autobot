@@ -12,6 +12,12 @@ namespace forte.devices.data
         Settings GetSettings();
 
         /// <summary>
+        ///     Get application settings
+        /// </summary>
+        /// <returns></returns>
+        DeviceConfig GetDeviceConfig();
+
+        /// <summary>
         ///     Save settings
         /// </summary>
         /// <param name="settings"></param>

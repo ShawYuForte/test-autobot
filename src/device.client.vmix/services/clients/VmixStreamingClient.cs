@@ -10,24 +10,19 @@ namespace forte.devices.services.clients
     {
         private readonly Regex _cameraRegex = new Regex(@"RTSPTCP rtsp:\/\/root:pass@[0-9.]*\/axis-media\/media\.amp");
         private readonly RestClient _client;
-        private ISettingsProvider _settingsProvider;
 
-        public VmixStreamingClient(ISettingsProvider settingsProvider)
+        public VmixStreamingClient()
         {
-            _settingsProvider = settingsProvider;
             _client = new RestClient(ConfigurationManager.AppSettings["vmix:api"] ?? "http://localhost:8088/api");
         }
 
         public StreamingClientState GetState()
         {
             var request = new RestRequest("", Method.GET);
-            var response = _client.Execute<VMixState>(request);
+            var response = _client.Execute<VmixState>(request);
 
             var vmixState = MatchPresetStateRoles(response.Data);
-            return new StreamingClientState
-            {
-
-            };
+            return VmixClientModule.Registrar.CreateMapper().Map<StreamingClientState>(vmixState);
         }
 
         /// <summary>
@@ -35,7 +30,7 @@ namespace forte.devices.services.clients
         /// </summary>
         /// <param name="state"></param>
         /// <returns></returns>
-        private VMixState MatchPresetStateRoles(VMixState state)
+        private VmixState MatchPresetStateRoles(VmixState state)
         {
             var preset = new StreamingPreset();
             

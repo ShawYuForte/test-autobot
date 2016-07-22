@@ -1,17 +1,30 @@
 ﻿using System;
+using System.Configuration;
+using System.Threading.Tasks;
 using AutoMapper;
 using forte.devices.data;
 using forte.devices.entities;
 using forte.devices.models;
+using Microsoft.AspNet.SignalR.Client;
 using RestSharp;
+using DeviceConfig = forte.devices.models.DeviceConfig;
+using Settings = forte.devices.models.Settings;
 
 namespace forte.devices.services
 {
     public class DeviceManager : IDeviceManager
     {
+        public delegate void MessageReceivedDelegate(string message);
+
         private readonly RestClient _client;
         private readonly IDeviceRepository _deviceRepository;
+
+        private readonly IDeviceManager _deviceManager;
         private readonly IStreamingClient _streamingClient;
+
+        private HubConnection _hubConnection;
+
+        private IHubProxy _stockTickerHubProxy;
 
         public DeviceManager(IDeviceRepository deviceRepository, IStreamingClient streamingClient)
         {
@@ -26,8 +39,11 @@ namespace forte.devices.services
         /// </summary>
         public void PublishState()
         {
-            throw new NotImplementedException();
             var clientState = _streamingClient.GetState();
+            var request = new RestRequest("", Method.POST);
+            request.AddBody(clientState);
+            var response = _client.Execute(request);
+
             // TODO
             // 1. Get latest from streaming client
             // 2. Post to client
@@ -62,6 +78,45 @@ namespace forte.devices.services
             // 3. Report new state to server
         }
 
+        public Settings GetSettings()
+        {
+            var settings = _deviceRepository.GetSettings();
+            return ClientModule.Registrar.CreateMapper().Map<Settings>(settings);
+        }
+
+        public DeviceConfig GetConfig()
+        {
+            var deviceConfig = _deviceRepository.GetDeviceConfig();
+            return ClientModule.Registrar.CreateMapper().Map<DeviceConfig>(deviceConfig);
+        }
+
+        public event services.MessageReceivedDelegate MessageReceived;
+
+        public async Task Connect()
+        {
+            _hubConnection = new HubConnection(ConfigurationManager.AppSettings["server:url"]);
+            _stockTickerHubProxy = _hubConnection.CreateHubProxy("DeviceInteractionHub");
+            _stockTickerHubProxy.On("Hello", message => { OnMessageReceived($"Server said {message}"); });
+            _stockTickerHubProxy.On("RequestState", deviceId =>
+            {
+                OnMessageReceived($"Server requested state for device id {deviceId}");
+                _deviceManager.PublishState();
+            });
+            await _hubConnection.Start();
+        }
+
+        public void Disconnect()
+        {
+            //_cancellationTokenSource.Cancel();
+            _hubConnection.Dispose();
+        }
+
+        public async Task Send(string message)
+        {
+            await _stockTickerHubProxy.Invoke("SendHello", message);
+            await _stockTickerHubProxy.Invoke("RequestState", Guid.Parse("602687aa-37bd-4e92-b0f8-05feffb4a1e0"));
+        }
+
         private VideoStreamModel DownloadStreamInformation(Guid videoStreamId)
         {
             var request = new RestRequest($"streams/{videoStreamId}", Method.GET)
@@ -78,6 +133,11 @@ namespace forte.devices.services
             var mapper = config.CreateMapper();
             _deviceRepository.SaveVideoStream(mapper.Map<VideoStream>(response.Data));
             return response.Data;
+        }
+
+        private void OnMessageReceived(string message)
+        {
+            MessageReceived?.Invoke(message);
         }
     }
 }

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Threading.Tasks;
+using forte.devices.models;
 
 namespace forte.devices.services
 {
@@ -21,5 +23,42 @@ namespace forte.devices.services
         /// </summary>
         /// <param name="videoStreamId"></param>
         void StopStreaming(Guid videoStreamId);
+
+        /// <summary>
+        /// Get app settings
+        /// </summary>
+        /// <returns></returns>
+        Settings GetSettings();
+
+        /// <summary>
+        /// Get device config
+        /// </summary>
+        /// <returns></returns>
+        DeviceConfig GetConfig();
+
+        /// <summary>
+        /// Message has been received from the server
+        /// </summary>
+        event MessageReceivedDelegate MessageReceived;
+
+        /// <summary>
+        /// Explicitly connect to the server
+        /// </summary>
+        /// <returns></returns>
+        Task Connect();
+
+        /// <summary>
+        /// Explicitly disconnect from the server
+        /// </summary>
+        void Disconnect();
+
+        /// <summary>
+        /// Send a message to the server
+        /// </summary>
+        /// <param name="message"></param>
+        /// <returns></returns>
+        Task Send(string message);
     }
+
+    public delegate void MessageReceivedDelegate(string message);
 }

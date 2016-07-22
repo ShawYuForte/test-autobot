@@ -1,6 +1,6 @@
 ﻿namespace forte.devices.models
 {
-    public class VMixInput
+    public class VmixInput
     {
         public string Key { get; set; }
         public string Number { get; set; }

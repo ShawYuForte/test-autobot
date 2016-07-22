@@ -1,17 +1,22 @@
 ﻿using System;
-using device.client;
-using Newtonsoft.Json;
+using forte.devices.services;
+using Microsoft.Practices.Unity;
 
-namespace device.console
+namespace forte.devices
 {
     public class Program
     {
         private static void Main(string[] args)
         {
             Console.Write("Starting client connection... ");
-            var client = new Client();
-            client.MessageReceived += Client_MessageReceived;
-            client.Connect().Wait();
+            var container = new UnityContainer();
+
+            ClientModule.Registrar.RegisterDependencies(container);
+            VmixClientModule.Registrar.RegisterDependencies(container);
+
+            var deviceManager = container.Resolve<IDeviceManager>();
+            deviceManager.MessageReceived += Client_MessageReceived;
+            deviceManager.Connect().Wait();
             Console.WriteLine("Done!");
 
             Console.WriteLine("Waiting...");
@@ -20,7 +25,7 @@ namespace device.console
             while (!string.IsNullOrWhiteSpace(input = Console.ReadLine()))
             {
                 Console.WriteLine($"Sending '{input}'");
-                client.Send(input).Wait();
+                deviceManager.Send(input).Wait();
             }
             //Console.ReadLine();
         }

@@ -34,7 +34,7 @@ namespace forte.devices.models
             //}
 
 #pragma warning disable CS0618 // Type or member is obsolete
-            Mapper.CreateMap<AppSettings, AppSettings>();
+            //Mapper.CreateMap<AppSettings, AppSettings>();
 #pragma warning restore CS0618 // Type or member is obsolete
 
             //Instance = JsonConvert.DeserializeObject<AppSettings>(Settings.Default.AppSettings)
