@@ -23,14 +23,14 @@ namespace forte.devices.services
 
         private HubConnection _hubConnection;
 
-        private IHubProxy _stockTickerHubProxy;
+        private IHubProxy _deviceInteractionHubProxy;
 
         public DeviceManager(IDeviceRepository deviceRepository, IStreamingClient streamingClient)
         {
             _deviceRepository = deviceRepository;
             _streamingClient = streamingClient;
             var settings = _deviceRepository.GetSettings();
-            _client = new RestClient(settings.ApiPath);
+            _client = new RestClient($"{settings.ApiPath}/devices/");
             _deviceId = GetDeviceConfig().DeviceId;
         }
 
@@ -40,8 +40,14 @@ namespace forte.devices.services
         public void PublishState()
         {
             var deviceState = FetchDeviceAndClientState();
-            var request = new RestRequest($"{_deviceId}/state", Method.POST);
-            request.AddBody(deviceState);
+            var request = new RestRequest($"{deviceState.DeviceId}/state", Method.POST);
+
+            //var json = request.JsonSerializer.Serialize(deviceState);
+
+            request.AddHeader("Content-Type", "application/json; charset=utf-8");
+            //request.AddParameter("application/json; charset=utf-8", json, ParameterType.RequestBody);
+
+            request.AddJsonBody(deviceState);
             var response = _client.Execute(request);
 
             if (response.ResponseStatus != ResponseStatus.Completed)
@@ -95,21 +101,25 @@ namespace forte.devices.services
 
         public void Connect()
         {
+            ConnectAsync().Wait();
+        }
+
+        private async Task ConnectAsync()
+        {
             var serverUrl = ConfigurationManager.AppSettings["server:url"];
-            OnMessageReceived($"Connecting to {serverUrl}");
             _hubConnection = new HubConnection(serverUrl);
-            _stockTickerHubProxy = _hubConnection.CreateHubProxy("DeviceInteractionHub");
-            _stockTickerHubProxy.On("Hello", message =>
+            _deviceInteractionHubProxy = _hubConnection.CreateHubProxy("DeviceInteractionHub");
+            _deviceInteractionHubProxy.On("Hello", message =>
             {
                 OnMessageReceived($"Server said {message}");
                 PublishState();
             });
-            _stockTickerHubProxy.On("RequestState", deviceId =>
+            _deviceInteractionHubProxy.On("RequestState", deviceId =>
             {
                 OnMessageReceived($"Server requested state for device id {deviceId}");
                 PublishState();
             });
-            _hubConnection.Start().Wait();
+            await _hubConnection.Start();
         }
 
         public void Disconnect()
@@ -120,8 +130,8 @@ namespace forte.devices.services
 
         public async Task Send(string message)
         {
-            await _stockTickerHubProxy.Invoke("SendHello", message);
-            await _stockTickerHubProxy.Invoke("RequestState", Guid.Parse("602687aa-37bd-4e92-b0f8-05feffb4a1e0"));
+            await _deviceInteractionHubProxy.Invoke("SendHello", message);
+            await _deviceInteractionHubProxy.Invoke("RequestState", Guid.Parse("602687aa-37bd-4e92-b0f8-05feffb4a1e0"));
         }
 
         private StreamingDeviceConfig GetDeviceConfig()

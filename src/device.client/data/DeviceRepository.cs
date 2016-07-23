@@ -41,7 +41,7 @@ namespace forte.devices.data
         {
             using (var dbContext = new DeviceDbContext())
             {
-                return dbContext.DeviceState.FirstOrDefault();
+                return dbContext.DeviceState.FirstOrDefault() ?? new StreamingDeviceState();
             }
         }
 
@@ -49,6 +49,8 @@ namespace forte.devices.data
         {
             using (var dbContext = new DeviceDbContext())
             {
+                if (deviceState.DeviceId == Guid.Empty)
+                    deviceState.DeviceId = Guid.Parse("602687AA-37BD-4E92-B0F8-05FEFFB4A1E0");
                 deviceState.StateCapturedOn = DateTime.UtcNow;
 
                 var existing = dbContext.DeviceState.Count();
