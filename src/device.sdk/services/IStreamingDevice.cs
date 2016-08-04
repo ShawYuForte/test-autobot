@@ -4,12 +4,17 @@ using forte.devices.models;
 
 namespace forte.devices.services
 {
-    public interface IDeviceManager
+    public interface IStreamingDevice
     {
+        /// <summary>
+        /// Fetches the next command, if available, from the server
+        /// </summary>
+        void FetchCommand();
+
         /// <summary>
         ///     Publish device state to the server
         /// </summary>
-        void PublishState();
+        bool PublishState();
 
         /// <summary>
         ///     Start streaming for the specified video stream identifier

@@ -1,13 +1,15 @@
-﻿using AutoMapper;
-using forte.devices.data;
-using forte.devices.entities;
-using forte.devices.models;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using AutoMapper;
 using forte.devices.services;
 using Microsoft.Practices.Unity;
 
 namespace forte.devices
 {
-    public static class ClientModule
+    public static class ServiceModule
     {
         public static class Registrar
         {
@@ -16,8 +18,7 @@ namespace forte.devices
 
             public static void RegisterDependencies(IUnityContainer container)
             {
-                container.RegisterType<IDeviceRepository, DeviceRepository>(new HierarchicalLifetimeManager());
-                container.RegisterType<IStreamingDevice, StreamingDevice>(new HierarchicalLifetimeManager());
+                container.RegisterType<ILogger, SeriLogger>(new HierarchicalLifetimeManager());
             }
 
             public static IMapper CreateMapper()
@@ -34,9 +35,6 @@ namespace forte.devices
             private static void ConfigureMapper(IMapperConfigurationExpression cfg)
             {
                 //cfg.CreateMap<Audio, VmixAudio>();
-
-                cfg.CreateMap<DeviceConfig, StreamingDeviceConfig>();
-                cfg.CreateMap<StreamingDeviceConfig, DeviceConfig > ();
 
                 //cfg.CreateMap<VmixState, StreamingClientState>()
                 //    .ForMember(m => m.Software, expression => { expression.UseValue("vMix"); });

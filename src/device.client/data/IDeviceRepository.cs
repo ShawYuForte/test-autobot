@@ -51,5 +51,12 @@ namespace forte.devices.data
         /// </summary>
         /// <param name="deviceState"></param>
         void Save(StreamingDeviceState deviceState);
+
+        /// <summary>
+        /// Save command to local repo
+        /// </summary>
+        /// <param name="deviceCommandEntity"></param>
+        /// <returns></returns>
+        DeviceCommandEntity SaveCommand(DeviceCommandEntity deviceCommandEntity);
     }
 }

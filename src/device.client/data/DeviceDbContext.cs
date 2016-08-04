@@ -14,11 +14,13 @@ namespace forte.devices.data
 
         public DbSet<DeviceConfig> DeviceConfig { get; set; }
         public DbSet<StreamingDeviceState> DeviceState { get; set; }
+        public DbSet<DeviceCommandEntity> Commands { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             modelBuilder.Configurations.Add(new DeviceEntityConfig());
             modelBuilder.Configurations.Add(new StreamingDeviceStateEntityConfig());
+            modelBuilder.Configurations.Add(new DeviceCommandConfig());
 
             base.OnModelCreating(modelBuilder);
         }

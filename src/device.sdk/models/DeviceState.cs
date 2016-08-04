@@ -17,7 +17,7 @@ namespace forte.devices.models
         /// <summary>
         ///     Active session identifier, if streaming
         /// </summary>
-        public Guid? ActiveSessionId { get; set; }
+        public Guid? ActiveVideoStreamId { get; set; }
 
         /// <summary>
         ///     Is the client recording

@@ -18,7 +18,10 @@ namespace forte.devices.data
         {
             using (var dbContext = new DeviceDbContext())
             {
-                return dbContext.DeviceConfig.FirstOrDefault();
+                return dbContext.DeviceConfig.FirstOrDefault() ?? new DeviceConfig
+                {
+                    DeviceId = Guid.Parse("602687AA-37BD-4E92-B0F8-05FEFFB4A1E0")
+                };
             }
         }
 
@@ -66,6 +69,29 @@ namespace forte.devices.data
 
                 dbContext.SaveChanges();
             }
+        }
+
+        public DeviceCommandEntity SaveCommand(DeviceCommandEntity deviceCommandEntity)
+        {
+            using (var dbContext = new DeviceDbContext())
+            {
+                if (deviceCommandEntity.Created == DateTime.MinValue) deviceCommandEntity.Created = DateTime.UtcNow;
+                if (deviceCommandEntity.LastModified == DateTime.MinValue) deviceCommandEntity.LastModified = DateTime.UtcNow;
+
+                if (dbContext.Commands.Count(command => command.Id == deviceCommandEntity.Id) > 0)
+                {
+                    dbContext.Commands.Attach(deviceCommandEntity);
+                    dbContext.Entry(deviceCommandEntity).State = EntityState.Modified;
+                }
+                else
+                {
+                    dbContext.Commands.Add(deviceCommandEntity);
+                }
+
+                dbContext.SaveChanges();
+
+                return deviceCommandEntity;
+            };
         }
     }
 }
