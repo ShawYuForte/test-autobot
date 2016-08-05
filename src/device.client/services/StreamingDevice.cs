@@ -1,12 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using forte.devices.data;
 using forte.devices.entities;
 using forte.devices.models;
 using Microsoft.AspNet.SignalR.Client;
+using Newtonsoft.Json;
 using RestSharp;
 using Settings = forte.devices.models.Settings;
 
@@ -17,15 +20,16 @@ namespace forte.devices.services
         public delegate void MessageReceivedDelegate(string message);
 
         private readonly RestClient _client;
-        private readonly IDeviceRepository _deviceRepository;
-
-        private readonly IStreamingClient _streamingClient;
         private readonly Guid _deviceId;
+        private readonly IDeviceRepository _deviceRepository;
         private readonly ILogger _logger;
 
-        private HubConnection _hubConnection;
+        private readonly IStreamingClient _streamingClient;
 
         private IHubProxy _deviceInteractionHubProxy;
+
+        private HubConnection _hubConnection;
+        private Timer _timer;
 
         public StreamingDevice(IDeviceRepository deviceRepository, IStreamingClient streamingClient, ILogger logger)
         {
@@ -66,13 +70,22 @@ namespace forte.devices.services
         /// <summary>
         ///     Start streaming for the specified video stream identifier
         /// </summary>
-        /// <param name="videoStreamId"></param>
-        public void StartStreaming(Guid videoStreamId)
+        /// <param name="command"></param>
+        public bool StartStreaming(DeviceCommandModel command)
         {
+            _logger.Debug("Starting streaming for command {@command}", command);
+
+            if (!command.Data.ContainsKey(CommonEntityParams.VideoStreamId))
+                throw new Exception("Video stream id not provided, cannot start streaming");
+            var videoStreamId = command.Data[CommonEntityParams.VideoStreamId].Get<Guid>();
             var state = _deviceRepository.GetDeviceState();
             state.Streaming = true;
             state.ActiveVideoStreamId = videoStreamId;
             _deviceRepository.Save(state);
+
+            _logger.Debug("Streaming started.");
+
+            return true;
             //PublishState();
             //var videoStream = DownloadStreamInformation(videoStreamId);
             // TODO
@@ -87,10 +100,19 @@ namespace forte.devices.services
         ///     Stop streaming for the specified video stream identifier. The video stream identifier is there to ensure that the
         ///     request is coming for the right stream
         /// </summary>
-        /// <param name="videoStreamId"></param>
-        public void StopStreaming(Guid videoStreamId)
+        /// <param name="command"></param>
+        public bool StopStreaming(DeviceCommandModel command)
         {
-            throw new NotImplementedException();
+            _logger.Debug("Stopping streaming for command {@command}", command);
+
+            var state = _deviceRepository.GetDeviceState();
+            state.Streaming = false;
+            state.ActiveVideoStreamId = null;
+            _deviceRepository.Save(state);
+
+            _logger.Debug("Streaming stopped.");
+
+            return true;
             // TODO
             // 1. Stop client streaming
             // 2. Unload client
@@ -113,30 +135,15 @@ namespace forte.devices.services
 
         public void Connect()
         {
-            ConnectAsync().Wait();
-        }
-
-        private async Task ConnectAsync()
-        {
-            var serverUrl = ConfigurationManager.AppSettings["server:url"];
-            _hubConnection = new HubConnection(serverUrl);
-            _deviceInteractionHubProxy = _hubConnection.CreateHubProxy("DeviceInteractionHub");
-            _deviceInteractionHubProxy.On("command-available", deviceId =>
+            try
             {
-                // If not our event, ignore
-                if (Guid.Parse(deviceId) != _deviceId) return;
-                OnMessageReceived($"Server notified us of a command available for device {deviceId}");
-                FetchCommand();
-            });
-
-            _hubConnection.Closed += () => _logger.Debug("Connection closed!");
-            _hubConnection.ConnectionSlow += () => _logger.Warning("Connection slow... might close!");
-            _hubConnection.Error += (exception) => _logger.Error($"Connection error: {exception.Message}");
-            _hubConnection.Reconnected += () => _logger.Debug($"Connection re-established");
-            _hubConnection.Reconnecting += () => _logger.Debug($"Re-connecting...");
-            _hubConnection.StateChanged += (state) => _logger.Warning($"Connection state changed from {state.OldState} to {state.NewState}");
-            _hubConnection.Received += (data) => _logger.Debug($"Received {data}");
-            await _hubConnection.Start();
+                ConnectAsync().Wait();
+            }
+            catch (Exception exception)
+            {
+                _logger.Error(exception, "Could not connect to hub");
+                OnHubConnectionOnClosed();
+            }
         }
 
         public void FetchCommand()
@@ -158,79 +165,9 @@ namespace forte.devices.services
             }
 
             _logger.Debug("Command retrieved {@command}", response.Data);
-            var config = new MapperConfiguration(cfg =>
-            {
-                cfg.CreateMap<DeviceCommandEntity, DeviceCommandModel>()
-                    .ForMember(cmd => cmd.ExecutionSucceeded, map => map.MapFrom(other => other.Status == ExecutionStatus.Executed));
-                cfg.CreateMap<DeviceCommandModel, DeviceCommandEntity>()
-                    .ForMember(cmd => cmd.Status, map => map.UseValue(ExecutionStatus.Received));
-            });
-            var mapper = config.CreateMapper();
-            var commandEntity = mapper.Map<DeviceCommandEntity>(response.Data);
+            var commandEntity = ClientModule.Registrar.CreateMapper().Map<DeviceCommandEntity>(response.Data);
             _deviceRepository.SaveCommand(commandEntity);
-            ExecuteCommand(commandEntity);
-        }
-
-        private void ExecuteCommand(DeviceCommandEntity commandEntity)
-        {
-            var result = true;
-            var resultMessage = string.Empty;
-
-            try
-            {
-                switch (commandEntity.Command)
-                {
-                    case DeviceCommands.UpdateState:
-                        result = PublishState();
-                        break;
-                    case DeviceCommands.StartStreaming:
-                        break;
-                    case DeviceCommands.StopStreaming:
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
-            catch (Exception exception)
-            {
-                resultMessage = exception.Message;
-                result = false;
-            }
-
-            commandEntity.ExecutionMessages = resultMessage;
-            commandEntity.Status = result ? ExecutionStatus.Executed : ExecutionStatus.Failed;
-            commandEntity.ExecutedOn = DateTime.UtcNow;
-
-            UpdateCommand(commandEntity);
-        }
-
-        private void UpdateCommand(DeviceCommandEntity commandEntity)
-        {
-            _deviceRepository.SaveCommand(commandEntity);
-
-            // TODO handle duplicates and queuing
-            var request = new RestRequest($"{_deviceId}/commands/{commandEntity.Id}", Method.PUT);
-            var response = _client.Execute<DeviceCommandModel>(request);
-            request.AddHeader("Content-Type", "application/json; charset=utf-8");
-            var commandPatch = new 
-            {
-                ExecutionSucceeded = commandEntity.Status == ExecutionStatus.Executed,
-                commandEntity.ExecutedOn,
-                commandEntity.ExecutionMessages
-            };
-            request.AddJsonBody(commandPatch);
-
-            if (response.StatusCode != HttpStatusCode.OK)
-            {
-                // TODO handle logging / exceptions
-                _logger.Error("Could not update command because of {@status}", response.ErrorMessage ?? response.StatusDescription);
-                return;
-            }
-
-            if (commandEntity.Status != ExecutionStatus.Executed) return;
-
-            commandEntity.PublishedOn = DateTime.UtcNow;
-            _deviceRepository.SaveCommand(commandEntity);
+            ExecuteCommand(response.Data);
         }
 
         public void Disconnect()
@@ -245,9 +182,118 @@ namespace forte.devices.services
             await _deviceInteractionHubProxy.Invoke("RequestState", Guid.Parse("602687aa-37bd-4e92-b0f8-05feffb4a1e0"));
         }
 
+        private async Task ConnectAsync()
+        {
+            if (_hubConnection != null)
+            {
+                await _hubConnection.Start();
+                return;
+            }
+
+            var serverUrl = ConfigurationManager.AppSettings["server:url"];
+            _hubConnection = new HubConnection(serverUrl);
+            _deviceInteractionHubProxy = _hubConnection.CreateHubProxy("DeviceInteractionHub");
+            _deviceInteractionHubProxy.On("command-available", deviceId =>
+            {
+                // If not our event, ignore
+                if (Guid.Parse(deviceId) != _deviceId) return;
+                _logger.Debug($"Server notified us of a command available for device {deviceId}");
+                FetchCommand();
+            });
+
+            _hubConnection.Closed += OnHubConnectionOnClosed;
+            _hubConnection.ConnectionSlow += () => _logger.Warning("Connection slow... might close!");
+            _hubConnection.Error += exception => _logger.Error($"Connection error: {exception.Message}");
+            _hubConnection.Reconnected += () => _logger.Debug($"Connection re-established");
+            _hubConnection.Reconnecting += () => _logger.Debug($"Re-connecting...");
+            _hubConnection.StateChanged +=
+                state => _logger.Warning($"Connection state changed from {state.OldState} to {state.NewState}");
+            _hubConnection.Received += data => _logger.Debug($"Received {data}");
+            await _hubConnection.Start();
+        }
+
+        private void OnHubConnectionOnClosed()
+        {
+            _logger.Debug("Connection closed, will retry in 10 seconds!");
+            _timer = new Timer(state =>
+            {
+                _logger.Debug("Attempting to re-connect");
+                Connect();
+                _timer.Dispose();
+            }, null, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(1));
+        }
+
+        private void ExecuteCommand(DeviceCommandModel command)
+        {
+            var result = true;
+            var resultMessage = string.Empty;
+
+            try
+            {
+                switch (command.Command)
+                {
+                    case DeviceCommands.UpdateState:
+                        result = PublishState();
+                        break;
+                    case DeviceCommands.StartStreaming:
+                        result = StartStreaming(command);
+                        break;
+                    case DeviceCommands.StopStreaming:
+                        result = StopStreaming(command);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+            catch (Exception exception)
+            {
+                resultMessage = exception.Message;
+                result = false;
+            }
+
+            command.ExecutionMessages = resultMessage;
+            command.Status = result ? ExecutionStatus.Executed : ExecutionStatus.Failed;
+            command.ExecutedOn = DateTime.UtcNow;
+
+            UpdateCommand(command);
+        }
+
+        private void UpdateCommand(DeviceCommandModel commandEntity)
+        {
+            var mapper = ClientModule.Registrar.CreateMapper();
+            _deviceRepository.SaveCommand(mapper.Map<DeviceCommandEntity>(commandEntity));
+
+            // TODO handle duplicates and queuing
+            var request = new RestRequest($"{_deviceId}/commands/{commandEntity.Id}", Method.PUT);
+            var response = _client.Execute<DeviceCommandModel>(request);
+            request.AddHeader("Content-Type", "application/json; charset=utf-8");
+            var commandPatch = new
+            {
+                ExecutionSucceeded = commandEntity.Status == ExecutionStatus.Executed,
+                commandEntity.ExecutedOn,
+                commandEntity.ExecutionMessages
+            };
+            request.AddJsonBody(commandPatch);
+
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                // TODO handle logging / exceptions
+                _logger.Error("Could not update command because of {@status}",
+                    response.ErrorMessage ?? response.StatusDescription);
+                return;
+            }
+
+            if (commandEntity.Status != ExecutionStatus.Executed) return;
+
+            commandEntity.PublishedOn = DateTime.UtcNow;
+            _deviceRepository.SaveCommand(mapper.Map<DeviceCommandEntity>(commandEntity));
+        }
+
         private StreamingDeviceConfig GetDeviceConfig()
         {
-            return ClientModule.Registrar.CreateMapper().Map<StreamingDeviceConfig>(_deviceRepository.GetDeviceConfig()) ?? new StreamingDeviceConfig();
+            return
+                ClientModule.Registrar.CreateMapper().Map<StreamingDeviceConfig>(_deviceRepository.GetDeviceConfig()) ??
+                new StreamingDeviceConfig();
         }
 
         public StreamingDeviceState FetchDeviceAndClientState()

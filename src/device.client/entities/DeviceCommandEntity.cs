@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using forte.devices.models;
 
 namespace forte.devices.entities
@@ -17,23 +18,6 @@ namespace forte.devices.entities
         public DateTime? PublishedOn { get; set; }
 
         public string ExecutionMessages { get; set; }
-    }
-
-    public enum ExecutionStatus
-    {
-        /// <summary>
-        ///     Command has been received
-        /// </summary>
-        Received = 0,
-
-        /// <summary>
-        ///     Command has been executed successfully
-        /// </summary>
-        Executed = 1,
-
-        /// <summary>
-        ///     Command execution failed
-        /// </summary>
-        Failed = 2
+        public string Data { get; set; }
     }
 }

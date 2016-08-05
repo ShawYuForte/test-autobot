@@ -19,15 +19,15 @@ namespace forte.devices.services
         /// <summary>
         ///     Start streaming for the specified video stream identifier
         /// </summary>
-        /// <param name="videoStreamId"></param>
-        void StartStreaming(Guid videoStreamId);
+        /// <param name="command"></param>
+        bool StartStreaming(DeviceCommandModel command);
 
         /// <summary>
         ///     Stop streaming for the specified video stream identifier. The video stream identifier is there to ensure that the
         ///     request is coming for the right stream
         /// </summary>
-        /// <param name="videoStreamId"></param>
-        void StopStreaming(Guid videoStreamId);
+        /// <param name="command"></param>
+        bool StopStreaming(DeviceCommandModel command);
 
         /// <summary>
         /// Get app settings

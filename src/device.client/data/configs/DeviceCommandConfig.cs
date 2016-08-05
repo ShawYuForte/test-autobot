@@ -8,7 +8,8 @@ namespace forte.devices.data.configs
         public DeviceCommandConfig()
         {
             HasKey(e => e.Id);
-            Property(e => e.Version).IsRowVersion();
+            //Property(e => e.Version).IsRowVersion();
+            Ignore(e => e.Version);
         }
     }
 }

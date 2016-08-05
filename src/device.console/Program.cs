@@ -1,4 +1,5 @@
 ﻿using System;
+using forte.devices.models;
 using forte.devices.services;
 using Microsoft.Practices.Unity;
 
@@ -16,6 +17,7 @@ namespace forte.devices
             ServiceModule.Registrar.RegisterDependencies(container);
             ClientModule.Registrar.RegisterDependencies(container);
             VmixClientModule.Registrar.RegisterDependencies(container);
+            CoreModule.SetDefaultSerializerSettings();
 
             var logger = container.Resolve<ILogger>();
 
@@ -43,8 +45,11 @@ namespace forte.devices
                 {
                     var videoStreamId = Guid.Parse(input.Split(':')[1]);
                     logger.Debug("User requested to stream for video stream id {@videoStreamId}", videoStreamId);
+
+                    var command = new DeviceCommandModel();
+                    command.Data.Add(CommonEntityParams.VideoStreamId, new DataValue(videoStreamId));
                     //Console.WriteLine($"Starting stream for video stream id {videoStreamId}");
-                    deviceManager.StartStreaming(videoStreamId);
+                    deviceManager.StartStreaming(command);
                 }
                 if (input == "?")
                 {

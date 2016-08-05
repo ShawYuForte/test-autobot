@@ -104,7 +104,6 @@
     <Compile Include="entities\Entity.cs" />
     <Compile Include="entities\Settings.cs" />
     <Compile Include="entities\VideoStream.cs" />
-    <Compile Include="models\DeviceCommandModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="services\StreamingDevice.cs" />
   </ItemGroup>
@@ -121,6 +120,9 @@
       <Project>{a848959a-23e7-41e6-83b2-9a047baf6fa5}</Project>
       <Name>device.services</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="models\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
