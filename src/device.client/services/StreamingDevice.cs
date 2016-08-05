@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using forte.devices.data;
 using forte.devices.entities;
+using forte.devices.extensions;
 using forte.devices.models;
 using Microsoft.AspNet.SignalR.Client;
 using Newtonsoft.Json;
@@ -15,6 +16,15 @@ using Settings = forte.devices.models.Settings;
 
 namespace forte.devices.services
 {
+    /// <summary>
+    /// Streaming device manager, responds to WebSocket messages when there are new commands, and then for each command:
+    ///  - Fetches command
+    ///  - Saves locally
+    ///  - Executes the command
+    ///  - Saves state locally
+    ///  - Saves command state on the server
+    ///  - Publishes new client state
+    /// </summary>
     public class StreamingDevice : IStreamingDevice
     {
         public delegate void MessageReceivedDelegate(string message);
@@ -30,6 +40,7 @@ namespace forte.devices.services
 
         private HubConnection _hubConnection;
         private Timer _timer;
+        private static readonly object Key = new object();
 
         public StreamingDevice(IDeviceRepository deviceRepository, IStreamingClient streamingClient, ILogger logger)
         {
@@ -39,32 +50,6 @@ namespace forte.devices.services
             var settings = _deviceRepository.GetSettings();
             _client = new RestClient($"{settings.ApiPath}/devices/");
             _deviceId = GetDeviceConfig().DeviceId;
-        }
-
-        /// <summary>
-        ///     Publish device state to the server
-        /// </summary>
-        public bool PublishState()
-        {
-            _logger.Debug("Publishing state");
-
-            var deviceState = FetchDeviceAndClientState();
-            var request = new RestRequest($"{deviceState.DeviceId}/state", Method.POST);
-            request.AddHeader("Content-Type", "application/json; charset=utf-8");
-
-            deviceState.Streaming = true;
-            request.AddJsonBody(deviceState);
-            var response = _client.Execute(request);
-
-            if (response.StatusCode != HttpStatusCode.OK)
-            {
-                // Log error
-                throw new Exception(response.ErrorMessage ?? $"Publishing state, response was {response.StatusCode}");
-            }
-
-            _logger.Debug("State published");
-
-            return true;
         }
 
         /// <summary>
@@ -148,8 +133,21 @@ namespace forte.devices.services
 
         public void FetchCommand()
         {
+            lock (Key)
+            {
+                ThreadSafeFetchCommand();
+            }
+        }
+
+        public void ThreadSafeFetchCommand()
+        {
+            _logger.Debug("Fetching command...");
+
             // TODO handle duplicates and queuing
-            var request = new RestRequest($"{_deviceId}/commands/next", Method.GET);
+            var request = new RestRequest($"{_deviceId}/commands/next", Method.GET)
+            {
+                JsonSerializer = NewtonsoftJsonSerializer.Default
+            };
             var response = _client.Execute<DeviceCommandModel>(request);
             // Not found if no command
             if (response.StatusCode == HttpStatusCode.NotFound)
@@ -165,9 +163,42 @@ namespace forte.devices.services
             }
 
             _logger.Debug("Command retrieved {@command}", response.Data);
-            var commandEntity = ClientModule.Registrar.CreateMapper().Map<DeviceCommandEntity>(response.Data);
+            var command = response.Data;
+
+            SaveCommandLocally(command);
+
+            try
+            {
+                ExecuteCommand(command);
+            }
+            catch (Exception exception)
+            {
+                command.ExecutionSucceeded = false;
+                command.Status = ExecutionStatus.Failed;
+                command.ExecutionMessages = exception.Message;
+            }
+
+            SaveCommandLocally(command);
+
+            try
+            {
+                SaveCommandOnServer(command);
+                command.PublishedOn = DateTime.UtcNow;
+            }
+            catch (Exception exception)
+            {
+                command.ExecutionMessages = exception.Message;
+            }
+
+            SaveCommandLocally(command);
+
+            PublishState();
+        }
+
+        private void SaveCommandLocally(DeviceCommandModel command)
+        {
+            var commandEntity = ClientModule.Registrar.CreateMapper().Map<DeviceCommandEntity>(command);
             _deviceRepository.SaveCommand(commandEntity);
-            ExecuteCommand(response.Data);
         }
 
         public void Disconnect()
@@ -193,7 +224,7 @@ namespace forte.devices.services
             var serverUrl = ConfigurationManager.AppSettings["server:url"];
             _hubConnection = new HubConnection(serverUrl);
             _deviceInteractionHubProxy = _hubConnection.CreateHubProxy("DeviceInteractionHub");
-            _deviceInteractionHubProxy.On("command-available", deviceId =>
+            _deviceInteractionHubProxy.On("CommandAvailable", deviceId =>
             {
                 // If not our event, ignore
                 if (Guid.Parse(deviceId) != _deviceId) return;
@@ -254,39 +285,67 @@ namespace forte.devices.services
             command.ExecutionMessages = resultMessage;
             command.Status = result ? ExecutionStatus.Executed : ExecutionStatus.Failed;
             command.ExecutedOn = DateTime.UtcNow;
-
-            UpdateCommand(command);
         }
 
-        private void UpdateCommand(DeviceCommandModel commandEntity)
+        /// <summary>
+        ///     Publish device state to the server
+        /// </summary>
+        public bool PublishState()
+        {
+            _logger.Debug("Publishing state");
+
+            var deviceState = FetchDeviceAndClientState();
+            var request = new RestRequest($"{deviceState.DeviceId}/state", Method.POST)
+            {
+                JsonSerializer = NewtonsoftJsonSerializer.Default
+            };
+            request.AddHeader("Content-Type", "application/json; charset=utf-8");
+
+            deviceState.Streaming = true;
+            request.AddJsonBody(deviceState);
+            var response = _client.Execute(request);
+
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                // Log error
+                throw new Exception(response.ErrorMessage ?? $"Publishing state, response was {response.StatusCode}");
+            }
+
+            _logger.Debug("State published");
+
+            return true;
+        }
+
+        /// <summary>
+        /// Saves command state on the server
+        /// </summary>
+        /// <param name="commandEntity"></param>
+        /// <exception cref="Exception">If server update fails</exception>
+        private void SaveCommandOnServer(DeviceCommandModel commandEntity)
         {
             var mapper = ClientModule.Registrar.CreateMapper();
             _deviceRepository.SaveCommand(mapper.Map<DeviceCommandEntity>(commandEntity));
 
             // TODO handle duplicates and queuing
-            var request = new RestRequest($"{_deviceId}/commands/{commandEntity.Id}", Method.PUT);
-            var response = _client.Execute<DeviceCommandModel>(request);
+            var request = new RestRequest($"{_deviceId}/commands/{commandEntity.Id}", Method.PUT)
+            {
+                JsonSerializer = NewtonsoftJsonSerializer.Default
+            };
             request.AddHeader("Content-Type", "application/json; charset=utf-8");
-            var commandPatch = new
+            var commandPatch = new UpdateCommandRequest
             {
                 ExecutionSucceeded = commandEntity.Status == ExecutionStatus.Executed,
-                commandEntity.ExecutedOn,
-                commandEntity.ExecutionMessages
+                ExecutedOn = commandEntity.ExecutedOn,
+                ExecutionMessages = commandEntity.ExecutionMessages
             };
             request.AddJsonBody(commandPatch);
+            var response = _client.Execute<DeviceCommandModel>(request);
 
-            if (response.StatusCode != HttpStatusCode.OK)
-            {
-                // TODO handle logging / exceptions
-                _logger.Error("Could not update command because of {@status}",
-                    response.ErrorMessage ?? response.StatusDescription);
-                return;
-            }
+            if (response.StatusCode == HttpStatusCode.OK) return;
 
-            if (commandEntity.Status != ExecutionStatus.Executed) return;
-
-            commandEntity.PublishedOn = DateTime.UtcNow;
-            _deviceRepository.SaveCommand(mapper.Map<DeviceCommandEntity>(commandEntity));
+            _logger.Error("Could not update command because of {@status}, response {@resposne}",
+                response.ErrorMessage ?? response.StatusDescription, response);
+            throw new Exception(response.ErrorMessage ?? response.StatusDescription);
         }
 
         private StreamingDeviceConfig GetDeviceConfig()
