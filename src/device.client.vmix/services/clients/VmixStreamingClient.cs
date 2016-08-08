@@ -10,9 +10,11 @@ namespace forte.devices.services.clients
     {
         private readonly Regex _cameraRegex = new Regex(@"RTSPTCP rtsp:\/\/root:pass@[0-9.]*\/axis-media\/media\.amp");
         private readonly RestClient _client;
+        private readonly IConfigurationManager _configurationManager;
 
-        public VmixStreamingClient()
+        public VmixStreamingClient(IConfigurationManager configurationManager)
         {
+            _configurationManager = configurationManager;
             _client = new RestClient(ConfigurationManager.AppSettings["vmix:api"] ?? "http://localhost:8088/api");
         }
 
@@ -26,6 +28,11 @@ namespace forte.devices.services.clients
             return VmixClientModule.Registrar.CreateMapper().Map<StreamingClientState>(vmixState);
         }
 
+        public void LoadVideoStreamPreset(VideoStreamModel videoStream)
+        {
+            throw new System.NotImplementedException();
+        }
+
         /// <summary>
         ///     Match predefined roles from the preset state
         /// </summary>
@@ -35,7 +42,6 @@ namespace forte.devices.services.clients
         {
             var preset = new StreamingPreset();
             
-
             var input = state.Inputs.FirstOrDefault(i => i.Title == preset.StartupImage.Title);
             if (input != null) input.Role = InputRole.OpeninStaticImage;
 
@@ -66,6 +72,21 @@ namespace forte.devices.services.clients
             state.Preview = state.Inputs.FirstOrDefault(i => i.Number == state.PreviewNumber);
 
             return state;
+        }
+
+
+        /// <summary>
+        ///     Load presets based on a preset file defined in the app config
+        /// </summary>
+        private void LoadPreset()
+        {
+            var config = _configurationManager.GetDeviceConfig();
+            var requestUrl = $"/?Function=OpenPreset&Value={config.Get<string>("VmixPresetFilePath")}";
+            var request = new RestRequest(requestUrl, Method.GET)
+            {
+                Timeout = 1
+            };
+            _client.Execute<VmixState>(request);
         }
     }
 }

@@ -1,17 +1,25 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using forte.devices.entities;
 using forte.devices.models;
-using Settings = forte.devices.entities.Settings;
 
 namespace forte.devices.data
 {
     public class DeviceRepository : IDeviceRepository
     {
-        public Settings GetSettings()
+        //public Settings GetSettings()
+        //{
+        //    return new Settings { ApiPath = "http://dev-api.forte.fit/api"};
+        //}
+
+        public List<DeviceSetting> GetSettings()
         {
-            return new Settings { ApiPath = "http://dev-api.forte.fit/api"};
+            using (var dbContext = new DeviceDbContext())
+            {
+                return dbContext.Settings.ToList();
+            }
         }
 
         public DeviceConfig GetDeviceConfig()
@@ -25,9 +33,40 @@ namespace forte.devices.data
             }
         }
 
-        public Settings SaveSettings(Settings settings)
+        public List<DeviceSetting> SaveSettings(List<DeviceSetting> settings)
         {
-            throw new NotImplementedException();
+            using (var dbContext = new DeviceDbContext())
+            {
+                var savedSettings = GetSettings();
+
+                foreach (var setting in savedSettings)
+                {
+                    if (settings.All(s => s.Name != setting.Name))
+                        dbContext.Settings.Remove(setting);
+                }
+
+                foreach (var setting in settings)
+                {
+                    var existing = savedSettings.FirstOrDefault(s => s.Name == setting.Name);
+                    if (existing != null)
+                    {
+                        setting.Id = existing.Id;
+                        setting.Version = existing.Version;
+                        dbContext.Settings.Attach(setting);
+                        dbContext.Entry(setting).State = EntityState.Modified;
+                    }
+                    else
+                    {
+                        setting.Id = Guid.NewGuid();
+                        setting.Created = DateTime.UtcNow;
+                        dbContext.Settings.Add(setting);
+                    }
+                }
+
+                dbContext.SaveChanges();
+
+                return dbContext.Settings.ToList();
+            }
         }
 
         public VideoStream GetVideoStream(Guid videoStreamId)

@@ -12,5 +12,11 @@ namespace forte.devices.services
         /// </summary>
         /// <returns></returns>
         StreamingClientState GetState();
+
+        /// <summary>
+        /// Loads the streaming software with presets based on the video stream provided
+        /// </summary>
+        /// <param name="videoStream"></param>
+        void LoadVideoStreamPreset(VideoStreamModel videoStream);
     }
 }

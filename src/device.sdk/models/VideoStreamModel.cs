@@ -39,6 +39,16 @@ namespace forte.devices.models
         ///     Program type
         /// </summary>
         public ProgramTypes Type { get; set; }
+
+        /// <summary>
+        ///     Primary ingest url used for streaming
+        /// </summary>
+        public string PrimaryIngestUrl { get; set; }
+
+        /// <summary>
+        ///     Secondary ingest url used for streaming
+        /// </summary>
+        public string SecondaryIngestUrl { get; set; }
     }
 
     public enum StreamStatuses

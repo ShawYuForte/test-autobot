@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,9 +8,7 @@ using forte.devices.entities;
 using forte.devices.extensions;
 using forte.devices.models;
 using Microsoft.AspNet.SignalR.Client;
-using Newtonsoft.Json;
 using RestSharp;
-using Settings = forte.devices.models.Settings;
 
 namespace forte.devices.services
 {
@@ -33,6 +29,7 @@ namespace forte.devices.services
         private readonly Guid _deviceId;
         private readonly IDeviceRepository _deviceRepository;
         private readonly ILogger _logger;
+        private readonly IConfigurationManager _configurationManager;
 
         private readonly IStreamingClient _streamingClient;
 
@@ -42,14 +39,15 @@ namespace forte.devices.services
         private Timer _timer;
         private static readonly object Key = new object();
 
-        public StreamingDevice(IDeviceRepository deviceRepository, IStreamingClient streamingClient, ILogger logger)
+        public StreamingDevice(IDeviceRepository deviceRepository, IStreamingClient streamingClient, ILogger logger, IConfigurationManager configurationManager)
         {
             _deviceRepository = deviceRepository;
             _streamingClient = streamingClient;
             _logger = logger;
-            var settings = _deviceRepository.GetSettings();
-            _client = new RestClient($"{settings.ApiPath}/devices/");
-            _deviceId = GetDeviceConfig().DeviceId;
+            _configurationManager = configurationManager;
+            var config = _configurationManager.GetDeviceConfig();
+            _client = new RestClient($"{config.Get<string>("ApiPath")}/devices/");
+            _deviceId = config.DeviceId;
         }
 
         /// <summary>
@@ -63,6 +61,12 @@ namespace forte.devices.services
             if (!command.Data.ContainsKey(CommonEntityParams.VideoStreamId))
                 throw new Exception("Video stream id not provided, cannot start streaming");
             var videoStreamId = command.Data[CommonEntityParams.VideoStreamId].Get<Guid>();
+
+            var videoStream = DownloadStreamInformation(videoStreamId);
+            if (videoStream == null) return false;
+
+
+
             var state = _deviceRepository.GetDeviceState();
             state.Streaming = true;
             state.ActiveVideoStreamId = videoStreamId;
@@ -72,7 +76,6 @@ namespace forte.devices.services
 
             return true;
             //PublishState();
-            //var videoStream = DownloadStreamInformation(videoStreamId);
             // TODO
             // 1. Generate preset (using video stream + other things)
             // 2. Make sure streaming client is idle (report if not)
@@ -104,13 +107,7 @@ namespace forte.devices.services
             // 3. Report new state to server
         }
 
-        public Settings GetSettings()
-        {
-            var settings = _deviceRepository.GetSettings();
-            return ClientModule.Registrar.CreateMapper().Map<Settings>(settings);
-        }
-
-        public StreamingDeviceConfig GetConfig()
+         public StreamingDeviceConfig GetConfig()
         {
             var deviceConfig = _deviceRepository.GetDeviceConfig();
             return ClientModule.Registrar.CreateMapper().Map<StreamingDeviceConfig>(deviceConfig);
@@ -221,7 +218,7 @@ namespace forte.devices.services
                 return;
             }
 
-            var serverUrl = ConfigurationManager.AppSettings["server:url"];
+            var serverUrl = System.Configuration.ConfigurationManager.AppSettings["server:url"];
             _hubConnection = new HubConnection(serverUrl);
             _deviceInteractionHubProxy = _hubConnection.CreateHubProxy("DeviceInteractionHub");
             _deviceInteractionHubProxy.On("CommandAvailable", deviceId =>
@@ -332,11 +329,11 @@ namespace forte.devices.services
                 JsonSerializer = NewtonsoftJsonSerializer.Default
             };
             request.AddHeader("Content-Type", "application/json; charset=utf-8");
-            var commandPatch = new UpdateCommandRequest
+            var commandPatch = new 
             {
                 ExecutionSucceeded = commandEntity.Status == ExecutionStatus.Executed,
-                ExecutedOn = commandEntity.ExecutedOn,
-                ExecutionMessages = commandEntity.ExecutionMessages
+                commandEntity.ExecutedOn,
+                commandEntity.ExecutionMessages
             };
             request.AddJsonBody(commandPatch);
             var response = _client.Execute<DeviceCommandModel>(request);
@@ -346,13 +343,6 @@ namespace forte.devices.services
             _logger.Error("Could not update command because of {@status}, response {@resposne}",
                 response.ErrorMessage ?? response.StatusDescription, response);
             throw new Exception(response.ErrorMessage ?? response.StatusDescription);
-        }
-
-        private StreamingDeviceConfig GetDeviceConfig()
-        {
-            return
-                ClientModule.Registrar.CreateMapper().Map<StreamingDeviceConfig>(_deviceRepository.GetDeviceConfig()) ??
-                new StreamingDeviceConfig();
         }
 
         public StreamingDeviceState FetchDeviceAndClientState()
@@ -373,15 +363,18 @@ namespace forte.devices.services
 
         private VideoStreamModel DownloadStreamInformation(Guid videoStreamId)
         {
-            var request = new RestRequest($"streams/{videoStreamId}", Method.GET)
+            var request = new RestRequest($"streams/{videoStreamId}?extended=true", Method.GET)
             {
                 Timeout = 1
             };
             var response = _client.Execute<VideoStreamModel>(request);
-            if (response.ResponseStatus != ResponseStatus.Completed)
+            if (response.StatusCode != HttpStatusCode.OK)
             {
+                var message = response.ErrorMessage ?? response.StatusDescription;
                 // TODO handle logging / exceptions
-                return null;
+                _logger.Fatal("Could not retrieve video stream details for {@videoStreamId} due to {@message} from response {@response}",
+                    videoStreamId, message, response);
+                throw new Exception($"Could not retrieve video stream details for {videoStreamId} due to {message}");
             }
             var config = new MapperConfiguration(cfg => { cfg.CreateMap<VideoStream, VideoStreamModel>(); });
             var mapper = config.CreateMapper();

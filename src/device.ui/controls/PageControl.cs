@@ -4,6 +4,7 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 using forte.device.services;
+using forte.devices.services;
 
 #endregion
 

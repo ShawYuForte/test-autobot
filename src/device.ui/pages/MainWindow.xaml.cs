@@ -6,6 +6,7 @@ using System.Deployment.Application;
 using System.Threading;
 using System.Windows;
 using forte.device.services;
+using forte.devices.services;
 using Xceed.Wpf.Toolkit.Core;
 
 #endregion

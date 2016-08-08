@@ -30,12 +30,6 @@ namespace forte.devices.services
         bool StopStreaming(DeviceCommandModel command);
 
         /// <summary>
-        /// Get app settings
-        /// </summary>
-        /// <returns></returns>
-        Settings GetSettings();
-
-        /// <summary>
         /// Get device config
         /// </summary>
         /// <returns></returns>

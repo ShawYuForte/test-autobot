@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using forte.devices.entities;
 using forte.devices.models;
-using Settings = forte.devices.entities.Settings;
 
 namespace forte.devices.data
 {
@@ -11,7 +11,7 @@ namespace forte.devices.data
         ///     Get application settings
         /// </summary>
         /// <returns></returns>
-        Settings GetSettings();
+        List<DeviceSetting> GetSettings();
 
         /// <summary>
         ///     Get application settings
@@ -24,7 +24,7 @@ namespace forte.devices.data
         /// </summary>
         /// <param name="settings"></param>
         /// <returns></returns>
-        Settings SaveSettings(Settings settings);
+        List<DeviceSetting> SaveSettings(List<DeviceSetting> settings);
 
         /// <summary>
         ///     Get video stream information

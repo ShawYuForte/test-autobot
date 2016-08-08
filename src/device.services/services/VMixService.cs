@@ -8,12 +8,13 @@ using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading;
 using forte.device.models;
+using forte.device.services;
 using forte.devices.models;
 using RestSharp;
 
 #endregion
 
-namespace forte.device.services
+namespace forte.devices.services
 {
     public class VMixService : Service
     {
@@ -76,19 +77,6 @@ namespace forte.device.services
             state.Preview = state.Inputs.FirstOrDefault(i => i.Number == state.PreviewNumber);
 
             return state;
-        }
-
-        /// <summary>
-        ///     Load presets based on a preset file defined in the app config
-        /// </summary>
-        public void LoadPreset()
-        {
-            var requestUrl = $"/?Function=OpenPreset&Value={AppSettings.Instance.VmixPresetFilePath}";
-            var request = new RestRequest(requestUrl, Method.GET)
-            {
-                Timeout = 1
-            };
-            _client.Execute<VMixState>(request);
         }
 
         /// <summary>
