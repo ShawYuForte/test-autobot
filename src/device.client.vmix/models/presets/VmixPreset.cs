@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
+using RestSharp.Extensions.MonoHttp;
 
 namespace forte.devices.models.presets
 {
@@ -23,7 +25,31 @@ namespace forte.devices.models.presets
                 preset = (VmixPreset)serializer.Deserialize(reader);
                 reader.Close();
             }
+            return ExtractDestinations(preset);
+        }
+
+        private static VmixPreset ExtractDestinations(VmixPreset preset)
+        {
+            var serializer = new XmlSerializer(typeof(VmixStreamDestination));
+            preset.Outputs = new List<VmixStreamDestination>();
+            ExtractDestination(preset, preset.StreamingSettings.StreamingSetting.Destination0, serializer);
+            ExtractDestination(preset, preset.StreamingSettings.StreamingSetting.Destination1, serializer);
+            ExtractDestination(preset, preset.StreamingSettings.StreamingSetting.Destination2, serializer);
             return preset;
+        }
+
+        private static void ExtractDestination(VmixPreset preset, string destination, XmlSerializer serializer)
+        {
+            if (string.IsNullOrWhiteSpace(destination)) return;
+            // decode embedded xml
+            destination = HttpUtility.HtmlDecode(destination);
+            destination = $"<StreamDestination>{destination}</StreamDestination>";
+            using (var reader = new StringReader(destination))
+            {
+                var vmixStreamDestination = (VmixStreamDestination)serializer.Deserialize(reader);
+                preset.Outputs.Add(vmixStreamDestination);
+                reader.Close();
+            }
         }
 
         public void ToFile(string filePath)
@@ -36,22 +62,26 @@ namespace forte.devices.models.presets
                 if (string.IsNullOrWhiteSpace(input.Text)) continue;
                 input.Text = input.Text.Replace(Environment.NewLine, string.Empty).Trim();
             }
+            ImportDestinations();
             State.PlayLists = "";
             var tempFilePath = Path.GetTempFileName();
 
             using (var stream = File.Create(tempFilePath))
-            using (var xmlWriter = XmlWriter.Create(stream, new XmlWriterSettings
             {
-                OmitXmlDeclaration = true,
-                Indent = false,
-                //NewLineHandling = NewLineHandling.Replace,
-                //NewLineChars = string.Empty,
-                //NewLineOnAttributes = false,
-                
-            }))
-            {
-                serializer.Serialize(xmlWriter, this);
-                //stream.Close();
+                var xmlWriterSettings = new XmlWriterSettings
+                {
+                    OmitXmlDeclaration = true,
+                    Indent = false,
+                    //NewLineHandling = NewLineHandling.Replace,
+                    //NewLineChars = string.Empty,
+                    //NewLineOnAttributes = false,
+
+                };
+                using (var xmlWriter = XmlWriter.Create(stream, xmlWriterSettings))
+                {
+                    serializer.Serialize(xmlWriter, this);
+                    //stream.Close();
+                }
             }
 
             var fileContents = File.OpenText(tempFilePath).ReadToEnd();
@@ -60,10 +90,54 @@ namespace forte.devices.models.presets
             File.WriteAllText(filePath, fileContents);
         }
 
+        private void ImportDestinations()
+        {
+            var serializer = new XmlSerializer(typeof(VmixStreamDestination));
+            string destination;
+
+            if (Outputs.Count > 0)
+            {
+                ImportDestination(serializer, out destination, Outputs[0]);
+                StreamingSettings.StreamingSetting.Destination0 = destination;
+            }
+            if (Outputs.Count > 1)
+            {
+                ImportDestination(serializer, out destination, Outputs[1]);
+                StreamingSettings.StreamingSetting.Destination1 = destination;
+            }
+            if (Outputs.Count > 2)
+            {
+                ImportDestination(serializer, out destination, Outputs[2]);
+                StreamingSettings.StreamingSetting.Destination2 = destination;
+            }
+        }
+
+        private void ImportDestination(XmlSerializer serializer, out string destination, VmixStreamDestination vmixStreamDestination)
+        {
+            var stringBuilder = new StringBuilder();
+
+            using (TextWriter writer = new StringWriter(stringBuilder))
+            {
+                serializer.Serialize(writer, vmixStreamDestination);
+            }
+
+            var serialized = stringBuilder.ToString();
+            serialized = serialized.Replace("<StreamDestination>", string.Empty)
+                .Replace("</StreamDestination>", string.Empty);
+            destination = HttpUtility.HtmlEncode(serialized);
+        }
+
         [XmlElement(ElementName = "Version")]
         public string Version { get; set; }
         [XmlElement(ElementName = "Input")]
         public List<VmixPresetInput> Inputs { get; set; }
+
+        /// <summary>
+        /// Stream outputs, the stream destinations (one is required, others for redundancy)
+        /// </summary>
+        [XmlIgnore]
+        public List<VmixStreamDestination> Outputs { get; set; }
+
         [XmlElement(ElementName = "State")]
         public VmixPresetState State { get; set; }
         [XmlElement(ElementName = "RecordingSettings")]

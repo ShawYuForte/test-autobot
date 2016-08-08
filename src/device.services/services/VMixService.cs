@@ -95,21 +95,7 @@ namespace forte.devices.services
                    state.Inputs.Count(input => input.Role == InputRole.Camera) > 0;
         }
 
-        #region GetVmixProcess
-
-        public Process GetVmixProcess()
-        {
-            FileSystemInfo fileInfo = new FileInfo(AppSettings.Instance.VmixExecutablePath);
-            var sExeName = fileInfo.Name.Replace(fileInfo.Extension, "");
-
-            var existingProcess = Process.GetProcessesByName(sExeName).FirstOrDefault();
-
-            return existingProcess;
-        }
-
-        #endregion
-
-        /// <summary>
+         /// <summary>
         ///     Set the preview window to the specified input
         /// </summary>
         /// <param name="input"></param>

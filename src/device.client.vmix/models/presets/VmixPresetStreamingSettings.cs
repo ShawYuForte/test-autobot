@@ -1,6 +1,6 @@
 ﻿using System.Xml.Serialization;
 
-namespace forte.devices.models
+namespace forte.devices.models.presets
 {
     [XmlRoot(ElementName = "StreamingSettings")]
     public class VmixPresetStreamingSettings

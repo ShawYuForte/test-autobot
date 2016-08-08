@@ -5,6 +5,9 @@ using System.Text;
 using forte.devices.models;
 using forte.devices.models.presets;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
+using Ploeh.AutoFixture;
+using Ploeh.AutoFixture.AutoMoq;
 
 namespace forte.devices.services.clients.tests
 {
@@ -15,7 +18,7 @@ namespace forte.devices.services.clients.tests
         public void TestPresetGeneration()
         {
             var presetFile = @"C:\dev\forte\iot\src\device.client.vmix.tests\services\clients\tests\data\preset1.vmix";
-            var preset =VmixPreset.FromFile(presetFile);
+            var preset = VmixPreset.FromFile(presetFile);
             Assert.IsNotNull(preset);
             var tempFile = Path.GetTempFileName();
             preset.ToFile(tempFile);
@@ -25,6 +28,59 @@ namespace forte.devices.services.clients.tests
 
             //Assert.IsTrue(same);
             //Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod, Ignore]
+        public void TestLoadingPresetFromVideoStream()
+        {
+            var config = new StreamingDeviceConfig();
+            config.Set("VmixPresetTemplateFilePath", @"C:\forte\preset\Forte Preset.vmix");
+            config.Set("VmixExecutablePath", @"D:\Program Files (x86)\vMix\vMix.exe");
+            var fixture = new Fixture().Customize(new AutoMoqCustomization());
+            var configManager = fixture.Freeze<Mock<IConfigurationManager>>();
+            configManager.Setup(mgr => mgr.GetDeviceConfig())
+                .Returns(config);
+
+            var sut = fixture.Create<VmixStreamingClient>();
+            var result = sut.LoadPreset(new VideoStreamModel
+            {
+                PrimaryIngestUrl = "primary",
+                SecondaryIngestUrl = "secondary"
+            });
+
+            Assert.IsTrue(result);
+            sut.StopVmix();
+        }
+
+        [TestMethod, Ignore]
+        public void TestLoadingPresetWithShortTimeout()
+        {
+            var config = new StreamingDeviceConfig();
+            config.Set("VmixPresetTemplateFilePath", @"C:\forte\preset\Forte Preset.vmix");
+            config.Set("VmixExecutablePath", @"D:\Program Files (x86)\vMix\vMix.exe");
+            var timeout = 1;
+            config.Set("VmixLoadTimeout", timeout);
+            var fixture = new Fixture().Customize(new AutoMoqCustomization());
+            var configManager = fixture.Freeze<Mock<IConfigurationManager>>();
+            configManager.Setup(mgr => mgr.GetDeviceConfig())
+                .Returns(config);
+
+            var sut = fixture.Create<VmixStreamingClient>();
+            try
+            {
+                sut.LoadPreset(new VideoStreamModel
+                {
+                    PrimaryIngestUrl = "primary",
+                    SecondaryIngestUrl = "secondary"
+                });
+                Assert.Fail("Expected timeout exception");
+            }
+            catch (Exception exception)
+            {
+                Assert.AreEqual($"Preset load timed out, could not load within {timeout} seconds.", exception.Message);
+            }
+
+            sut.StopVmix();
         }
 
         [TestMethod, Ignore]

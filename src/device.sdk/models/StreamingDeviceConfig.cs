@@ -63,9 +63,10 @@ namespace forte.devices.models
             }
         }
 
-        public T Get<T>(string setting)
+        public T Get<T>(string setting, T defaultValue = default(T))
         {
-            return this[setting].Get<T>();
+            var value = this[setting].Get<T>();
+            return Equals(value, default(T)) ? defaultValue : value;
         }
 
         public void Set<T>(string setting, T value)

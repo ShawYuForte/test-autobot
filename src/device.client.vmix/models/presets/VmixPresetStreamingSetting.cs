@@ -1,6 +1,6 @@
 using System.Xml.Serialization;
 
-namespace forte.devices.models
+namespace forte.devices.models.presets
 {
     [XmlRoot(ElementName = "StreamingSetting")]
     public class VmixPresetStreamingSetting
@@ -56,7 +56,7 @@ namespace forte.devices.models
         [XmlElement(ElementName = "NetworkBuffer")]
         public string NetworkBuffer { get; set; }
         [XmlElement(ElementName = "StrictCBR")]
-        public string StrictCBR { get; set; }
+        public string StrictCbr { get; set; }
         [XmlElement(ElementName = "Destination0")]
         public string Destination0 { get; set; }
         [XmlElement(ElementName = "Destination1")]
