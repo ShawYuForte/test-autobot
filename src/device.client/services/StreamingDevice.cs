@@ -62,10 +62,6 @@ namespace forte.devices.services
                 config = _configurationManager.UpdateSetting(nameof(config.DeviceId), Guid.Parse("602687AA-37BD-4E92-B0F8-05FEFFB4A1E0"));
         }
 
-        /// <summary>
-        ///     Start streaming for the specified video stream identifier
-        /// </summary>
-        /// <param name="command"></param>
         public bool StartStreaming(DeviceCommandModel command)
         {
             _logger.Debug("Starting streaming for command {@command}", command);
@@ -74,17 +70,47 @@ namespace forte.devices.services
                 throw new Exception("Video stream id not provided, cannot start streaming");
             var videoStreamId = command.Data[CommonEntityParams.VideoStreamId].Get<Guid>();
 
+            var state = _deviceRepository.GetDeviceState();
+            if (state.ActiveVideoStreamId != videoStreamId)
+            {
+                _logger.Fatal(
+                    "Cannot stream for video stream {@newVideoStream}, prepared to stream for video stream {@oldVideoStream}",
+                    videoStreamId, state.ActiveVideoStreamId);
+                throw new Exception("Cannot stream, device prepared to stream for a different stream");
+            }
+            _deviceRepository.Save(state);
+
+            _streamingClient.StartBroadcast();
+            FetchDeviceAndClientState();
+
+            _logger.Debug("Streaming started.");
+
+            return true;
+        }
+
+        /// <summary>
+        ///     Start streaming for the specified video stream identifier
+        /// </summary>
+        /// <param name="command"></param>
+        public bool PrepareForStream(DeviceCommandModel command)
+        {
+            _logger.Debug("Preparing to stream based on command {@command}", command);
+
+            if (!command.Data.ContainsKey(CommonEntityParams.VideoStreamId))
+                throw new Exception("Video stream id not provided, cannot prepare for streaming");
+            var videoStreamId = command.Data[CommonEntityParams.VideoStreamId].Get<Guid>();
+
             var videoStream = DownloadStreamInformation(videoStreamId);
-            if (videoStream == null) return false;
+            if (videoStream == null)
+                throw new Exception("Video stream could not be downloaded, cannot prepare for streaming");
 
             _streamingClient.LoadVideoStreamPreset(videoStream);
-            _streamingClient.StartBroadcast();
             FetchDeviceAndClientState();
             var state = _deviceRepository.GetDeviceState();
             state.ActiveVideoStreamId = videoStream.Id;
             _deviceRepository.Save(state);
 
-            _logger.Debug("Streaming started.");
+            _logger.Debug("Device is ready to stream.");
 
             return true;
 
@@ -281,6 +307,9 @@ namespace forte.devices.services
                     break;
                 case DeviceCommands.StopStreaming:
                     result = StopStreaming(command);
+                    break;
+                case DeviceCommands.PrepareForStream:
+                    result = PrepareForStream(command);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

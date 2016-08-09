@@ -6,7 +6,7 @@ namespace forte.devices.models
     {
         public StreamingDeviceState()
         {
-            //Status = StreamingDeviceStatuses.Idle;
+            Status = StreamingDeviceStatuses.Idle;
         }
 
         /// <summary>

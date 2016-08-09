@@ -31,6 +31,11 @@ namespace forte.devices.models
         UpdateState,
 
         /// <summary>
+        ///     Device is requested to be ready to stream
+        /// </summary>
+        PrepareForStream,
+
+        /// <summary>
         ///     Device is requested to start streaming
         /// </summary>
         StartStreaming,
