@@ -179,6 +179,7 @@ namespace forte.devices.services
                 command.ExecutionSucceeded = false;
                 command.Status = ExecutionStatus.Failed;
                 command.ExecutionMessages = exception.Message;
+                command.RetryCount++;
                 _logger.Error(exception, "Could not execute command {@command}", command);
             }
 
@@ -195,6 +196,13 @@ namespace forte.devices.services
             }
 
             SaveCommandLocally(command);
+
+            if (command.Status == ExecutionStatus.Failed && command.RetryCount >= 3)
+            {
+                var deviceState = _deviceRepository.GetDeviceState();
+                deviceState.Status = StreamingDeviceStatuses.Error;
+                _deviceRepository.Save(deviceState);
+            }
 
             PublishState();
         }
@@ -296,8 +304,6 @@ namespace forte.devices.services
                 JsonSerializer = NewtonsoftJsonSerializer.Default
             };
             request.AddHeader("Content-Type", "application/json; charset=utf-8");
-
-            deviceState.Streaming = true;
             request.AddJsonBody(deviceState);
             var response = _client.Execute(request);
 
@@ -348,9 +354,16 @@ namespace forte.devices.services
         {
             var clientState = _streamingClient.GetState();
             var deviceState = _deviceRepository.GetDeviceState();
-            deviceState.Recording = clientState?.Recording ?? false;
+            if (clientState != null)
+            {
+                if (clientState.Recording && clientState.Streaming) 
+                    deviceState.Status = StreamingDeviceStatuses.StreamingAndRecording;
+                else if (clientState.Recording)
+                    deviceState.Status = StreamingDeviceStatuses.Recording;
+                else if (clientState.Streaming)
+                    deviceState.Status = StreamingDeviceStatuses.Streaming;
+            }
             deviceState.StateCapturedOn = DateTime.UtcNow;
-            deviceState.Streaming = clientState?.Streaming ?? false;
             _deviceRepository.Save(deviceState);
             return GetState();
         }

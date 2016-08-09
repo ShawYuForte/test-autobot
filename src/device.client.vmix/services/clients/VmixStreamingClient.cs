@@ -35,7 +35,7 @@ namespace forte.devices.services.clients
             if (string.IsNullOrWhiteSpace(config.Get<string>(SettingParams.VmixApiPath)))
                 config = _configurationManager.UpdateSetting(SettingParams.VmixApiPath, "http://localhost:8088/api");
             if (string.IsNullOrWhiteSpace(config.Get<string>(SettingParams.VmixExePath)))
-                config = _configurationManager.UpdateSetting(SettingParams.VmixExePath, @"D:\Program Files (x86)\vMix\vMix.exe");
+                config = _configurationManager.UpdateSetting(SettingParams.VmixExePath, @"c:\Program Files (x86)\vMix\vMix.exe");
             if (string.IsNullOrWhiteSpace(config.Get<string>(SettingParams.VmixPlaylistName)))
                 config = _configurationManager.UpdateSetting(SettingParams.VmixPlaylistName, "CameraSwitchingProgram");
             if (string.IsNullOrWhiteSpace(config.Get<string>(SettingParams.VmixPresetTemplateFilePath)))
@@ -117,6 +117,16 @@ namespace forte.devices.services.clients
         {
             var state = CallAndFetchState("/?Function=StartStreaming", "start streaming");
 
+            var retries = 10;
+
+            while (!state.Streaming && retries-- > 0)
+            {
+                Thread.Sleep(1000);
+                state = GetVmixState();
+            }
+
+            if (!state.Streaming) throw new Exception("Could not start streaming");
+
             return state;
         }
 
@@ -127,6 +137,15 @@ namespace forte.devices.services.clients
         public VmixState StartRecording()
         {
             var state = CallAndFetchState("/?Function=StartRecording", "start recording");
+            var retries = 10;
+
+            while (!state.Recording && retries-- > 0)
+            {
+                Thread.Sleep(1000);
+                state = GetVmixState();
+            }
+
+            if (!state.Recording) throw new Exception("Could not start recording");
 
             return state;
         }

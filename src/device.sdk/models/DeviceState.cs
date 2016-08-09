@@ -4,6 +4,11 @@ namespace forte.devices.models
 {
     public class StreamingDeviceState
     {
+        public StreamingDeviceState()
+        {
+            //Status = StreamingDeviceStatuses.Idle;
+        }
+
         /// <summary>
         ///     Device unique identifier
         /// </summary>
@@ -20,13 +25,51 @@ namespace forte.devices.models
         public Guid? ActiveVideoStreamId { get; set; }
 
         /// <summary>
-        ///     Is the client recording
+        ///     Device status
         /// </summary>
-        public bool Recording { get; set; }
+        public StreamingDeviceStatuses Status { get; set; }
+    }
+
+    public enum StreamingDeviceStatuses
+    {
+        /// <summary>
+        ///     Device status is unknown
+        /// </summary>
+        Unknown = 0,
 
         /// <summary>
-        ///     Is the client streaming
+        ///     Device is idle, ready to take on commands
         /// </summary>
-        public bool Streaming { get; set; }
+        Idle = 1,
+
+        /// <summary>
+        ///     Device is streaming, can queue commands
+        /// </summary>
+        Streaming = 2,
+
+        /// <summary>
+        ///     Device is streaming and recording, can queue commands
+        /// </summary>
+        StreamingAndRecording = 3,
+
+        /// <summary>
+        ///     Device is streaming and recording, can queue commands
+        /// </summary>
+        Recording = 4,
+
+        /// <summary>
+        ///     Device is busy (setting up or tearing down stream), can queue commands
+        /// </summary>
+        Busy = 5,
+
+        /// <summary>
+        ///     Device is offline, cannot process commands
+        /// </summary>
+        Offline = 6,
+
+        /// <summary>
+        ///     An error occurred with the device workflow
+        /// </summary>
+        Error = 7
     }
 }

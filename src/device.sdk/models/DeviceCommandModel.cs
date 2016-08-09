@@ -17,6 +17,7 @@ namespace forte.devices.models
         public DateTime? ExecutedOn { get; set; }
         public bool ExecutionSucceeded { get; set; }
         public string ExecutionMessages { get; set; }
+        public int RetryCount { get; set; }
         public Dictionary<string, DataValue> Data { get; set; }
         public ExecutionStatus Status { get; set; }
         public DateTime? PublishedOn { get; set; }
