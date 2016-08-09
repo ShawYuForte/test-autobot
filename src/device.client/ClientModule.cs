@@ -20,6 +20,7 @@ namespace forte.devices
             {
                 container.RegisterType<IDeviceRepository, DeviceRepository>(new HierarchicalLifetimeManager());
                 container.RegisterType<IStreamingDevice, StreamingDevice>(new HierarchicalLifetimeManager());
+                container.RegisterType<IConfigurationManager, ConfigurationManager>(new HierarchicalLifetimeManager());
             }
 
             public static IMapper CreateMapper()
@@ -51,8 +52,11 @@ namespace forte.devices
                     .ForMember(model => model.Data,
                         map => map.MapFrom(entity => JsonConvert.SerializeObject(entity.Data)));
 
-                //cfg.CreateMap<VmixState, StreamingClientState>()
-                //    .ForMember(m => m.Software, expression => { expression.UseValue("vMix"); });
+                cfg.CreateMap<DataValue, DeviceSetting>();
+                cfg.CreateMap<DeviceSetting, DataValue>();
+
+                cfg.CreateMap<VideoStreamModel, VideoStream>();
+                cfg.CreateMap<VideoStream, VideoStreamModel>();
             }
         }
     }

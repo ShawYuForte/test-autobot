@@ -200,7 +200,6 @@
     </Compile>
     <Compile Include="ServiceModule.cs" />
     <Compile Include="services\AzureService.cs" />
-    <Compile Include="services\ILogger.cs" />
     <Compile Include="services\SeriLogger.cs" />
     <Compile Include="services\Service.cs" />
     <Compile Include="services\VMixService.cs" />

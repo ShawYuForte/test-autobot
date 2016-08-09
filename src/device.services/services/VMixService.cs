@@ -95,16 +95,6 @@ namespace forte.devices.services
                    state.Inputs.Count(input => input.Role == InputRole.Camera) > 0;
         }
 
-         /// <summary>
-        ///     Set the preview window to the specified input
-        /// </summary>
-        /// <param name="input"></param>
-        /// <returns></returns>
-        public VMixState SetPreview(VMixInput input)
-        {
-            return CallAndFetchState($"/?Function=PreviewInput&Input={input.Key}", "set preview");
-        }
-
         /// <summary>
         ///     Set the preview window to the specified input
         /// </summary>
@@ -125,27 +115,6 @@ namespace forte.devices.services
             return CallAndFetchState($"/?Function=OverlayInput1&Input={input.Key}", "set overlay");
         }
 
-        /// <summary>
-        ///     Start streaming to the already selected channel
-        /// </summary>
-        /// <returns></returns>
-        public VMixState StartStreaming()
-        {
-            var state = CallAndFetchState("/?Function=StartStreaming", "start streaming");
-
-            return state;
-        }
-
-        /// <summary>
-        ///     Start streaming to the already selected channel
-        /// </summary>
-        /// <returns></returns>
-        public VMixState StartRecording()
-        {
-            var state = CallAndFetchState("/?Function=StartRecording", "start recording");
-
-            return state;
-        }
 
         private VMixState CallAndFetchState(string operation, string description)
         {
@@ -159,65 +128,8 @@ namespace forte.devices.services
             throw new System.Exception(error);
         }
 
-        public VMixState FadeToPreview()
-        {
-            var result = CallAndFetchState("/?Function=Transition1", "fade to preview");
-            Thread.Sleep(2000);
-            return result;
-        }
 
-        public VMixState TurnAudioOn()
-        {
-            var audioInputs = AppState.Instance.CurrentVmixState.Inputs.Where(input => input.Role == InputRole.Audio).ToList();
-            VMixState state = null;
-            foreach (var audioInput in audioInputs)
-            {
-                state = CallAndFetchState($"/?Function=AudioOn&Input={audioInput.Key}", "audio on");
-            }
-            return state;
-        }
-
-        public VMixState TurnAudioOff()
-        {
-            var audioInputs = AppState.Instance.CurrentVmixState.Inputs.Where(input => input.Role == InputRole.Audio).ToList();
-            VMixState state = null;
-            foreach (var audioInput in audioInputs)
-            {
-                state = CallAndFetchState($"/?Function=AudioOff&Input={audioInput.Key}", "audio off");
-            }
-            return state;
-        }
-
-        public VMixState TurnOverlayOn()
-        {
-            var overlayInput =
-                AppState.Instance.CurrentVmixState.Inputs.Single(input => input.Role == InputRole.LogoOverlay);
-            return CallAndFetchState($"/?Function=OverlayInput1In&Input={overlayInput.Key}", "turn overlay on");
-        }
-
-        public VMixState TurnOverlayOff()
-        {
-            var overlayInput =
-                AppState.Instance.CurrentVmixState.Inputs.Single(input => input.Role == InputRole.LogoOverlay);
-            return CallAndFetchState($"/?Function=OverlayInput1Off&Input={overlayInput.Key}", "turn overlay off");
-        }
-
-        public VMixState StartPlaylist()
-        {
-            CallAndFetchState($"/?Function=SelectPlayList&Value={ConfigurationManager.AppSettings["playlist-name"]}",
-                "set playlist");
-            return CallAndFetchState("/?Function=StartPlayList", "start playlist");
-        }
-
-        public VMixState StopPlaylist()
-        {
-            return CallAndFetchState("/?Function=StopPlayList", "stop playlist");
-        }
-
-        public VMixState StopStreaming()
-        {
-            return CallAndFetchState("/?Function=StopStreaming", "stop streaming");
-        }
+ 
 
         public VMixState StopRecording()
         {

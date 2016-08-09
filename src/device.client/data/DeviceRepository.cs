@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
+using AutoMapper;
 using forte.devices.entities;
 using forte.devices.models;
 
@@ -71,12 +72,12 @@ namespace forte.devices.data
 
         public VideoStream GetVideoStream(Guid videoStreamId)
         {
-            throw new NotImplementedException();
+            return null;
         }
 
         public VideoStream SaveVideoStream(VideoStream videoStream)
         {
-            throw new NotImplementedException();
+            return videoStream;
         }
 
         public StreamingDeviceState GetDeviceState()
@@ -131,6 +132,42 @@ namespace forte.devices.data
 
                 return deviceCommandEntity;
             };
+        }
+
+        public void SaveSetting<T>(string setting, T value)
+        {
+            DeviceSetting existing;
+
+            using (var dbContext = new DeviceDbContext())
+            {
+                // ... want it deached, hence calling separately
+                existing = dbContext.Settings.FirstOrDefault(s => s.Name == setting);
+            }
+
+            using (var dbContext = new DeviceDbContext())
+            {
+                var mapper = ClientModule.Registrar.CreateMapper();
+                var newSetting = mapper.Map<DeviceSetting>(new DataValue(value));
+                newSetting.Name = setting;
+                newSetting.LastModified = DateTime.UtcNow;
+
+                if (existing != null)
+                {
+                    newSetting.Id = existing.Id;
+                    newSetting.Version = existing.Version;
+                    newSetting.Created = existing.Created;
+                    dbContext.Settings.Attach(newSetting);
+                    dbContext.Entry(newSetting).State = EntityState.Modified;
+                }
+                else
+                {
+                    newSetting.Id = Guid.NewGuid();
+                    newSetting.Created = DateTime.UtcNow;
+                    dbContext.Settings.Add(newSetting);
+                }
+
+                dbContext.SaveChanges();
+            }
         }
     }
 }

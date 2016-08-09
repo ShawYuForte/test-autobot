@@ -18,5 +18,16 @@ namespace forte.devices.services
         /// </summary>
         /// <param name="videoStream"></param>
         void LoadVideoStreamPreset(VideoStreamModel videoStream);
+
+        /// <summary>
+        /// Starts the broadcast sequence
+        /// </summary>
+        void StartBroadcast();
+
+        /// <summary>
+        /// Ends a broadcast, and optionally shuts down the streaming client software
+        /// </summary>
+        /// <param name="shutdownClient"></param>
+        void EndBroadcast(bool shutdownClient);
     }
 }

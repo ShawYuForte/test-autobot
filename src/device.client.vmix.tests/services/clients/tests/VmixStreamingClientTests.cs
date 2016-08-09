@@ -33,7 +33,7 @@ namespace forte.devices.services.clients.tests
         [TestMethod, Ignore]
         public void TestLoadingPresetFromVideoStream()
         {
-            var config = new StreamingDeviceConfig();
+            var config = new TestStreamingDeviceConfig();
             config.Set("VmixPresetTemplateFilePath", @"C:\forte\preset\Forte Preset.vmix");
             config.Set("VmixExecutablePath", @"D:\Program Files (x86)\vMix\vMix.exe");
             var fixture = new Fixture().Customize(new AutoMoqCustomization());
@@ -55,7 +55,7 @@ namespace forte.devices.services.clients.tests
         [TestMethod, Ignore]
         public void TestLoadingPresetWithShortTimeout()
         {
-            var config = new StreamingDeviceConfig();
+            var config = new TestStreamingDeviceConfig();
             config.Set("VmixPresetTemplateFilePath", @"C:\forte\preset\Forte Preset.vmix");
             config.Set("VmixExecutablePath", @"D:\Program Files (x86)\vMix\vMix.exe");
             var timeout = 1;

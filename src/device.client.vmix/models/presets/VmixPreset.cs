@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Serialization;
 using RestSharp.Extensions.MonoHttp;
@@ -14,6 +15,17 @@ namespace forte.devices.models.presets
         public const string PositionsMagicString =
             "&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-16&quot;?&gt;&#xD;&#xA;&lt;ArrayOfMatrixPosition xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; xmlns:xsd=&quot;http://www.w3.org/2001/XMLSchema&quot;&gt;&#xD;&#xA;  &lt;MatrixPosition&gt;&#xD;&#xA;    &lt;Mirror&gt;false&lt;/Mirror&gt;&#xD;&#xA;    &lt;ZoomX&gt;1&lt;/ZoomX&gt;&#xD;&#xA;    &lt;ZoomY&gt;1&lt;/ZoomY&gt;&#xD;&#xA;    &lt;RotateOrigin&gt;&#xD;&#xA;      &lt;X&gt;0&lt;/X&gt;&#xD;&#xA;      &lt;Y&gt;0&lt;/Y&gt;&#xD;&#xA;      &lt;Z&gt;0&lt;/Z&gt;&#xD;&#xA;    &lt;/RotateOrigin&gt;&#xD;&#xA;    &lt;Rotate&gt;&#xD;&#xA;      &lt;X&gt;0&lt;/X&gt;&#xD;&#xA;      &lt;Y&gt;0&lt;/Y&gt;&#xD;&#xA;      &lt;Z&gt;0&lt;/Z&gt;&#xD;&#xA;    &lt;/Rotate&gt;&#xD;&#xA;    &lt;PanX&gt;0&lt;/PanX&gt;&#xD;&#xA;    &lt;PanY&gt;0&lt;/PanY&gt;&#xD;&#xA;  &lt;/MatrixPosition&gt;&#xD;&#xA;  &lt;MatrixPosition&gt;&#xD;&#xA;    &lt;MultiplyPosition&gt;&#xD;&#xA;      &lt;Mirror&gt;false&lt;/Mirror&gt;&#xD;&#xA;      &lt;ZoomX&gt;1&lt;/ZoomX&gt;&#xD;&#xA;      &lt;ZoomY&gt;1&lt;/ZoomY&gt;&#xD;&#xA;      &lt;RotateOrigin&gt;&#xD;&#xA;        &lt;X&gt;0&lt;/X&gt;&#xD;&#xA;        &lt;Y&gt;0&lt;/Y&gt;&#xD;&#xA;        &lt;Z&gt;0&lt;/Z&gt;&#xD;&#xA;      &lt;/RotateOrigin&gt;&#xD;&#xA;      &lt;Rotate&gt;&#xD;&#xA;        &lt;X&gt;0&lt;/X&gt;&#xD;&#xA;        &lt;Y&gt;0&lt;/Y&gt;&#xD;&#xA;        &lt;Z&gt;0&lt;/Z&gt;&#xD;&#xA;      &lt;/Rotate&gt;&#xD;&#xA;      &lt;PanX&gt;0&lt;/PanX&gt;&#xD;&#xA;      &lt;PanY&gt;0&lt;/PanY&gt;&#xD;&#xA;    &lt;/MultiplyPosition&gt;&#xD;&#xA;    &lt;Mirror&gt;false&lt;/Mirror&gt;&#xD;&#xA;    &lt;ZoomX&gt;1&lt;/ZoomX&gt;&#xD;&#xA;    &lt;ZoomY&gt;1&lt;/ZoomY&gt;&#xD;&#xA;    &lt;RotateOrigin&gt;&#xD;&#xA;      &lt;X&gt;0&lt;/X&gt;&#xD;&#xA;      &lt;Y&gt;0&lt;/Y&gt;&#xD;&#xA;      &lt;Z&gt;0&lt;/Z&gt;&#xD;&#xA;    &lt;/RotateOrigin&gt;&#xD;&#xA;    &lt;Rotate&gt;&#xD;&#xA;      &lt;X&gt;0&lt;/X&gt;&#xD;&#xA;      &lt;Y&gt;0&lt;/Y&gt;&#xD;&#xA;      &lt;Z&gt;0&lt;/Z&gt;&#xD;&#xA;    &lt;/Rotate&gt;&#xD;&#xA;    &lt;PanX&gt;0&lt;/PanX&gt;&#xD;&#xA;    &lt;PanY&gt;0&lt;/PanY&gt;&#xD;&#xA;  &lt;/MatrixPosition&gt;&#xD;&#xA;  &lt;MatrixPosition&gt;&#xD;&#xA;    &lt;MultiplyPosition&gt;&#xD;&#xA;      &lt;Mirror&gt;false&lt;/Mirror&gt;&#xD;&#xA;      &lt;ZoomX&gt;1&lt;/ZoomX&gt;&#xD;&#xA;      &lt;ZoomY&gt;1&lt;/ZoomY&gt;&#xD;&#xA;      &lt;RotateOrigin&gt;&#xD;&#xA;        &lt;X&gt;0&lt;/X&gt;&#xD;&#xA;        &lt;Y&gt;0&lt;/Y&gt;&#xD;&#xA;        &lt;Z&gt;0&lt;/Z&gt;&#xD;&#xA;      &lt;/RotateOrigin&gt;&#xD;&#xA;      &lt;Rotate&gt;&#xD;&#xA;        &lt;X&gt;0&lt;/X&gt;&#xD;&#xA;        &lt;Y&gt;0&lt;/Y&gt;&#xD;&#xA;        &lt;Z&gt;0&lt;/Z&gt;&#xD;&#xA;      &lt;/Rotate&gt;&#xD;&#xA;      &lt;PanX&gt;0&lt;/PanX&gt;&#xD;&#xA;      &lt;PanY&gt;0&lt;/PanY&gt;&#xD;&#xA;    &lt;/MultiplyPosition&gt;&#xD;&#xA;    &lt;Mirror&gt;false&lt;/Mirror&gt;&#xD;&#xA;    &lt;ZoomX&gt;1&lt;/ZoomX&gt;&#xD;&#xA;    &lt;ZoomY&gt;1&lt;/ZoomY&gt;&#xD;&#xA;    &lt;RotateOrigin&gt;&#xD;&#xA;      &lt;X&gt;0&lt;/X&gt;&#xD;&#xA;      &lt;Y&gt;0&lt;/Y&gt;&#xD;&#xA;      &lt;Z&gt;0&lt;/Z&gt;&#xD;&#xA;    &lt;/RotateOrigin&gt;&#xD;&#xA;    &lt;Rotate&gt;&#xD;&#xA;      &lt;X&gt;0&lt;/X&gt;&#xD;&#xA;      &lt;Y&gt;0&lt;/Y&gt;&#xD;&#xA;      &lt;Z&gt;0&lt;/Z&gt;&#xD;&#xA;    &lt;/Rotate&gt;&#xD;&#xA;    &lt;PanX&gt;0&lt;/PanX&gt;&#xD;&#xA;    &lt;PanY&gt;0&lt;/PanY&gt;&#xD;&#xA;  &lt;/MatrixPosition&gt;&#xD;&#xA;  &lt;MatrixPosition&gt;&#xD;&#xA;    &lt;MultiplyPosition&gt;&#xD;&#xA;      &lt;Mirror&gt;false&lt;/Mirror&gt;&#xD;&#xA;      &lt;ZoomX&gt;1&lt;/ZoomX&gt;&#xD;&#xA;      &lt;ZoomY&gt;1&lt;/ZoomY&gt;&#xD;&#xA;      &lt;RotateOrigin&gt;&#xD;&#xA;        &lt;X&gt;0&lt;/X&gt;&#xD;&#xA;        &lt;Y&gt;0&lt;/Y&gt;&#xD;&#xA;        &lt;Z&gt;0&lt;/Z&gt;&#xD;&#xA;      &lt;/RotateOrigin&gt;&#xD;&#xA;      &lt;Rotate&gt;&#xD;&#xA;        &lt;X&gt;0&lt;/X&gt;&#xD;&#xA;        &lt;Y&gt;0&lt;/Y&gt;&#xD;&#xA;        &lt;Z&gt;0&lt;/Z&gt;&#xD;&#xA;      &lt;/Rotate&gt;&#xD;&#xA;      &lt;PanX&gt;0&lt;/PanX&gt;&#xD;&#xA;      &lt;PanY&gt;0&lt;/PanY&gt;&#xD;&#xA;    &lt;/MultiplyPosition&gt;&#xD;&#xA;    &lt;Mirror&gt;false&lt;/Mirror&gt;&#xD;&#xA;    &lt;ZoomX&gt;1&lt;/ZoomX&gt;&#xD;&#xA;    &lt;ZoomY&gt;1&lt;/ZoomY&gt;&#xD;&#xA;    &lt;RotateOrigin&gt;&#xD;&#xA;      &lt;X&gt;0&lt;/X&gt;&#xD;&#xA;      &lt;Y&gt;0&lt;/Y&gt;&#xD;&#xA;      &lt;Z&gt;0&lt;/Z&gt;&#xD;&#xA;    &lt;/RotateOrigin&gt;&#xD;&#xA;    &lt;Rotate&gt;&#xD;&#xA;      &lt;X&gt;0&lt;/X&gt;&#xD;&#xA;      &lt;Y&gt;0&lt;/Y&gt;&#xD;&#xA;      &lt;Z&gt;0&lt;/Z&gt;&#xD;&#xA;    &lt;/Rotate&gt;&#xD;&#xA;    &lt;PanX&gt;0&lt;/PanX&gt;&#xD;&#xA;    &lt;PanY&gt;0&lt;/PanY&gt;&#xD;&#xA;  &lt;/MatrixPosition&gt;&#xD;&#xA;  &lt;MatrixPosition&gt;&#xD;&#xA;    &lt;MultiplyPosition&gt;&#xD;&#xA;      &lt;Mirror&gt;false&lt;/Mirror&gt;&#xD;&#xA;      &lt;ZoomX&gt;1&lt;/ZoomX&gt;&#xD;&#xA;      &lt;ZoomY&gt;1&lt;/ZoomY&gt;&#xD;&#xA;      &lt;RotateOrigin&gt;&#xD;&#xA;        &lt;X&gt;0&lt;/X&gt;&#xD;&#xA;        &lt;Y&gt;0&lt;/Y&gt;&#xD;&#xA;        &lt;Z&gt;0&lt;/Z&gt;&#xD;&#xA;      &lt;/RotateOrigin&gt;&#xD;&#xA;      &lt;Rotate&gt;&#xD;&#xA;        &lt;X&gt;0&lt;/X&gt;&#xD;&#xA;        &lt;Y&gt;0&lt;/Y&gt;&#xD;&#xA;        &lt;Z&gt;0&lt;/Z&gt;&#xD;&#xA;      &lt;/Rotate&gt;&#xD;&#xA;      &lt;PanX&gt;0&lt;/PanX&gt;&#xD;&#xA;      &lt;PanY&gt;0&lt;/PanY&gt;&#xD;&#xA;    &lt;/MultiplyPosition&gt;&#xD;&#xA;    &lt;Mirror&gt;false&lt;/Mirror&gt;&#xD;&#xA;    &lt;ZoomX&gt;1&lt;/ZoomX&gt;&#xD;&#xA;    &lt;ZoomY&gt;1&lt;/ZoomY&gt;&#xD;&#xA;    &lt;RotateOrigin&gt;&#xD;&#xA;      &lt;X&gt;0&lt;/X&gt;&#xD;&#xA;      &lt;Y&gt;0&lt;/Y&gt;&#xD;&#xA;      &lt;Z&gt;0&lt;/Z&gt;&#xD;&#xA;    &lt;/RotateOrigin&gt;&#xD;&#xA;    &lt;Rotate&gt;&#xD;&#xA;      &lt;X&gt;0&lt;/X&gt;&#xD;&#xA;      &lt;Y&gt;0&lt;/Y&gt;&#xD;&#xA;      &lt;Z&gt;0&lt;/Z&gt;&#xD;&#xA;    &lt;/Rotate&gt;&#xD;&#xA;    &lt;PanX&gt;0&lt;/PanX&gt;&#xD;&#xA;    &lt;PanY&gt;0&lt;/PanY&gt;&#xD;&#xA;  &lt;/MatrixPosition&gt;&#xD;&#xA;  &lt;MatrixPosition&gt;&#xD;&#xA;    &lt;MultiplyPosition&gt;&#xD;&#xA;      &lt;Mirror&gt;false&lt;/Mirror&gt;&#xD;&#xA;      &lt;ZoomX&gt;1&lt;/ZoomX&gt;&#xD;&#xA;      &lt;ZoomY&gt;1&lt;/ZoomY&gt;&#xD;&#xA;      &lt;RotateOrigin&gt;&#xD;&#xA;        &lt;X&gt;0&lt;/X&gt;&#xD;&#xA;        &lt;Y&gt;0&lt;/Y&gt;&#xD;&#xA;        &lt;Z&gt;0&lt;/Z&gt;&#xD;&#xA;      &lt;/RotateOrigin&gt;&#xD;&#xA;      &lt;Rotate&gt;&#xD;&#xA;        &lt;X&gt;0&lt;/X&gt;&#xD;&#xA;        &lt;Y&gt;0&lt;/Y&gt;&#xD;&#xA;        &lt;Z&gt;0&lt;/Z&gt;&#xD;&#xA;      &lt;/Rotate&gt;&#xD;&#xA;      &lt;PanX&gt;0&lt;/PanX&gt;&#xD;&#xA;      &lt;PanY&gt;0&lt;/PanY&gt;&#xD;&#xA;    &lt;/MultiplyPosition&gt;&#xD;&#xA;    &lt;Mirror&gt;false&lt;/Mirror&gt;&#xD;&#xA;    &lt;ZoomX&gt;1&lt;/ZoomX&gt;&#xD;&#xA;    &lt;ZoomY&gt;1&lt;/ZoomY&gt;&#xD;&#xA;    &lt;RotateOrigin&gt;&#xD;&#xA;      &lt;X&gt;0&lt;/X&gt;&#xD;&#xA;      &lt;Y&gt;0&lt;/Y&gt;&#xD;&#xA;      &lt;Z&gt;0&lt;/Z&gt;&#xD;&#xA;    &lt;/RotateOrigin&gt;&#xD;&#xA;    &lt;Rotate&gt;&#xD;&#xA;      &lt;X&gt;0&lt;/X&gt;&#xD;&#xA;      &lt;Y&gt;0&lt;/Y&gt;&#xD;&#xA;      &lt;Z&gt;0&lt;/Z&gt;&#xD;&#xA;    &lt;/Rotate&gt;&#xD;&#xA;    &lt;PanX&gt;0&lt;/PanX&gt;&#xD;&#xA;    &lt;PanY&gt;0&lt;/PanY&gt;&#xD;&#xA;  &lt;/MatrixPosition&gt;&#xD;&#xA;&lt;/ArrayOfMatrixPosition&gt;";
         public const string TriggersMagicString = "&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-16&quot;?&gt;&#xD;&#xA;&lt;ArrayOfInputTrigger xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; xmlns:xsd=&quot;http://www.w3.org/2001/XMLSchema&quot; /&gt;";
+
+        private readonly XmlWriterSettings _xmlWriterSettings = new XmlWriterSettings
+        {
+            OmitXmlDeclaration = true,
+            Indent = false,
+            NamespaceHandling = NamespaceHandling.OmitDuplicates
+            //NewLineHandling = NewLineHandling.Replace,
+            //NewLineChars = string.Empty,
+            //NewLineOnAttributes = false,
+
+        };
 
         public static VmixPreset FromFile(string filePath)
         {
@@ -63,24 +75,14 @@ namespace forte.devices.models.presets
                 input.Text = input.Text.Replace(Environment.NewLine, string.Empty).Trim();
             }
             ImportDestinations();
-            State.PlayLists = "";
+            //State.PlayLists = "";
             var tempFilePath = Path.GetTempFileName();
 
             using (var stream = File.Create(tempFilePath))
             {
-                var xmlWriterSettings = new XmlWriterSettings
-                {
-                    OmitXmlDeclaration = true,
-                    Indent = false,
-                    //NewLineHandling = NewLineHandling.Replace,
-                    //NewLineChars = string.Empty,
-                    //NewLineOnAttributes = false,
-
-                };
-                using (var xmlWriter = XmlWriter.Create(stream, xmlWriterSettings))
+                using (var xmlWriter = XmlWriter.Create(stream, _xmlWriterSettings))
                 {
                     serializer.Serialize(xmlWriter, this);
-                    //stream.Close();
                 }
             }
 
@@ -118,13 +120,26 @@ namespace forte.devices.models.presets
 
             using (TextWriter writer = new StringWriter(stringBuilder))
             {
-                serializer.Serialize(writer, vmixStreamDestination);
+                using (XmlWriter xmlWriter = XmlWriter.Create(writer, _xmlWriterSettings))
+                {
+                    serializer.Serialize(xmlWriter, vmixStreamDestination);
+                }
             }
 
+            const string tagRegEx = @"<\/?StreamDestination[\sa-zA-Z:=\-""\/\.0-9]*>";
             var serialized = stringBuilder.ToString();
-            serialized = serialized.Replace("<StreamDestination>", string.Empty)
-                .Replace("</StreamDestination>", string.Empty);
-            destination = HttpUtility.HtmlEncode(serialized);
+
+            var match = Regex.Match(serialized, tagRegEx);
+
+            while (match.Success)
+            {
+                serialized = serialized.Replace(match.Value, string.Empty);
+                match = match.NextMatch();
+            }
+
+            //serialized = serialized.Replace("<StreamDestination>", string.Empty)
+            //    .Replace("</StreamDestination>", string.Empty);
+            destination = serialized; // HttpUtility.HtmlEncode(serialized);
         }
 
         [XmlElement(ElementName = "Version")]

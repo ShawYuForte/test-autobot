@@ -80,6 +80,7 @@
     <Compile Include="models\VideoStreamModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="services\IConfigurationManager.cs" />
+    <Compile Include="services\ILogger.cs" />
     <Compile Include="services\IStreamingDevice.cs" />
     <Compile Include="services\IStreamingClient.cs" />
   </ItemGroup>

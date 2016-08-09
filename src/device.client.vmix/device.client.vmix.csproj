@@ -71,6 +71,7 @@
     <Compile Include="models\presets\playlists\PlaylistItem.cs" />
     <Compile Include="models\presets\playlists\PlayLists.cs" />
     <Compile Include="models\presets\VmixStreamDestination.cs" />
+    <Compile Include="models\SettingParams.cs" />
     <Compile Include="models\VMixAudio.cs" />
     <Compile Include="models\VMixInput.cs" />
     <Compile Include="models\VmixMatrixPosition.cs" />

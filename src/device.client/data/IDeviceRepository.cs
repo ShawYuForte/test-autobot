@@ -58,5 +58,13 @@ namespace forte.devices.data
         /// <param name="deviceCommandEntity"></param>
         /// <returns></returns>
         DeviceCommandEntity SaveCommand(DeviceCommandEntity deviceCommandEntity);
+
+        /// <summary>
+        /// Save a particular setting value
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="setting"></param>
+        /// <param name="value"></param>
+        void SaveSetting<T>(string setting, T value);
     }
 }

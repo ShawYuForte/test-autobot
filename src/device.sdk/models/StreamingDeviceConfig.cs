@@ -9,39 +9,22 @@ namespace forte.devices.models
         /// <summary>
         ///     Device unique identifier
         /// </summary>
-        public Guid DeviceId
-        {
-            get { return Get<Guid>(nameof(DeviceId)); }
-            set { Set(nameof(DeviceId), value); }
-        }
+        public Guid DeviceId => Get<Guid>(nameof(DeviceId));
 
         /// <summary>
         /// Information on the operating system this device is running with
         /// </summary>
-        public string OperatingSystem
-        {
-            get { return Get<string>(nameof(OperatingSystem)); }
-            set { Set(nameof(OperatingSystem), value); }
-        }
+        public string OperatingSystem => Get<string>(nameof(OperatingSystem));
 
         /// <summary>
         /// Information on the processor the device is running with
         /// </summary>
-        public string Processor
-        {
-            get { return Get<string>(nameof(Processor)); }
-            set { Set(nameof(Processor), value); }
-        }
+        public string Processor => Get<string>(nameof(Processor));
 
         /// <summary>
         /// Information on the configured machine memory for the device
         /// </summary>
-        public int Memory
-        {
-            get { return Get<int>(nameof(Memory)); }
-            set { Set(nameof(Memory), value); }
-        }
-
+        public int Memory => Get<int>(nameof(Memory));
 
         private readonly Dictionary<string, DataValue> _settings = new Dictionary<string, DataValue>();
 
@@ -67,11 +50,6 @@ namespace forte.devices.models
         {
             var value = this[setting].Get<T>();
             return Equals(value, default(T)) ? defaultValue : value;
-        }
-
-        public void Set<T>(string setting, T value)
-        {
-            this[setting].Set(value);
         }
 
         public IDictionary<string, DataValue> ToDictionary()

@@ -26,6 +26,7 @@ namespace forte.devices.services
         public delegate void MessageReceivedDelegate(string message);
 
         private readonly RestClient _client;
+        private readonly RestClient _streamClient;
         private readonly Guid _deviceId;
         private readonly IDeviceRepository _deviceRepository;
         private readonly ILogger _logger;
@@ -45,9 +46,20 @@ namespace forte.devices.services
             _streamingClient = streamingClient;
             _logger = logger;
             _configurationManager = configurationManager;
+            SetDefaultSettings();
             var config = _configurationManager.GetDeviceConfig();
-            _client = new RestClient($"{config.Get<string>("ApiPath")}/devices/");
+            _client = new RestClient($"{config.Get<string>(SettingParams.ServerApiPath)}/devices/");
+            _streamClient = new RestClient($"{config.Get<string>(SettingParams.ServerApiPath)}/streams/");
             _deviceId = config.DeviceId;
+        }
+
+        private void SetDefaultSettings()
+        {
+            var config = _configurationManager.GetDeviceConfig();
+            if (string.IsNullOrWhiteSpace(config.Get<string>(SettingParams.ServerApiPath)))
+                config = _configurationManager.UpdateSetting(SettingParams.ServerApiPath, "http://dev-api.forte.fit/api");
+            if (config.DeviceId == Guid.Empty)
+                config = _configurationManager.UpdateSetting(nameof(config.DeviceId), Guid.Parse("602687AA-37BD-4E92-B0F8-05FEFFB4A1E0"));
         }
 
         /// <summary>
@@ -65,23 +77,19 @@ namespace forte.devices.services
             var videoStream = DownloadStreamInformation(videoStreamId);
             if (videoStream == null) return false;
 
-
-
+            _streamingClient.LoadVideoStreamPreset(videoStream);
+            _streamingClient.StartBroadcast();
+            FetchDeviceAndClientState();
             var state = _deviceRepository.GetDeviceState();
-            state.Streaming = true;
-            state.ActiveVideoStreamId = videoStreamId;
+            state.ActiveVideoStreamId = videoStream.Id;
             _deviceRepository.Save(state);
 
             _logger.Debug("Streaming started.");
 
             return true;
-            //PublishState();
+
             // TODO
-            // 1. Generate preset (using video stream + other things)
-            // 2. Make sure streaming client is idle (report if not)
-            // 3. Load client preset
-            // 4. Start stream
-            // 5. Report new state to server
+            // - Make sure streaming client is idle (report if not)
         }
 
         /// <summary>
@@ -94,17 +102,15 @@ namespace forte.devices.services
             _logger.Debug("Stopping streaming for command {@command}", command);
 
             var state = _deviceRepository.GetDeviceState();
-            state.Streaming = false;
             state.ActiveVideoStreamId = null;
             _deviceRepository.Save(state);
+
+            _streamingClient.EndBroadcast(true);
+            FetchDeviceAndClientState();
 
             _logger.Debug("Streaming stopped.");
 
             return true;
-            // TODO
-            // 1. Stop client streaming
-            // 2. Unload client
-            // 3. Report new state to server
         }
 
          public StreamingDeviceConfig GetConfig()
@@ -173,6 +179,7 @@ namespace forte.devices.services
                 command.ExecutionSucceeded = false;
                 command.Status = ExecutionStatus.Failed;
                 command.ExecutionMessages = exception.Message;
+                _logger.Error(exception, "Could not execute command {@command}", command);
             }
 
             SaveCommandLocally(command);
@@ -256,27 +263,19 @@ namespace forte.devices.services
             var result = true;
             var resultMessage = string.Empty;
 
-            try
+            switch (command.Command)
             {
-                switch (command.Command)
-                {
-                    case DeviceCommands.UpdateState:
-                        result = PublishState();
-                        break;
-                    case DeviceCommands.StartStreaming:
-                        result = StartStreaming(command);
-                        break;
-                    case DeviceCommands.StopStreaming:
-                        result = StopStreaming(command);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
-            catch (Exception exception)
-            {
-                resultMessage = exception.Message;
-                result = false;
+                case DeviceCommands.UpdateState:
+                    result = PublishState();
+                    break;
+                case DeviceCommands.StartStreaming:
+                    result = StartStreaming(command);
+                    break;
+                case DeviceCommands.StopStreaming:
+                    result = StopStreaming(command);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
 
             command.ExecutionMessages = resultMessage;
@@ -363,11 +362,8 @@ namespace forte.devices.services
 
         private VideoStreamModel DownloadStreamInformation(Guid videoStreamId)
         {
-            var request = new RestRequest($"streams/{videoStreamId}?extended=true", Method.GET)
-            {
-                Timeout = 1
-            };
-            var response = _client.Execute<VideoStreamModel>(request);
+            var request = new RestRequest($"{videoStreamId}?extended=true", Method.GET);
+            var response = _streamClient.Execute<VideoStreamModel>(request);
             if (response.StatusCode != HttpStatusCode.OK)
             {
                 var message = response.ErrorMessage ?? response.StatusDescription;
@@ -376,8 +372,7 @@ namespace forte.devices.services
                     videoStreamId, message, response);
                 throw new Exception($"Could not retrieve video stream details for {videoStreamId} due to {message}");
             }
-            var config = new MapperConfiguration(cfg => { cfg.CreateMap<VideoStream, VideoStreamModel>(); });
-            var mapper = config.CreateMapper();
+            var mapper = ClientModule.Registrar.CreateMapper();
             _deviceRepository.SaveVideoStream(mapper.Map<VideoStream>(response.Data));
             return response.Data;
         }
