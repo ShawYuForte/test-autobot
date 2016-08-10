@@ -33,5 +33,10 @@ namespace forte.devices.models
         ///     Master audio settings
         /// </summary>
         public Audio MasterAudio { get; set; }
+
+        /// <summary>
+        /// Unique identifier for the preset load instance
+        /// </summary>
+        public string PresetLoadHash { get; set; }
     }
 }

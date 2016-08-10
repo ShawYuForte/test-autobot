@@ -16,18 +16,29 @@ namespace forte.devices.services
         /// <summary>
         /// Loads the streaming software with presets based on the video stream provided
         /// </summary>
+        /// <returns>Unique identifier for loaded preset</returns>
         /// <param name="videoStream"></param>
-        void LoadVideoStreamPreset(VideoStreamModel videoStream);
+        string LoadVideoStreamPreset(VideoStreamModel videoStream);
 
         /// <summary>
-        /// Starts the broadcast sequence
+        /// Starts streaming to the streaming service
         /// </summary>
-        void StartBroadcast();
+        void StartStreaming();
+
+        /// <summary>
+        /// Starts the program, video and image intros, and playlist
+        /// </summary>
+        void StartProgram();
 
         /// <summary>
         /// Ends a broadcast, and optionally shuts down the streaming client software
         /// </summary>
         /// <param name="shutdownClient"></param>
-        void EndBroadcast(bool shutdownClient);
+        void StopStreaming(bool shutdownClient);
+
+        /// <summary>
+        /// Stops program by playing outro and stopping the playlist
+        /// </summary>
+        void StopProgram();
     }
 }

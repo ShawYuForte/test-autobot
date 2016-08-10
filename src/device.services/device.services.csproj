@@ -202,7 +202,6 @@
     <Compile Include="services\AzureService.cs" />
     <Compile Include="services\SeriLogger.cs" />
     <Compile Include="services\Service.cs" />
-    <Compile Include="services\VMixService.cs" />
     <Compile Include="Settings.cs" />
   </ItemGroup>
   <ItemGroup>

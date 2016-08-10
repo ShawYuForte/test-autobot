@@ -80,7 +80,33 @@ namespace forte.devices.services
             }
             _deviceRepository.Save(state);
 
-            _streamingClient.StartBroadcast();
+            _streamingClient.StartStreaming();
+            FetchDeviceAndClientState();
+
+            _logger.Debug("Streaming started.");
+
+            return true;
+        }
+
+        public bool StartProgram(DeviceCommandModel command)
+        {
+            _logger.Debug("Starting program for command {@command}", command);
+
+            if (!command.Data.ContainsKey(CommonEntityParams.VideoStreamId))
+                throw new Exception("Video stream id not provided, cannot start program");
+            var videoStreamId = command.Data[CommonEntityParams.VideoStreamId].Get<Guid>();
+
+            var state = _deviceRepository.GetDeviceState();
+            if (state.ActiveVideoStreamId != videoStreamId)
+            {
+                _logger.Fatal(
+                    "Cannot stream for program {@newVideoStream}, prepared to stream for video stream {@oldVideoStream}",
+                    videoStreamId, state.ActiveVideoStreamId);
+                throw new Exception("Cannot stream, device prepared to stream for a different stream");
+            }
+            _deviceRepository.Save(state);
+
+            _streamingClient.StartProgram();
             FetchDeviceAndClientState();
 
             _logger.Debug("Streaming started.");
@@ -104,9 +130,8 @@ namespace forte.devices.services
             if (videoStream == null)
                 throw new Exception("Video stream could not be downloaded, cannot prepare for streaming");
 
-            _streamingClient.LoadVideoStreamPreset(videoStream);
-            FetchDeviceAndClientState();
             var state = _deviceRepository.GetDeviceState();
+            state.StreamingPresetLoadHash = _streamingClient.LoadVideoStreamPreset(videoStream);
             state.ActiveVideoStreamId = videoStream.Id;
             state.Status = StreamingDeviceStatuses.ReadyToStream;
             _deviceRepository.Save(state);
@@ -132,7 +157,28 @@ namespace forte.devices.services
             state.ActiveVideoStreamId = null;
             _deviceRepository.Save(state);
 
-            _streamingClient.EndBroadcast(true);
+            _streamingClient.StopStreaming(shutdownClient: true);
+            FetchDeviceAndClientState();
+
+            _logger.Debug("Streaming stopped.");
+
+            return true;
+        }
+
+        /// <summary>
+        ///     Stop streaming for the specified video stream identifier. The video stream identifier is there to ensure that the
+        ///     request is coming for the right stream
+        /// </summary>
+        /// <param name="command"></param>
+        public bool StopProgram(DeviceCommandModel command)
+        {
+            _logger.Debug("Stopping program for command {@command}", command);
+
+            var state = _deviceRepository.GetDeviceState();
+            state.ActiveVideoStreamId = null;
+            _deviceRepository.Save(state);
+
+            _streamingClient.StopProgram();
             FetchDeviceAndClientState();
 
             _logger.Debug("Streaming stopped.");
@@ -312,6 +358,12 @@ namespace forte.devices.services
                 case DeviceCommands.PrepareForStream:
                     result = PrepareForStream(command);
                     break;
+                case DeviceCommands.StartProgram:
+                    result = StartProgram(command);
+                    break;
+                case DeviceCommands.StopProgram:
+                    result = StopProgram(command);
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -384,19 +436,25 @@ namespace forte.devices.services
         {
             var clientState = _streamingClient.GetState();
             var deviceState = _deviceRepository.GetDeviceState();
-            deviceState.Status = StreamingDeviceStatuses.Idle;
 
-            if (clientState != null)
+            if (clientState == null)
             {
-                if (clientState.Recording && clientState.Streaming) 
+                deviceState.StreamingPresetLoadHash = null;
+                deviceState.Status = StreamingDeviceStatuses.Idle;
+            }
+            else
+            {
+                if (clientState.Recording && clientState.Streaming)
                     deviceState.Status = StreamingDeviceStatuses.StreamingAndRecording;
                 else if (clientState.Recording)
                     deviceState.Status = StreamingDeviceStatuses.Recording;
                 else if (clientState.Streaming)
                     deviceState.Status = StreamingDeviceStatuses.Streaming;
             }
+
             deviceState.StateCapturedOn = DateTime.UtcNow;
             _deviceRepository.Save(deviceState);
+
             return GetState();
         }
 

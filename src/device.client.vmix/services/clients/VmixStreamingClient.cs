@@ -49,13 +49,22 @@ namespace forte.devices.services.clients
             if (string.IsNullOrWhiteSpace(config.Get<string>(SettingParams.BroadcastClosingVideo)))
                 config = _configurationManager.UpdateSetting(SettingParams.BroadcastClosingVideo, "logo_reveal_house.mp4");
             if (string.IsNullOrWhiteSpace(config.Get<string>(SettingParams.BroadcastOverlayImage)))
-                config = _configurationManager.UpdateSetting(SettingParams.BroadcastOverlayImage, "overlay_1280_720.png");
+                _configurationManager.UpdateSetting(SettingParams.BroadcastOverlayImage, "overlay_1280_720.png");
         }
 
         public StreamingClientState GetState()
         {
             var state = GetVmixState();
-            return VmixClientModule.Registrar.CreateMapper().Map<StreamingClientState>(state);
+            if (state == null) return null;
+            var clientState = VmixClientModule.Registrar.CreateMapper().Map<StreamingClientState>(state);
+            clientState.PresetLoadHash = GetVmixProcessHash();
+            return clientState;
+        }
+
+        private string GetVmixProcessHash()
+        {
+            var vmixProcess = GetVmixProcess();
+            return vmixProcess?.Handle.ToString();
         }
 
         private VmixState GetVmixState()
@@ -65,13 +74,30 @@ namespace forte.devices.services.clients
             return response.StatusCode != HttpStatusCode.OK ? null : MatchPresetStateRoles(response.Data);
         }
 
-        public void LoadVideoStreamPreset(VideoStreamModel videoStream)
+        public string LoadVideoStreamPreset(VideoStreamModel videoStream)
         {
-            if (!LoadPreset(videoStream))
+            var presetIdentifier = LoadPreset(videoStream);
+            if (presetIdentifier == null)
                 throw new Exception("Could not load preset");
+            return presetIdentifier;
         }
 
-        public void StartBroadcast()
+        void IStreamingClient.StartStreaming()
+        {
+            _logger.Debug("Loading static image intro...");
+
+            var vmixState = GetVmixState();
+            var openingVideo = vmixState.Inputs.Single(input => input.Role == InputRole.OpeninStaticImage);
+            SetActive(openingVideo);
+
+            _logger.Debug("Starting streaming...");
+
+            StartStreaming();
+
+            _logger.Debug("Starting started.");
+        }
+
+        public void StartProgram()
         {
             _logger.Debug("Starting intro video...");
 
@@ -104,8 +130,52 @@ namespace forte.devices.services.clients
             // Activate playlist
             StartPlaylist();
             _logger.Debug("Started the playlist");
+        }
 
-            StartStreaming();
+        public void StopStreaming(bool shutdownClient)
+        {
+            _logger.Debug("Stopping streaming...");
+            StopStreaming();
+            _logger.Debug("Stopped streaming.");
+
+            if (shutdownClient) StopVmix();
+        }
+
+        public void StopProgram()
+        {
+            _logger.Debug("Stopping program...");
+
+            var vmixState = GetVmixState();
+
+            var closingVideo = vmixState.Inputs.Single(input => input.Role == InputRole.ClosingVideo);
+            SetPreview(closingVideo);
+            _logger.Debug("Placed closing video in preview.");
+
+            // Turn off audio (possibly fade)
+            TurnAudioOff(vmixState);
+            _logger.Debug("Turned audio off.");
+
+            // Remove logo overlay
+            TurnOverlayOff(vmixState);
+            _logger.Debug("Turned logo overlay off.");
+
+            // Stop playlist
+            StopPlaylist();
+            _logger.Debug("Stopped the playlist");
+
+            // Fade to intro video
+            FadeToPreview();
+            _logger.Debug("Switched to closing video.");
+
+            // Set ending background image as preview
+            var closingImageInput = vmixState.Inputs.First(input => input.Role == InputRole.ClosingStaticImage);
+            SetPreview(closingImageInput);
+            _logger.Debug("Set closing image as preview.");
+
+            Thread.Sleep(closingVideo.Duration);
+
+            FadeToPreview();
+            _logger.Debug("Switched to closing image.");
         }
 
 
@@ -148,46 +218,6 @@ namespace forte.devices.services.clients
             if (!state.Recording) throw new Exception("Could not start recording");
 
             return state;
-        }
-
-        public void EndBroadcast(bool shutdownClient)
-        {
-            var vmixState = GetVmixState();
-
-            var closingVideo = vmixState.Inputs.Single(input => input.Role == InputRole.ClosingVideo);
-            SetPreview(closingVideo);
-            _logger.Debug("Placed closing video in preview.");
-
-            // Turn off audio (possibly fade)
-            TurnAudioOff(vmixState);
-            _logger.Debug("Turned audio off.");
-
-            // Remove logo overlay
-            TurnOverlayOff(vmixState);
-            _logger.Debug("Turned logo overlay off.");
-
-            // Stop playlist
-            StopPlaylist();
-            _logger.Debug("Stop the playlist");
-
-            // Fade to intro video
-            FadeToPreview();
-            _logger.Debug("Switched to closing video.");
-
-            // Set ending background image as preview
-            var closingImageInput = vmixState.Inputs.First(input => input.Role == InputRole.ClosingStaticImage);
-            SetPreview(closingImageInput);
-            _logger.Debug("Set closing image as preview.");
-
-            Thread.Sleep(closingVideo.Duration);
-
-            FadeToPreview();
-            _logger.Debug("Switched to closing image.");
-
-            StopStreaming();
-            _logger.Debug("Stopped streaming.");
-
-            if (shutdownClient) StopVmix();
         }
 
         public VmixState StopStreaming()
@@ -262,6 +292,31 @@ namespace forte.devices.services.clients
             return result;
         }
 
+        /// <summary>
+        ///     Set the preview window to the specified input
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public VmixState SetActive(VmixInput input)
+        {
+            return CallAndFetchState($"/?Function=ActiveInput&Input={input.Key}", "set active");
+        }
+
+        /// <summary>
+        ///     Set the preview window to the specified input
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public VmixState SetOverlay(VmixInput input)
+        {
+            return CallAndFetchState($"/?Function=OverlayInput1&Input={input.Key}", "set overlay");
+        }
+
+        public VmixState StopRecording()
+        {
+            return CallAndFetchState("/?Function=StopRecording", "stop recording");
+        }
+
         private VmixState CallAndFetchState(string operation, string description)
         {
             try
@@ -326,11 +381,12 @@ namespace forte.devices.services.clients
             return state;
         }
 
-        private void EnsureVmixIsRunning(bool startFresh)
+        private string EnsureVmixIsRunning(bool startFresh)
         {
-            if (GetVmixProcess() != null)
+            var existingProcess = GetVmixProcess();
+            if (existingProcess != null)
             {
-                if (!startFresh) return;
+                if (!startFresh) return existingProcess.Handle.ToString();
                 StopVmix();
             }
 
@@ -358,6 +414,8 @@ namespace forte.devices.services.clients
                 Thread.Sleep(100);
                 vMixProcess.Refresh();
             }
+
+            return vMixProcess.Handle.ToString();
         }
 
         public void StopVmix()
@@ -381,16 +439,15 @@ namespace forte.devices.services.clients
         /// <summary>
         ///     Load presets based on a preset file defined in the app config
         /// </summary>
-        public bool LoadPreset(VideoStreamModel videoStream)
+        public string LoadPreset(VideoStreamModel videoStream)
         {
-            EnsureVmixIsRunning(startFresh: true);
+            var vmixProcessHandle = EnsureVmixIsRunning(startFresh: true);
 
             var config = _configurationManager.GetDeviceConfig();
             var presetTemplateFilePath = config.Get<string>(SettingParams.VmixPresetTemplateFilePath);
             var vmixPresetOutputFolder = config.Get<string>(SettingParams.VmixPresetFolderPath) ?? Path.GetTempPath();
             var timeStamp = DateTime.UtcNow.ToString(CultureInfo.InvariantCulture).Replace(":", "").Replace("/", "");
-            var vmixPresetOutputFile =
-                $"{timeStamp}-{Guid.NewGuid()}.vmix";
+            var vmixPresetOutputFile = $"{timeStamp}-{Guid.NewGuid()}.vmix";
             vmixPresetOutputFile = Path.Combine(vmixPresetOutputFolder, vmixPresetOutputFile);
 
             var vmixPreset = VmixPreset.FromFile(presetTemplateFilePath);
@@ -421,7 +478,7 @@ namespace forte.devices.services.clients
                 Thread.Sleep(fiveSeconds);
             }
 
-            return true;
+            return vmixProcessHandle;
         }
 
         private bool IsPresetLoaded(VmixPreset preset)

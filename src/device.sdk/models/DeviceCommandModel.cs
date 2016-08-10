@@ -41,9 +41,19 @@ namespace forte.devices.models
         StartStreaming,
 
         /// <summary>
+        ///     Device is requested to kick off it's program
+        /// </summary>
+        StartProgram,
+
+        /// <summary>
         ///     Device is requested to stop streaming
         /// </summary>
-        StopStreaming
+        StopStreaming,
+
+        /// <summary>
+        ///     Device is requested to stop program
+        /// </summary>
+        StopProgram
     }
 
     public enum ExecutionStatus

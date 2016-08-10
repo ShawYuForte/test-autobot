@@ -28,6 +28,12 @@ namespace forte.devices.models
         ///     Device status
         /// </summary>
         public StreamingDeviceStatuses Status { get; set; }
+
+
+        /// <summary>
+        /// Unique identifier for the preset load instance
+        /// </summary>
+        public string StreamingPresetLoadHash { get; set; }
     }
 
     public enum StreamingDeviceStatuses
@@ -40,41 +46,56 @@ namespace forte.devices.models
         /// <summary>
         ///     Device is idle, ready to take on commands
         /// </summary>
-        Idle = 1,
+        Idle,
 
         /// <summary>
         ///     Device has been prepared for streaming, and is allocated to a particular video stream
         /// </summary>
-        ReadyToStream = 2,
+        ReadyToStream,
 
         /// <summary>
         ///     Device is streaming, can queue commands
         /// </summary>
-        Streaming = 3,
+        Streaming,
+
+        /// <summary>
+        ///     Device is streaming, can queue commands
+        /// </summary>
+        StreamingProgram,
 
         /// <summary>
         ///     Device is streaming and recording, can queue commands
         /// </summary>
-        StreamingAndRecording = 4,
+        StreamingAndRecording,
 
         /// <summary>
         ///     Device is streaming and recording, can queue commands
         /// </summary>
-        Recording = 5,
+        StreamingAndRecordingProgram,
+
+        /// <summary>
+        ///     Device is recording, can queue commands
+        /// </summary>
+        Recording,
+
+        /// <summary>
+        ///     Device is recording, can queue commands
+        /// </summary>
+        RecordingProgram,
 
         /// <summary>
         ///     Device is busy (setting up or tearing down stream), can queue commands
         /// </summary>
-        Busy = 6,
+        Busy,
 
         /// <summary>
         ///     Device is offline, cannot process commands
         /// </summary>
-        Offline = 7,
+        Offline,
 
         /// <summary>
         ///     An error occurred with the device workflow
         /// </summary>
-        Error = 8
+        Error
     }
 }

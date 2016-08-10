@@ -48,7 +48,7 @@ namespace forte.devices.services.clients.tests
                 SecondaryIngestUrl = "secondary"
             });
 
-            Assert.IsTrue(result);
+            Assert.IsFalse(string.IsNullOrWhiteSpace(result));
             sut.StopVmix();
         }
 
