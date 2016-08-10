@@ -326,9 +326,13 @@ namespace forte.devices.services.clients
             return state;
         }
 
-        private void EnsureVmixIsRunning()
+        private void EnsureVmixIsRunning(bool startFresh)
         {
-            if (GetVmixProcess() != null) return;
+            if (GetVmixProcess() != null)
+            {
+                if (!startFresh) return;
+                StopVmix();
+            }
 
             var config = _configurationManager.GetDeviceConfig();
             var presetTemplateFilePath = config.Get<string>(SettingParams.VmixExePath);
@@ -379,7 +383,7 @@ namespace forte.devices.services.clients
         /// </summary>
         public bool LoadPreset(VideoStreamModel videoStream)
         {
-            EnsureVmixIsRunning();
+            EnsureVmixIsRunning(startFresh: true);
 
             var config = _configurationManager.GetDeviceConfig();
             var presetTemplateFilePath = config.Get<string>(SettingParams.VmixPresetTemplateFilePath);
@@ -404,9 +408,9 @@ namespace forte.devices.services.clients
             };
             _client.Execute<VmixState>(request);
 
-            const int fixeSeconds = 5000;
-            const int sixtySeconds = 60;
-            var timeout = config.Get(SettingParams.VmixLoadTimeout, defaultValue: sixtySeconds);
+            const int fiveSeconds = 5000;
+            const int twoMinutes = 120;
+            var timeout = config.Get(SettingParams.VmixLoadTimeout, defaultValue: twoMinutes);
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
@@ -414,7 +418,7 @@ namespace forte.devices.services.clients
             {
                 if (stopwatch.Elapsed.TotalSeconds > timeout)
                     throw new Exception($"Preset load timed out, could not load within {timeout} seconds.");
-                Thread.Sleep(fixeSeconds);
+                Thread.Sleep(fiveSeconds);
             }
 
             return true;

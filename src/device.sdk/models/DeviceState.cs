@@ -43,33 +43,38 @@ namespace forte.devices.models
         Idle = 1,
 
         /// <summary>
+        ///     Device has been prepared for streaming, and is allocated to a particular video stream
+        /// </summary>
+        ReadyToStream = 2,
+
+        /// <summary>
         ///     Device is streaming, can queue commands
         /// </summary>
-        Streaming = 2,
+        Streaming = 3,
 
         /// <summary>
         ///     Device is streaming and recording, can queue commands
         /// </summary>
-        StreamingAndRecording = 3,
+        StreamingAndRecording = 4,
 
         /// <summary>
         ///     Device is streaming and recording, can queue commands
         /// </summary>
-        Recording = 4,
+        Recording = 5,
 
         /// <summary>
         ///     Device is busy (setting up or tearing down stream), can queue commands
         /// </summary>
-        Busy = 5,
+        Busy = 6,
 
         /// <summary>
         ///     Device is offline, cannot process commands
         /// </summary>
-        Offline = 6,
+        Offline = 7,
 
         /// <summary>
         ///     An error occurred with the device workflow
         /// </summary>
-        Error = 7
+        Error = 8
     }
 }

@@ -108,6 +108,7 @@ namespace forte.devices.services
             FetchDeviceAndClientState();
             var state = _deviceRepository.GetDeviceState();
             state.ActiveVideoStreamId = videoStream.Id;
+            state.Status = StreamingDeviceStatuses.ReadyToStream;
             _deviceRepository.Save(state);
 
             _logger.Debug("Device is ready to stream.");
@@ -383,6 +384,8 @@ namespace forte.devices.services
         {
             var clientState = _streamingClient.GetState();
             var deviceState = _deviceRepository.GetDeviceState();
+            deviceState.Status = StreamingDeviceStatuses.Idle;
+
             if (clientState != null)
             {
                 if (clientState.Recording && clientState.Streaming) 
