@@ -84,7 +84,7 @@ namespace forte.devices.data
         {
             using (var dbContext = new DeviceDbContext())
             {
-                return dbContext.DeviceState.FirstOrDefault() ?? new StreamingDeviceState();
+                return dbContext.DeviceState.FirstOrDefault();
             }
         }
 

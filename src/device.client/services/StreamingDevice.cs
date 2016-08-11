@@ -424,7 +424,7 @@ namespace forte.devices.services
         {
             _logger.Debug("Publishing state");
 
-            var deviceState = FetchDeviceAndClientState();
+            var deviceState = GetState();
             var request = new RestRequest($"{deviceState.DeviceId}/state", Method.POST)
             {
                 JsonSerializer = NewtonsoftJsonSerializer.Default
@@ -473,35 +473,20 @@ namespace forte.devices.services
             throw new Exception(response.ErrorMessage ?? response.StatusDescription);
         }
 
-        public StreamingDeviceState FetchDeviceAndClientState()
-        {
-            //var clientState = _streamingClient.GetState();
-            //var deviceState = _deviceRepository.GetDeviceState();
-
-            //if (clientState == null)
-            //{
-            //    deviceState.StreamingPresetLoadHash = null;
-            //    deviceState.Status = StreamingDeviceStatuses.Idle;
-            //}
-            //else
-            //{
-            //    if (clientState.Recording && clientState.Streaming)
-            //        deviceState.Status = StreamingDeviceStatuses.StreamingAndRecording;
-            //    else if (clientState.Recording)
-            //        deviceState.Status = StreamingDeviceStatuses.Recording;
-            //    else if (clientState.Streaming)
-            //        deviceState.Status = StreamingDeviceStatuses.Streaming;
-            //}
-
-            //deviceState.StateCapturedOn = DateTime.UtcNow;
-            //_deviceRepository.Save(deviceState);
-
-            return GetState();
-        }
-
         private StreamingDeviceState GetState()
         {
-            return _deviceRepository.GetDeviceState();
+            var state = _deviceRepository.GetDeviceState();
+            if (state != null) return state;
+
+            var config = GetConfig();
+            state = new StreamingDeviceState
+            {
+                DeviceId = config.DeviceId,
+                StateCapturedOn = DateTime.UtcNow,
+                Status = StreamingDeviceStatuses.Idle
+            };
+            _deviceRepository.Save(state);
+            return state;
         }
 
         private VideoStreamModel DownloadStreamInformation(Guid videoStreamId)
