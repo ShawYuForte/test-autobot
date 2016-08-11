@@ -165,7 +165,7 @@ namespace forte.devices.services
             switch (state.Status)
             {
                 case StreamingDeviceStatuses.Idle:
-                    _logger.Error("Request to start program against idle device (expected streaming)");
+                    _logger.Error("Request to stop streaming against idle device (expected streaming)");
                     return false;
                 case StreamingDeviceStatuses.Streaming:
                 case StreamingDeviceStatuses.StreamingAndRecording:
@@ -207,12 +207,12 @@ namespace forte.devices.services
             switch (state.Status)
             {
                 case StreamingDeviceStatuses.Idle:
-                    _logger.Error("Request to start program against idle device (expected streaming program)");
+                    _logger.Error("Request to stop program against idle device (expected streaming program)");
                     return false;
                 case StreamingDeviceStatuses.Streaming:
                 case StreamingDeviceStatuses.StreamingAndRecording:
                 case StreamingDeviceStatuses.Recording:
-                    _logger.Warning("Request to stopp program against device without a running program. {@state}", state);
+                    _logger.Warning("Request to stop program against device without a running program. {@state}", state);
                     return false;
                 case StreamingDeviceStatuses.StreamingProgram:
                 case StreamingDeviceStatuses.StreamingAndRecordingProgram:
