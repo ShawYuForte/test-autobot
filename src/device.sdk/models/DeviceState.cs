@@ -39,19 +39,9 @@ namespace forte.devices.models
     public enum StreamingDeviceStatuses
     {
         /// <summary>
-        ///     Device status is unknown
-        /// </summary>
-        Unknown = 0,
-
-        /// <summary>
         ///     Device is idle, ready to take on commands
         /// </summary>
         Idle,
-
-        /// <summary>
-        ///     Device has been prepared for streaming, and is allocated to a particular video stream
-        /// </summary>
-        ReadyToStream,
 
         /// <summary>
         ///     Device is streaming, can queue commands
@@ -82,11 +72,6 @@ namespace forte.devices.models
         ///     Device is recording, can queue commands
         /// </summary>
         RecordingProgram,
-
-        /// <summary>
-        ///     Device is busy (setting up or tearing down stream), can queue commands
-        /// </summary>
-        Busy,
 
         /// <summary>
         ///     Device is offline, cannot process commands
