@@ -30,12 +30,6 @@ namespace forte.devices.services
         bool StopStreaming(DeviceCommandModel command);
 
         /// <summary>
-        /// Get device config
-        /// </summary>
-        /// <returns></returns>
-        StreamingDeviceConfig GetConfig();
-
-        /// <summary>
         /// Message has been received from the server
         /// </summary>
         event MessageReceivedDelegate MessageReceived;

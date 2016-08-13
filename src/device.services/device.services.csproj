@@ -182,16 +182,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="extensions\ExceptionHandlingExtensions.cs" />
-    <Compile Include="extensions\MatchingExtension.cs" />
-    <Compile Include="extensions\StringExtensions.cs" />
-    <Compile Include="models\AppSettings.cs" />
-    <Compile Include="models\AppState.cs" />
-    <Compile Include="models\AzureProgram.cs" />
-    <Compile Include="models\VMixAudio.cs" />
-    <Compile Include="models\VMixInput.cs" />
-    <Compile Include="models\VMixState.cs" />
-    <Compile Include="models\Workflow.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -199,15 +189,9 @@
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
     <Compile Include="ServiceModule.cs" />
-    <Compile Include="services\AzureService.cs" />
     <Compile Include="services\SeriLogger.cs" />
-    <Compile Include="services\Service.cs" />
-    <Compile Include="Settings.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="data\expected-state.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
     <None Include="App.config" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">

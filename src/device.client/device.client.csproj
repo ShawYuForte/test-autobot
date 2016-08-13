@@ -119,10 +119,6 @@
       <Project>{4fc451ca-14c1-46da-95ff-5c177463cfd4}</Project>
       <Name>device.sdk</Name>
     </ProjectReference>
-    <ProjectReference Include="..\device.services\device.services.csproj">
-      <Project>{a848959a-23e7-41e6-83b2-9a047baf6fa5}</Project>
-      <Name>device.services</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

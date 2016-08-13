@@ -56,8 +56,10 @@ namespace forte.devices.services
         private void SetDefaultSettings()
         {
             var config = _configurationManager.GetDeviceConfig();
+            if (string.IsNullOrWhiteSpace(config.Get<string>(SettingParams.ServerRootPath)))
+                config = _configurationManager.UpdateSetting(SettingParams.ServerRootPath, "http://forte-devapi.azurewebsites.net");
             if (string.IsNullOrWhiteSpace(config.Get<string>(SettingParams.ServerApiPath)))
-                config = _configurationManager.UpdateSetting(SettingParams.ServerApiPath, "http://dev-api.forte.fit/api");
+                config = _configurationManager.UpdateSetting(SettingParams.ServerApiPath, "http://forte-devapi.azurewebsites.net/api");
             if (config.DeviceId == Guid.Empty)
                 config = _configurationManager.UpdateSetting(nameof(config.DeviceId), Guid.Parse("602687AA-37BD-4E92-B0F8-05FEFFB4A1E0"));
         }
@@ -74,7 +76,7 @@ namespace forte.devices.services
             if (videoStream == null)
                 throw new Exception("Video stream could not be downloaded, cannot prepare for streaming");
 
-            var state = _deviceRepository.GetDeviceState();
+            var state = GetState();
 
             switch (state.Status)
             {
@@ -114,7 +116,7 @@ namespace forte.devices.services
                 throw new Exception("Video stream id not provided, cannot start program");
             var videoStreamId = command.Data[CommonEntityParams.VideoStreamId].Get<Guid>();
 
-            var state = _deviceRepository.GetDeviceState();
+            var state = GetState();
             if (state.ActiveVideoStreamId != videoStreamId)
             {
                 _logger.Fatal("Cannot stream for program {@newVideoStream}, prepared to stream for video stream {@oldVideoStream}", videoStreamId, state.ActiveVideoStreamId);
@@ -160,7 +162,7 @@ namespace forte.devices.services
         {
             _logger.Debug("Stopping streaming for command {@command}", command);
 
-            var state = _deviceRepository.GetDeviceState();
+            var state = GetState();
 
             switch (state.Status)
             {
@@ -202,7 +204,7 @@ namespace forte.devices.services
         {
             _logger.Debug("Stopping program for command {@command}", command);
 
-            var state = _deviceRepository.GetDeviceState();
+            var state = GetState();
 
             switch (state.Status)
             {
@@ -232,12 +234,6 @@ namespace forte.devices.services
             _logger.Debug("Program stopped.");
 
             return true;
-        }
-
-        public StreamingDeviceConfig GetConfig()
-        {
-            var deviceConfig = _deviceRepository.GetDeviceConfig();
-            return ClientModule.Registrar.CreateMapper().Map<StreamingDeviceConfig>(deviceConfig);
         }
 
         public event services.MessageReceivedDelegate MessageReceived;
@@ -320,7 +316,7 @@ namespace forte.devices.services
 
             if (command.Status == ExecutionStatus.Failed && command.RetryCount >= 3)
             {
-                var deviceState = _deviceRepository.GetDeviceState();
+                var deviceState = GetState();
                 deviceState.Status = StreamingDeviceStatuses.Error;
                 _deviceRepository.Save(deviceState);
             }
@@ -354,7 +350,8 @@ namespace forte.devices.services
                 return;
             }
 
-            var serverUrl = System.Configuration.ConfigurationManager.AppSettings["server:url"];
+            var config = _configurationManager.GetDeviceConfig();
+            var serverUrl = config.Get<string>(SettingParams.ServerRootPath);
             _hubConnection = new HubConnection(serverUrl);
             _deviceInteractionHubProxy = _hubConnection.CreateHubProxy("DeviceInteractionHub");
             _deviceInteractionHubProxy.On("CommandAvailable", deviceId =>
@@ -478,7 +475,7 @@ namespace forte.devices.services
             var state = _deviceRepository.GetDeviceState();
             if (state != null) return state;
 
-            var config = GetConfig();
+            var config = _configurationManager.GetDeviceConfig();
             state = new StreamingDeviceState
             {
                 DeviceId = config.DeviceId,

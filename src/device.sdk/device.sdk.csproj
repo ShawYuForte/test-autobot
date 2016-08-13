@@ -66,6 +66,7 @@
   <ItemGroup>
     <Compile Include="CoreModule.cs" />
     <Compile Include="extensions\DictionarySafeCamelCasePropertyNamesContractResolver.cs" />
+    <Compile Include="extensions\ExceptionHandlingExtensions.cs" />
     <Compile Include="extensions\NewtonsoftJsonSerializer.cs" />
     <Compile Include="models\Audio.cs" />
     <Compile Include="models\CommonEntityParams.cs" />
