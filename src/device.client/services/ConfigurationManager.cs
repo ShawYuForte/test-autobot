@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using forte.devices.data;
+using forte.devices.extensions;
 using forte.devices.models;
+using forte.models;
 
 namespace forte.devices.services
 {
@@ -21,7 +23,7 @@ namespace forte.devices.services
             _deviceConfig = new StreamingDeviceConfig();
             foreach (var setting in settings)
             {
-                _deviceConfig[setting.Name] = Mapper.Map<DataValue>(setting);
+                _deviceConfig[setting.Name] = setting.ToValue();
             }
             return _deviceConfig;
         }

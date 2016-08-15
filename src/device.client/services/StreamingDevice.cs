@@ -7,9 +7,12 @@ using forte.devices.data;
 using forte.devices.entities;
 using forte.devices.extensions;
 using forte.devices.models;
-using Forte.Services.Contracts;
+using forte.models.devices;
+using forte.services;
 using Microsoft.AspNet.SignalR.Client;
 using RestSharp;
+using StreamingDeviceState = forte.devices.models.StreamingDeviceState;
+using StreamingDeviceStatuses = forte.devices.models.StreamingDeviceStatuses;
 
 namespace forte.devices.services
 {
@@ -269,7 +272,7 @@ namespace forte.devices.services
             {
                 JsonSerializer = NewtonsoftJsonSerializer.Default
             };
-            var response = _client.Execute<DeviceCommandModel>(request);
+            var response = _client.Execute<DeviceCommandModelEx>(request);
             // Not found if no command
             if (response.StatusCode == HttpStatusCode.NotFound)
             {
@@ -384,7 +387,7 @@ namespace forte.devices.services
             }, null, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(1));
         }
 
-        private void ExecuteCommand(DeviceCommandModel command)
+        private void ExecuteCommand(DeviceCommandModelEx command)
         {
             var result = true;
             var resultMessage = string.Empty;
@@ -445,21 +448,21 @@ namespace forte.devices.services
         /// <summary>
         /// Saves command state on the server
         /// </summary>
-        /// <param name="commandEntity"></param>
+        /// <param name="commandModel"></param>
         /// <exception cref="Exception">If server update fails</exception>
-        private void SaveCommandOnServer(DeviceCommandModel commandEntity)
+        private void SaveCommandOnServer(DeviceCommandModelEx commandModel)
         {
-            _deviceRepository.SaveCommand(Mapper.Map<DeviceCommandEntity>(commandEntity));
+            _deviceRepository.SaveCommand(Mapper.Map<DeviceCommandEntity>(commandModel));
 
             // TODO handle duplicates and queuing
-            var request = new RestRequest($"{_deviceId}/commands/{commandEntity.Id}", Method.PUT)
+            var request = new RestRequest($"{_deviceId}/commands/{commandModel.Id}", Method.PUT)
             {
                 JsonSerializer = NewtonsoftJsonSerializer.Default
             };
             request.AddHeader("Content-Type", "application/json; charset=utf-8");
             var commandPatch = new
             {
-                ExecutionSucceeded = commandEntity.Status == ExecutionStatus.Executed, commandEntity.ExecutedOn, commandEntity.ExecutionMessages
+                ExecutionSucceeded = commandModel.Status == ExecutionStatus.Executed, commandModel.ExecutedOn, commandModel.ExecutionMessages
             };
             request.AddJsonBody(commandPatch);
             var response = _client.Execute<DeviceCommandModel>(request);

@@ -4,8 +4,11 @@ using forte.devices.data;
 using forte.devices.entities;
 using forte.devices.models;
 using forte.devices.services;
+using forte.models;
+using forte.models.devices;
 using Microsoft.Practices.Unity;
 using Newtonsoft.Json;
+using StreamingDeviceConfig = forte.devices.models.StreamingDeviceConfig;
 
 namespace forte.devices
 {

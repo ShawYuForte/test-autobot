@@ -5,6 +5,7 @@ using System.Linq;
 using AutoMapper;
 using forte.devices.entities;
 using forte.devices.models;
+using forte.models;
 
 namespace forte.devices.data
 {

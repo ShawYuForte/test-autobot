@@ -1,6 +1,5 @@
-﻿using System;
-using System.Threading.Tasks;
-using forte.devices.models;
+﻿using System.Threading.Tasks;
+using forte.models.devices;
 
 namespace forte.devices.services
 {

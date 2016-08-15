@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using forte.devices.models;
+using forte.models.devices;
 
 namespace forte.devices.entities
 {

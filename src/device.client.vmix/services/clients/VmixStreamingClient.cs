@@ -10,7 +10,7 @@ using System.Threading;
 using AutoMapper;
 using forte.devices.models;
 using forte.devices.models.presets;
-using Forte.Services.Contracts;
+using forte.services;
 using RestSharp;
 
 namespace forte.devices.services.clients

@@ -1,7 +1,9 @@
 ﻿using System;
 using forte.devices.models;
 using forte.devices.services;
-using Forte.Services.Contracts;
+using forte.models;
+using forte.models.devices;
+using forte.services;
 using Microsoft.Practices.Unity;
 
 namespace forte.devices
@@ -15,13 +17,9 @@ namespace forte.devices
             Console.Write("Starting client connection... ");
             var container = new UnityContainer();
 
-            Forte.CoreModule.Registrar.RegisterDependencies(container);
-            Forte.CoreModule.Registrar.RegisterMappings();
-
             //ServiceModule.Registrar.RegisterDependencies(container);
             ClientModule.Registrar.RegisterDependencies(container);
             ClientModule.Registrar.RegisterMappings();
-
 
             VmixClientModule.Registrar.RegisterDependencies(container);
             VmixClientModule.Registrar.RegisterMappings();
