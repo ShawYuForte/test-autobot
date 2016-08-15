@@ -1,0 +1,418 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{30D61209-29E3-4FC7-9BC1-3A5CE830DB25}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>device.client.web</RootNamespace>
+    <AssemblyName>device.client.web</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.Owin, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Owin.3.0.1\lib\net45\Microsoft.Owin.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Owin.FileSystems, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Owin.FileSystems.3.0.1\lib\net45\Microsoft.Owin.FileSystems.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Owin.Host.HttpListener, Version=2.0.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Owin.Host.HttpListener.2.0.2\lib\net45\Microsoft.Owin.Host.HttpListener.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Owin.Hosting, Version=2.0.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Owin.Hosting.2.0.2\lib\net45\Microsoft.Owin.Hosting.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Owin.StaticFiles, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Owin.StaticFiles.3.0.1\lib\net45\Microsoft.Owin.StaticFiles.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.6.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Owin, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f0ebd12fd5e55cc5, processorArchitecture=MSIL">
+      <HintPath>..\packages\Owin.1.0\lib\net40\Owin.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Net.Http.Formatting, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.3\lib\net45\System.Net.Http.Formatting.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Web.Http, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Core.5.2.3\lib\net45\System.Web.Http.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Web.Http.Owin, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Owin.5.2.3\lib\net45\System.Web.Http.Owin.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="controllers\DeviceController.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="server\Startup.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="client\bower_components\angular\.bower.json" />
+    <None Include="client\bower_components\angular\angular.min.js.gzip" />
+    <None Include="client\bower_components\angular\angular.min.js.map" />
+    <None Include="client\bower_components\angular\bower.json" />
+    <None Include="client\bower_components\angular\LICENSE.md" />
+    <None Include="client\bower_components\angular\package.json" />
+    <None Include="client\bower_components\angular\README.md" />
+    <None Include="client\bower_components\bootstrap\.bower.json" />
+    <None Include="client\bower_components\bootstrap\bower.json" />
+    <None Include="client\bower_components\bootstrap\CHANGELOG.md" />
+    <None Include="client\bower_components\bootstrap\dist\css\bootstrap-theme.css.map" />
+    <None Include="client\bower_components\bootstrap\dist\css\bootstrap-theme.min.css.map" />
+    <None Include="client\bower_components\bootstrap\dist\css\bootstrap.css.map" />
+    <None Include="client\bower_components\bootstrap\dist\css\bootstrap.min.css.map" />
+    <None Include="client\bower_components\bootstrap\dist\fonts\glyphicons-halflings-regular.eot" />
+    <None Include="client\bower_components\bootstrap\dist\fonts\glyphicons-halflings-regular.ttf" />
+    <None Include="client\bower_components\bootstrap\dist\fonts\glyphicons-halflings-regular.woff" />
+    <None Include="client\bower_components\bootstrap\dist\fonts\glyphicons-halflings-regular.woff2" />
+    <None Include="client\bower_components\bootstrap\fonts\glyphicons-halflings-regular.eot" />
+    <None Include="client\bower_components\bootstrap\fonts\glyphicons-halflings-regular.ttf" />
+    <None Include="client\bower_components\bootstrap\fonts\glyphicons-halflings-regular.woff" />
+    <None Include="client\bower_components\bootstrap\fonts\glyphicons-halflings-regular.woff2" />
+    <None Include="client\bower_components\bootstrap\Gemfile" />
+    <None Include="client\bower_components\bootstrap\Gemfile.lock" />
+    <None Include="client\bower_components\bootstrap\grunt\.jshintrc" />
+    <None Include="client\bower_components\bootstrap\grunt\configBridge.json" />
+    <None Include="client\bower_components\bootstrap\grunt\npm-shrinkwrap.json" />
+    <None Include="client\bower_components\bootstrap\grunt\sauce_browsers.yml" />
+    <None Include="client\bower_components\bootstrap\ISSUE_TEMPLATE.md" />
+    <None Include="client\bower_components\bootstrap\js\.jscsrc" />
+    <None Include="client\bower_components\bootstrap\js\.jshintrc" />
+    <None Include="client\bower_components\bootstrap\less\.csscomb.json" />
+    <None Include="client\bower_components\bootstrap\less\.csslintrc" />
+    <None Include="client\bower_components\bootstrap\less\alerts.less" />
+    <None Include="client\bower_components\bootstrap\less\badges.less" />
+    <None Include="client\bower_components\bootstrap\less\bootstrap.less" />
+    <None Include="client\bower_components\bootstrap\less\breadcrumbs.less" />
+    <None Include="client\bower_components\bootstrap\less\button-groups.less" />
+    <None Include="client\bower_components\bootstrap\less\buttons.less" />
+    <None Include="client\bower_components\bootstrap\less\carousel.less" />
+    <None Include="client\bower_components\bootstrap\less\close.less" />
+    <None Include="client\bower_components\bootstrap\less\code.less" />
+    <None Include="client\bower_components\bootstrap\less\component-animations.less" />
+    <None Include="client\bower_components\bootstrap\less\dropdowns.less" />
+    <None Include="client\bower_components\bootstrap\less\forms.less" />
+    <None Include="client\bower_components\bootstrap\less\glyphicons.less" />
+    <None Include="client\bower_components\bootstrap\less\grid.less" />
+    <None Include="client\bower_components\bootstrap\less\input-groups.less" />
+    <None Include="client\bower_components\bootstrap\less\jumbotron.less" />
+    <None Include="client\bower_components\bootstrap\less\labels.less" />
+    <None Include="client\bower_components\bootstrap\less\list-group.less" />
+    <None Include="client\bower_components\bootstrap\less\media.less" />
+    <None Include="client\bower_components\bootstrap\less\mixins.less" />
+    <None Include="client\bower_components\bootstrap\less\mixins\alerts.less" />
+    <None Include="client\bower_components\bootstrap\less\mixins\background-variant.less" />
+    <None Include="client\bower_components\bootstrap\less\mixins\border-radius.less" />
+    <None Include="client\bower_components\bootstrap\less\mixins\buttons.less" />
+    <None Include="client\bower_components\bootstrap\less\mixins\center-block.less" />
+    <None Include="client\bower_components\bootstrap\less\mixins\clearfix.less" />
+    <None Include="client\bower_components\bootstrap\less\mixins\forms.less" />
+    <None Include="client\bower_components\bootstrap\less\mixins\gradients.less" />
+    <None Include="client\bower_components\bootstrap\less\mixins\grid-framework.less" />
+    <None Include="client\bower_components\bootstrap\less\mixins\grid.less" />
+    <None Include="client\bower_components\bootstrap\less\mixins\hide-text.less" />
+    <None Include="client\bower_components\bootstrap\less\mixins\image.less" />
+    <None Include="client\bower_components\bootstrap\less\mixins\labels.less" />
+    <None Include="client\bower_components\bootstrap\less\mixins\list-group.less" />
+    <None Include="client\bower_components\bootstrap\less\mixins\nav-divider.less" />
+    <None Include="client\bower_components\bootstrap\less\mixins\nav-vertical-align.less" />
+    <None Include="client\bower_components\bootstrap\less\mixins\opacity.less" />
+    <None Include="client\bower_components\bootstrap\less\mixins\pagination.less" />
+    <None Include="client\bower_components\bootstrap\less\mixins\panels.less" />
+    <None Include="client\bower_components\bootstrap\less\mixins\progress-bar.less" />
+    <None Include="client\bower_components\bootstrap\less\mixins\reset-filter.less" />
+    <None Include="client\bower_components\bootstrap\less\mixins\reset-text.less" />
+    <None Include="client\bower_components\bootstrap\less\mixins\resize.less" />
+    <None Include="client\bower_components\bootstrap\less\mixins\responsive-visibility.less" />
+    <None Include="client\bower_components\bootstrap\less\mixins\size.less" />
+    <None Include="client\bower_components\bootstrap\less\mixins\tab-focus.less" />
+    <None Include="client\bower_components\bootstrap\less\mixins\table-row.less" />
+    <None Include="client\bower_components\bootstrap\less\mixins\text-emphasis.less" />
+    <None Include="client\bower_components\bootstrap\less\mixins\text-overflow.less" />
+    <None Include="client\bower_components\bootstrap\less\mixins\vendor-prefixes.less" />
+    <None Include="client\bower_components\bootstrap\less\modals.less" />
+    <None Include="client\bower_components\bootstrap\less\navbar.less" />
+    <None Include="client\bower_components\bootstrap\less\navs.less" />
+    <None Include="client\bower_components\bootstrap\less\normalize.less" />
+    <None Include="client\bower_components\bootstrap\less\pager.less" />
+    <None Include="client\bower_components\bootstrap\less\pagination.less" />
+    <None Include="client\bower_components\bootstrap\less\panels.less" />
+    <None Include="client\bower_components\bootstrap\less\popovers.less" />
+    <None Include="client\bower_components\bootstrap\less\print.less" />
+    <None Include="client\bower_components\bootstrap\less\progress-bars.less" />
+    <None Include="client\bower_components\bootstrap\less\responsive-embed.less" />
+    <None Include="client\bower_components\bootstrap\less\responsive-utilities.less" />
+    <None Include="client\bower_components\bootstrap\less\scaffolding.less" />
+    <None Include="client\bower_components\bootstrap\less\tables.less" />
+    <None Include="client\bower_components\bootstrap\less\theme.less" />
+    <None Include="client\bower_components\bootstrap\less\thumbnails.less" />
+    <None Include="client\bower_components\bootstrap\less\tooltip.less" />
+    <None Include="client\bower_components\bootstrap\less\type.less" />
+    <None Include="client\bower_components\bootstrap\less\utilities.less" />
+    <None Include="client\bower_components\bootstrap\less\variables.less" />
+    <None Include="client\bower_components\bootstrap\less\wells.less" />
+    <None Include="client\bower_components\bootstrap\LICENSE" />
+    <None Include="client\bower_components\bootstrap\nuget\bootstrap.less.nuspec" />
+    <None Include="client\bower_components\bootstrap\nuget\bootstrap.nuspec" />
+    <None Include="client\bower_components\bootstrap\nuget\MyGet.ps1" />
+    <None Include="client\bower_components\bootstrap\package.json" />
+    <None Include="client\bower_components\bootstrap\README.md" />
+    <None Include="client\bower_components\font-awesome\.bower.json" />
+    <None Include="client\bower_components\font-awesome\.gitignore" />
+    <None Include="client\bower_components\font-awesome\.npmignore" />
+    <None Include="client\bower_components\font-awesome\bower.json" />
+    <None Include="client\bower_components\font-awesome\css\font-awesome.css.map" />
+    <None Include="client\bower_components\font-awesome\fonts\fontawesome-webfont.eot" />
+    <None Include="client\bower_components\font-awesome\fonts\fontawesome-webfont.ttf" />
+    <None Include="client\bower_components\font-awesome\fonts\fontawesome-webfont.woff" />
+    <None Include="client\bower_components\font-awesome\fonts\fontawesome-webfont.woff2" />
+    <None Include="client\bower_components\font-awesome\fonts\FontAwesome.otf" />
+    <None Include="client\bower_components\font-awesome\less\animated.less" />
+    <None Include="client\bower_components\font-awesome\less\bordered-pulled.less" />
+    <None Include="client\bower_components\font-awesome\less\core.less" />
+    <None Include="client\bower_components\font-awesome\less\fixed-width.less" />
+    <None Include="client\bower_components\font-awesome\less\font-awesome.less" />
+    <None Include="client\bower_components\font-awesome\less\icons.less" />
+    <None Include="client\bower_components\font-awesome\less\larger.less" />
+    <None Include="client\bower_components\font-awesome\less\list.less" />
+    <None Include="client\bower_components\font-awesome\less\mixins.less" />
+    <None Include="client\bower_components\font-awesome\less\path.less" />
+    <None Include="client\bower_components\font-awesome\less\rotated-flipped.less" />
+    <None Include="client\bower_components\font-awesome\less\screen-reader.less" />
+    <None Include="client\bower_components\font-awesome\less\stacked.less" />
+    <None Include="client\bower_components\font-awesome\less\variables.less" />
+    <None Include="client\bower_components\font-awesome\scss\font-awesome.scss" />
+    <None Include="client\bower_components\font-awesome\scss\_animated.scss" />
+    <None Include="client\bower_components\font-awesome\scss\_bordered-pulled.scss" />
+    <None Include="client\bower_components\font-awesome\scss\_core.scss" />
+    <None Include="client\bower_components\font-awesome\scss\_fixed-width.scss" />
+    <None Include="client\bower_components\font-awesome\scss\_icons.scss" />
+    <None Include="client\bower_components\font-awesome\scss\_larger.scss" />
+    <None Include="client\bower_components\font-awesome\scss\_list.scss" />
+    <None Include="client\bower_components\font-awesome\scss\_mixins.scss" />
+    <None Include="client\bower_components\font-awesome\scss\_path.scss" />
+    <None Include="client\bower_components\font-awesome\scss\_rotated-flipped.scss" />
+    <None Include="client\bower_components\font-awesome\scss\_screen-reader.scss" />
+    <None Include="client\bower_components\font-awesome\scss\_stacked.scss" />
+    <None Include="client\bower_components\font-awesome\scss\_variables.scss" />
+    <None Include="client\bower_components\jquery\.bower.json" />
+    <None Include="client\bower_components\jquery\bower.json" />
+    <None Include="client\bower_components\jquery\dist\jquery.min.map" />
+    <None Include="client\bower_components\jquery\dist\jquery.slim.min.map" />
+    <None Include="client\bower_components\jquery\external\sizzle\dist\sizzle.min.map" />
+    <None Include="client\bower_components\jquery\README.md" />
+    <None Include="client\bower_components\jquery\src\.eslintrc" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="client\bower_components\angular\angular-csp.css" />
+    <Content Include="client\bower_components\angular\angular.js" />
+    <Content Include="client\bower_components\angular\angular.min.js" />
+    <Content Include="client\bower_components\angular\index.js" />
+    <Content Include="client\bower_components\bootstrap\dist\css\bootstrap-theme.css" />
+    <Content Include="client\bower_components\bootstrap\dist\css\bootstrap-theme.min.css" />
+    <Content Include="client\bower_components\bootstrap\dist\css\bootstrap.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="client\bower_components\bootstrap\dist\css\bootstrap.min.css" />
+    <Content Include="client\bower_components\bootstrap\dist\fonts\glyphicons-halflings-regular.svg" />
+    <Content Include="client\bower_components\bootstrap\dist\js\bootstrap.js" />
+    <Content Include="client\bower_components\bootstrap\dist\js\bootstrap.min.js" />
+    <Content Include="client\bower_components\bootstrap\dist\js\npm.js" />
+    <Content Include="client\bower_components\bootstrap\fonts\glyphicons-halflings-regular.svg" />
+    <Content Include="client\bower_components\bootstrap\Gruntfile.js" />
+    <Content Include="client\bower_components\bootstrap\grunt\bs-commonjs-generator.js" />
+    <Content Include="client\bower_components\bootstrap\grunt\bs-glyphicons-data-generator.js" />
+    <Content Include="client\bower_components\bootstrap\grunt\bs-lessdoc-parser.js" />
+    <Content Include="client\bower_components\bootstrap\grunt\bs-raw-files-generator.js" />
+    <Content Include="client\bower_components\bootstrap\grunt\change-version.js" />
+    <Content Include="client\bower_components\bootstrap\js\affix.js" />
+    <Content Include="client\bower_components\bootstrap\js\alert.js" />
+    <Content Include="client\bower_components\bootstrap\js\button.js" />
+    <Content Include="client\bower_components\bootstrap\js\carousel.js" />
+    <Content Include="client\bower_components\bootstrap\js\collapse.js" />
+    <Content Include="client\bower_components\bootstrap\js\dropdown.js" />
+    <Content Include="client\bower_components\bootstrap\js\modal.js" />
+    <Content Include="client\bower_components\bootstrap\js\popover.js" />
+    <Content Include="client\bower_components\bootstrap\js\scrollspy.js" />
+    <Content Include="client\bower_components\bootstrap\js\tab.js" />
+    <Content Include="client\bower_components\bootstrap\js\tooltip.js" />
+    <Content Include="client\bower_components\bootstrap\js\transition.js" />
+    <Content Include="client\bower_components\bootstrap\package.js" />
+    <Content Include="client\bower_components\font-awesome\css\font-awesome.css" />
+    <Content Include="client\bower_components\font-awesome\css\font-awesome.min.css" />
+    <Content Include="client\bower_components\font-awesome\fonts\fontawesome-webfont.svg" />
+    <Content Include="client\bower_components\font-awesome\HELP-US-OUT.txt" />
+    <Content Include="client\bower_components\jquery\AUTHORS.txt" />
+    <Content Include="client\bower_components\jquery\dist\core.js" />
+    <Content Include="client\bower_components\jquery\dist\jquery.js" />
+    <Content Include="client\bower_components\jquery\dist\jquery.min.js" />
+    <Content Include="client\bower_components\jquery\dist\jquery.slim.js" />
+    <Content Include="client\bower_components\jquery\dist\jquery.slim.min.js" />
+    <Content Include="client\bower_components\jquery\external\sizzle\dist\sizzle.js" />
+    <Content Include="client\bower_components\jquery\external\sizzle\dist\sizzle.min.js" />
+    <Content Include="client\bower_components\jquery\external\sizzle\LICENSE.txt" />
+    <Content Include="client\bower_components\jquery\LICENSE.txt" />
+    <Content Include="client\bower_components\jquery\src\ajax.js" />
+    <Content Include="client\bower_components\jquery\src\ajax\jsonp.js" />
+    <Content Include="client\bower_components\jquery\src\ajax\load.js" />
+    <Content Include="client\bower_components\jquery\src\ajax\parseXML.js" />
+    <Content Include="client\bower_components\jquery\src\ajax\script.js" />
+    <Content Include="client\bower_components\jquery\src\ajax\var\location.js" />
+    <Content Include="client\bower_components\jquery\src\ajax\var\nonce.js" />
+    <Content Include="client\bower_components\jquery\src\ajax\var\rquery.js" />
+    <Content Include="client\bower_components\jquery\src\ajax\xhr.js" />
+    <Content Include="client\bower_components\jquery\src\attributes.js" />
+    <Content Include="client\bower_components\jquery\src\attributes\attr.js" />
+    <Content Include="client\bower_components\jquery\src\attributes\classes.js" />
+    <Content Include="client\bower_components\jquery\src\attributes\prop.js" />
+    <Content Include="client\bower_components\jquery\src\attributes\support.js" />
+    <Content Include="client\bower_components\jquery\src\attributes\val.js" />
+    <Content Include="client\bower_components\jquery\src\callbacks.js" />
+    <Content Include="client\bower_components\jquery\src\core.js" />
+    <Content Include="client\bower_components\jquery\src\core\access.js" />
+    <Content Include="client\bower_components\jquery\src\core\DOMEval.js" />
+    <Content Include="client\bower_components\jquery\src\core\init.js" />
+    <Content Include="client\bower_components\jquery\src\core\parseHTML.js" />
+    <Content Include="client\bower_components\jquery\src\core\ready-no-deferred.js" />
+    <Content Include="client\bower_components\jquery\src\core\ready.js" />
+    <Content Include="client\bower_components\jquery\src\core\readyException.js" />
+    <Content Include="client\bower_components\jquery\src\core\support.js" />
+    <Content Include="client\bower_components\jquery\src\core\var\rsingleTag.js" />
+    <Content Include="client\bower_components\jquery\src\css.js" />
+    <Content Include="client\bower_components\jquery\src\css\addGetHookIf.js" />
+    <Content Include="client\bower_components\jquery\src\css\adjustCSS.js" />
+    <Content Include="client\bower_components\jquery\src\css\curCSS.js" />
+    <Content Include="client\bower_components\jquery\src\css\hiddenVisibleSelectors.js" />
+    <Content Include="client\bower_components\jquery\src\css\showHide.js" />
+    <Content Include="client\bower_components\jquery\src\css\support.js" />
+    <Content Include="client\bower_components\jquery\src\css\var\cssExpand.js" />
+    <Content Include="client\bower_components\jquery\src\css\var\getStyles.js" />
+    <Content Include="client\bower_components\jquery\src\css\var\isHiddenWithinTree.js" />
+    <Content Include="client\bower_components\jquery\src\css\var\rmargin.js" />
+    <Content Include="client\bower_components\jquery\src\css\var\rnumnonpx.js" />
+    <Content Include="client\bower_components\jquery\src\css\var\swap.js" />
+    <Content Include="client\bower_components\jquery\src\data.js" />
+    <Content Include="client\bower_components\jquery\src\data\Data.js" />
+    <Content Include="client\bower_components\jquery\src\data\var\acceptData.js" />
+    <Content Include="client\bower_components\jquery\src\data\var\dataPriv.js" />
+    <Content Include="client\bower_components\jquery\src\data\var\dataUser.js" />
+    <Content Include="client\bower_components\jquery\src\deferred.js" />
+    <Content Include="client\bower_components\jquery\src\deferred\exceptionHook.js" />
+    <Content Include="client\bower_components\jquery\src\deprecated.js" />
+    <Content Include="client\bower_components\jquery\src\dimensions.js" />
+    <Content Include="client\bower_components\jquery\src\effects.js" />
+    <Content Include="client\bower_components\jquery\src\effects\animatedSelector.js" />
+    <Content Include="client\bower_components\jquery\src\effects\Tween.js" />
+    <Content Include="client\bower_components\jquery\src\event.js" />
+    <Content Include="client\bower_components\jquery\src\event\ajax.js" />
+    <Content Include="client\bower_components\jquery\src\event\alias.js" />
+    <Content Include="client\bower_components\jquery\src\event\focusin.js" />
+    <Content Include="client\bower_components\jquery\src\event\support.js" />
+    <Content Include="client\bower_components\jquery\src\event\trigger.js" />
+    <Content Include="client\bower_components\jquery\src\exports\amd.js" />
+    <Content Include="client\bower_components\jquery\src\exports\global.js" />
+    <Content Include="client\bower_components\jquery\src\jquery.js" />
+    <Content Include="client\bower_components\jquery\src\manipulation.js" />
+    <Content Include="client\bower_components\jquery\src\manipulation\buildFragment.js" />
+    <Content Include="client\bower_components\jquery\src\manipulation\getAll.js" />
+    <Content Include="client\bower_components\jquery\src\manipulation\setGlobalEval.js" />
+    <Content Include="client\bower_components\jquery\src\manipulation\support.js" />
+    <Content Include="client\bower_components\jquery\src\manipulation\var\rcheckableType.js" />
+    <Content Include="client\bower_components\jquery\src\manipulation\var\rscriptType.js" />
+    <Content Include="client\bower_components\jquery\src\manipulation\var\rtagName.js" />
+    <Content Include="client\bower_components\jquery\src\manipulation\wrapMap.js" />
+    <Content Include="client\bower_components\jquery\src\manipulation\_evalUrl.js" />
+    <Content Include="client\bower_components\jquery\src\offset.js" />
+    <Content Include="client\bower_components\jquery\src\queue.js" />
+    <Content Include="client\bower_components\jquery\src\queue\delay.js" />
+    <Content Include="client\bower_components\jquery\src\selector-native.js" />
+    <Content Include="client\bower_components\jquery\src\selector-sizzle.js" />
+    <Content Include="client\bower_components\jquery\src\selector.js" />
+    <Content Include="client\bower_components\jquery\src\serialize.js" />
+    <Content Include="client\bower_components\jquery\src\traversing.js" />
+    <Content Include="client\bower_components\jquery\src\traversing\findFilter.js" />
+    <Content Include="client\bower_components\jquery\src\traversing\var\dir.js" />
+    <Content Include="client\bower_components\jquery\src\traversing\var\rneedsContext.js" />
+    <Content Include="client\bower_components\jquery\src\traversing\var\siblings.js" />
+    <Content Include="client\bower_components\jquery\src\var\arr.js" />
+    <Content Include="client\bower_components\jquery\src\var\class2type.js" />
+    <Content Include="client\bower_components\jquery\src\var\concat.js" />
+    <Content Include="client\bower_components\jquery\src\var\document.js" />
+    <Content Include="client\bower_components\jquery\src\var\documentElement.js" />
+    <Content Include="client\bower_components\jquery\src\var\fnToString.js" />
+    <Content Include="client\bower_components\jquery\src\var\getProto.js" />
+    <Content Include="client\bower_components\jquery\src\var\hasOwn.js" />
+    <Content Include="client\bower_components\jquery\src\var\indexOf.js" />
+    <Content Include="client\bower_components\jquery\src\var\ObjectFunctionString.js" />
+    <Content Include="client\bower_components\jquery\src\var\pnum.js" />
+    <Content Include="client\bower_components\jquery\src\var\push.js" />
+    <Content Include="client\bower_components\jquery\src\var\rcssNum.js" />
+    <Content Include="client\bower_components\jquery\src\var\rnotwhite.js" />
+    <Content Include="client\bower_components\jquery\src\var\slice.js" />
+    <Content Include="client\bower_components\jquery\src\var\support.js" />
+    <Content Include="client\bower_components\jquery\src\var\toString.js" />
+    <Content Include="client\bower_components\jquery\src\wrap.js" />
+    <Content Include="client\css\client.css" />
+    <Content Include="client\index.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="client\app\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>xcopy $(ProjectDir)client $(ProjectDir)$(OutDir)client /Y/D/E</PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

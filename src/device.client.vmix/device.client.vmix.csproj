@@ -138,14 +138,14 @@
     <Compile Include="VmixClientModule.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\device.sdk\device.sdk.csproj">
-      <Project>{4fc451ca-14c1-46da-95ff-5c177463cfd4}</Project>
-      <Name>device.sdk</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\device.core\device.core.csproj">
+      <Project>{4fc451ca-14c1-46da-95ff-5c177463cfd4}</Project>
+      <Name>device.core</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

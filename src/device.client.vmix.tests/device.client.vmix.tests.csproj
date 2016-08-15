@@ -99,9 +99,9 @@
       <Project>{bd82769b-e2b9-47d8-9962-ab7844548496}</Project>
       <Name>device.client.vmix</Name>
     </ProjectReference>
-    <ProjectReference Include="..\device.sdk\device.sdk.csproj">
+    <ProjectReference Include="..\device.core\device.core.csproj">
       <Project>{4fc451ca-14c1-46da-95ff-5c177463cfd4}</Project>
-      <Name>device.sdk</Name>
+      <Name>device.core</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
