@@ -10,7 +10,6 @@ namespace forte.devices
     {
         public static class Registrar
         {
-            private static IMapper _mapper;
             private static readonly object MapperLock = new object();
 
             public static void RegisterDependencies(IUnityContainer container)
@@ -18,22 +17,11 @@ namespace forte.devices
                 container.RegisterType<IStreamingClient, VmixStreamingClient>(new HierarchicalLifetimeManager());
             }
 
-            public static IMapper CreateMapper()
+            public static void RegisterMappings()
             {
-                lock (MapperLock)
-                {
-                    if (_mapper != null) return _mapper;
-                    var config = new MapperConfiguration(ConfigureMapper);
-                    _mapper = config.CreateMapper();
-                    return _mapper;
-                }
-            }
+                Mapper.CreateMap<Audio, VmixAudio>();
 
-            private static void ConfigureMapper(IMapperConfigurationExpression cfg)
-            {
-                cfg.CreateMap<Audio, VmixAudio>();
-
-                cfg.CreateMap<VmixState, StreamingClientState>()
+                Mapper.CreateMap<VmixState, StreamingClientState>()
                     .ForMember(m => m.Software, expression => { expression.UseValue("vMix"); });
             }
         }

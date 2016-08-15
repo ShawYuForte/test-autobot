@@ -7,6 +7,7 @@ using forte.devices.data;
 using forte.devices.entities;
 using forte.devices.extensions;
 using forte.devices.models;
+using Forte.Services.Contracts;
 using Microsoft.AspNet.SignalR.Client;
 using RestSharp;
 
@@ -326,7 +327,7 @@ namespace forte.devices.services
 
         private void SaveCommandLocally(DeviceCommandModel command)
         {
-            var commandEntity = ClientModule.Registrar.CreateMapper().Map<DeviceCommandEntity>(command);
+            var commandEntity = Mapper.Map<DeviceCommandEntity>(command);
             _deviceRepository.SaveCommand(commandEntity);
         }
 
@@ -448,8 +449,7 @@ namespace forte.devices.services
         /// <exception cref="Exception">If server update fails</exception>
         private void SaveCommandOnServer(DeviceCommandModel commandEntity)
         {
-            var mapper = ClientModule.Registrar.CreateMapper();
-            _deviceRepository.SaveCommand(mapper.Map<DeviceCommandEntity>(commandEntity));
+            _deviceRepository.SaveCommand(Mapper.Map<DeviceCommandEntity>(commandEntity));
 
             // TODO handle duplicates and queuing
             var request = new RestRequest($"{_deviceId}/commands/{commandEntity.Id}", Method.PUT)
@@ -497,8 +497,7 @@ namespace forte.devices.services
                 _logger.Fatal("Could not retrieve video stream details for {@videoStreamId} due to {@message} from response {@response}", videoStreamId, message, response);
                 throw new Exception($"Could not retrieve video stream details for {videoStreamId} due to {message}");
             }
-            var mapper = ClientModule.Registrar.CreateMapper();
-            _deviceRepository.SaveVideoStream(mapper.Map<VideoStream>(response.Data));
+            _deviceRepository.SaveVideoStream(Mapper.Map<VideoStream>(response.Data));
             return response.Data;
         }
 

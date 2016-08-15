@@ -2,7 +2,7 @@
 
 namespace forte.devices.services
 {
-    public interface ILogger : IDisposable
+    public interface ILogger2 : IDisposable
     {
         /// <summary>
         ///     Write a log event with the <see cref="F:Serilog.Events.LogEventLevel.Debug" /> level.

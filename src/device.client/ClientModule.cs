@@ -13,7 +13,6 @@ namespace forte.devices
     {
         public static class Registrar
         {
-            private static IMapper _mapper;
             private static readonly object MapperLock = new object();
 
             public static void RegisterDependencies(IUnityContainer container)
@@ -23,40 +22,29 @@ namespace forte.devices
                 container.RegisterType<IConfigurationManager, ConfigurationManager>(new HierarchicalLifetimeManager());
             }
 
-            public static IMapper CreateMapper()
-            {
-                lock (MapperLock)
-                {
-                    if (_mapper != null) return _mapper;
-                    var config = new MapperConfiguration(ConfigureMapper);
-                    _mapper = config.CreateMapper();
-                    return _mapper;
-                }
-            }
-
-            private static void ConfigureMapper(IMapperConfigurationExpression cfg)
+            public static void RegisterMappings()
             {
                 //cfg.CreateMap<Audio, VmixAudio>();
 
-                cfg.CreateMap<DeviceConfig, StreamingDeviceConfig>();
-                cfg.CreateMap<StreamingDeviceConfig, DeviceConfig>();
+                Mapper.CreateMap<DeviceConfig, StreamingDeviceConfig>();
+                Mapper.CreateMap<StreamingDeviceConfig, DeviceConfig>();
 
-                cfg.CreateMap<DeviceCommandEntity, DeviceCommandModel>()
+                Mapper.CreateMap<DeviceCommandEntity, DeviceCommandModel>()
                     .ForMember(entity => entity.ExecutionSucceeded,
                         map => map.MapFrom(model => model.Status == ExecutionStatus.Executed))
                     .ForMember(entity => entity.Data,
                         map => map.MapFrom(
                                 model => JsonConvert.DeserializeObject<Dictionary<string, DataValue>>(model.Data)));
-                cfg.CreateMap<DeviceCommandModel, DeviceCommandEntity>()
+                Mapper.CreateMap<DeviceCommandModel, DeviceCommandEntity>()
                     .ForMember(model => model.Status, map => map.UseValue(ExecutionStatus.Received))
                     .ForMember(model => model.Data,
                         map => map.MapFrom(entity => JsonConvert.SerializeObject(entity.Data)));
 
-                cfg.CreateMap<DataValue, DeviceSetting>();
-                cfg.CreateMap<DeviceSetting, DataValue>();
+                Mapper.CreateMap<DataValue, DeviceSetting>();
+                Mapper.CreateMap<DeviceSetting, DataValue>();
 
-                cfg.CreateMap<VideoStreamModel, VideoStream>();
-                cfg.CreateMap<VideoStream, VideoStreamModel>();
+                Mapper.CreateMap<VideoStreamModel, VideoStream>();
+                Mapper.CreateMap<VideoStream, VideoStreamModel>();
             }
         }
     }

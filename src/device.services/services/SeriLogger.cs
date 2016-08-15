@@ -9,7 +9,7 @@ using Serilog.Events;
 
 namespace forte.devices.services
 {
-    public class SeriLogger : ILogger
+    public class SeriLogger : ILogger2
     {
         public SeriLogger()
         {

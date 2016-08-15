@@ -19,10 +19,9 @@ namespace forte.devices.services
             if (_deviceConfig != null) return _deviceConfig;
             var settings = _deviceRepository.GetSettings();
             _deviceConfig = new StreamingDeviceConfig();
-            var mapper = ClientModule.Registrar.CreateMapper();
             foreach (var setting in settings)
             {
-                _deviceConfig[setting.Name] = mapper.Map<DataValue>(setting);
+                _deviceConfig[setting.Name] = Mapper.Map<DataValue>(setting);
             }
             return _deviceConfig;
         }

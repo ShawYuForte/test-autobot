@@ -7,8 +7,10 @@ using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading;
+using AutoMapper;
 using forte.devices.models;
 using forte.devices.models.presets;
+using Forte.Services.Contracts;
 using RestSharp;
 
 namespace forte.devices.services.clients
@@ -56,7 +58,7 @@ namespace forte.devices.services.clients
         {
             var state = GetVmixState();
             if (state == null) return null;
-            var clientState = VmixClientModule.Registrar.CreateMapper().Map<StreamingClientState>(state);
+            var clientState = Mapper.Map<StreamingClientState>(state);
             clientState.PresetLoadHash = GetVmixProcessHash();
             return clientState;
         }

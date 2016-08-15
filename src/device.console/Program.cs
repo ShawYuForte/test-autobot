@@ -1,6 +1,7 @@
 ﻿using System;
 using forte.devices.models;
 using forte.devices.services;
+using Forte.Services.Contracts;
 using Microsoft.Practices.Unity;
 
 namespace forte.devices
@@ -14,9 +15,20 @@ namespace forte.devices
             Console.Write("Starting client connection... ");
             var container = new UnityContainer();
 
-            ServiceModule.Registrar.RegisterDependencies(container);
+            Forte.CoreModule.Registrar.RegisterDependencies(container);
+            Forte.CoreModule.Registrar.RegisterMappings();
+
+            //ServiceModule.Registrar.RegisterDependencies(container);
             ClientModule.Registrar.RegisterDependencies(container);
+            ClientModule.Registrar.RegisterMappings();
+
+
             VmixClientModule.Registrar.RegisterDependencies(container);
+            VmixClientModule.Registrar.RegisterMappings();
+
+            SerilogModule.Registrar.RegisterDependencies(container);
+            SerilogModule.Registrar.RegisterMappings();
+
             CoreModule.SetDefaultSerializerSettings();
 
             var logger = container.Resolve<ILogger>();

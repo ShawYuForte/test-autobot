@@ -146,8 +146,7 @@ namespace forte.devices.data
 
             using (var dbContext = new DeviceDbContext())
             {
-                var mapper = ClientModule.Registrar.CreateMapper();
-                var newSetting = mapper.Map<DeviceSetting>(new DataValue(value));
+                var newSetting = Mapper.Map<DeviceSetting>(new DataValue(value));
                 newSetting.Name = setting;
                 newSetting.LastModified = DateTime.UtcNow;
 
