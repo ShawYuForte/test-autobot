@@ -28,30 +28,30 @@ namespace forte.devices.services.clients
             _logger = logger;
             LoadDefaultSettings();
             var config = _configurationManager.GetDeviceConfig();
-            _client = new RestClient(config.Get<string>(SettingParams.VmixApiPath));
+            _client = new RestClient(config.Get<string>(VmixSettingParams.VmixApiPath));
         }
 
         private void LoadDefaultSettings()
         {
             var config = _configurationManager.GetDeviceConfig();
-            if (string.IsNullOrWhiteSpace(config.Get<string>(SettingParams.VmixApiPath)))
-                config = _configurationManager.UpdateSetting(SettingParams.VmixApiPath, "http://localhost:8088/api");
-            if (string.IsNullOrWhiteSpace(config.Get<string>(SettingParams.VmixExePath)))
-                config = _configurationManager.UpdateSetting(SettingParams.VmixExePath, @"d:\Program Files (x86)\vMix\vMix.exe");
-            if (string.IsNullOrWhiteSpace(config.Get<string>(SettingParams.VmixPlaylistName)))
-                config = _configurationManager.UpdateSetting(SettingParams.VmixPlaylistName, "CameraSwitchingProgram");
-            if (string.IsNullOrWhiteSpace(config.Get<string>(SettingParams.VmixPresetTemplateFilePath)))
-                config = _configurationManager.UpdateSetting(SettingParams.VmixPresetTemplateFilePath, @"C:\forte\preset\Forte Preset.vmix");
-            if (string.IsNullOrWhiteSpace(config.Get<string>(SettingParams.BroadcastStartupImage)))
-                config = _configurationManager.UpdateSetting(SettingParams.BroadcastStartupImage, "logo_dark_background.jpg");
-            if (string.IsNullOrWhiteSpace(config.Get<string>(SettingParams.BroadcastStartupVideo)))
-                config = _configurationManager.UpdateSetting(SettingParams.BroadcastStartupVideo, "logo_dark_background_mantis.mp4");
-            if (string.IsNullOrWhiteSpace(config.Get<string>(SettingParams.BroadcastClosingImage)))
-                config = _configurationManager.UpdateSetting(SettingParams.BroadcastClosingImage, "logo_girl_warrior_stance.jpg");
-            if (string.IsNullOrWhiteSpace(config.Get<string>(SettingParams.BroadcastClosingVideo)))
-                config = _configurationManager.UpdateSetting(SettingParams.BroadcastClosingVideo, "logo_reveal_house.mp4");
-            if (string.IsNullOrWhiteSpace(config.Get<string>(SettingParams.BroadcastOverlayImage)))
-                _configurationManager.UpdateSetting(SettingParams.BroadcastOverlayImage, "overlay_1280_720.png");
+            if (string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.VmixApiPath)))
+                config = _configurationManager.UpdateSetting(VmixSettingParams.VmixApiPath, "http://localhost:8088/api");
+            if (string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.VmixExePath)))
+                config = _configurationManager.UpdateSetting(VmixSettingParams.VmixExePath, @"d:\Program Files (x86)\vMix\vMix.exe");
+            if (string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.VmixPlaylistName)))
+                config = _configurationManager.UpdateSetting(VmixSettingParams.VmixPlaylistName, "CameraSwitchingProgram");
+            if (string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.VmixPresetTemplateFilePath)))
+                config = _configurationManager.UpdateSetting(VmixSettingParams.VmixPresetTemplateFilePath, @"C:\forte\preset\Forte Preset.vmix");
+            if (string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.BroadcastStartupImage)))
+                config = _configurationManager.UpdateSetting(VmixSettingParams.BroadcastStartupImage, "logo_dark_background.jpg");
+            if (string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.BroadcastStartupVideo)))
+                config = _configurationManager.UpdateSetting(VmixSettingParams.BroadcastStartupVideo, "logo_dark_background_mantis.mp4");
+            if (string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.BroadcastClosingImage)))
+                config = _configurationManager.UpdateSetting(VmixSettingParams.BroadcastClosingImage, "logo_girl_warrior_stance.jpg");
+            if (string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.BroadcastClosingVideo)))
+                config = _configurationManager.UpdateSetting(VmixSettingParams.BroadcastClosingVideo, "logo_reveal_house.mp4");
+            if (string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.BroadcastOverlayImage)))
+                _configurationManager.UpdateSetting(VmixSettingParams.BroadcastOverlayImage, "overlay_1280_720.png");
         }
 
         public StreamingClientState GetState()
@@ -254,7 +254,7 @@ namespace forte.devices.services.clients
         {
             var config = _configurationManager.GetDeviceConfig();
 
-            CallAndFetchState($"/?Function=SelectPlayList&Value={config.Get<string>(SettingParams.VmixPlaylistName)}",
+            CallAndFetchState($"/?Function=SelectPlayList&Value={config.Get<string>(VmixSettingParams.VmixPlaylistName)}",
                 "set playlist");
             return CallAndFetchState("/?Function=StartPlayList", "start playlist");
         }
@@ -325,7 +325,7 @@ namespace forte.devices.services.clients
             {
                 var config = _configurationManager.GetDeviceConfig();
                 var webRequest =
-                    WebRequest.CreateHttp($"{config.Get<string>(SettingParams.VmixApiPath)}{operation}");
+                    WebRequest.CreateHttp($"{config.Get<string>(VmixSettingParams.VmixApiPath)}{operation}");
                 var response = (HttpWebResponse) webRequest.GetResponse();
                 if (response.StatusCode == HttpStatusCode.OK) return GetVmixState();
 
@@ -351,19 +351,19 @@ namespace forte.devices.services.clients
 
             var config = _configurationManager.GetDeviceConfig();
 
-            var input = state.Inputs.FirstOrDefault(i => i.Title == config.Get<string>(SettingParams.BroadcastStartupImage));
+            var input = state.Inputs.FirstOrDefault(i => i.Title == config.Get<string>(VmixSettingParams.BroadcastStartupImage));
             if (input != null) input.Role = InputRole.OpeninStaticImage;
 
-            input = state.Inputs.FirstOrDefault(i => i.Title == config.Get<string>(SettingParams.BroadcastStartupVideo));
+            input = state.Inputs.FirstOrDefault(i => i.Title == config.Get<string>(VmixSettingParams.BroadcastStartupVideo));
             if (input != null) input.Role = InputRole.OpeningVideo;
 
-            input = state.Inputs.FirstOrDefault(i => i.Title == config.Get<string>(SettingParams.BroadcastClosingImage));
+            input = state.Inputs.FirstOrDefault(i => i.Title == config.Get<string>(VmixSettingParams.BroadcastClosingImage));
             if (input != null) input.Role = InputRole.ClosingStaticImage;
 
-            input = state.Inputs.FirstOrDefault(i => i.Title == config.Get<string>(SettingParams.BroadcastClosingVideo));
+            input = state.Inputs.FirstOrDefault(i => i.Title == config.Get<string>(VmixSettingParams.BroadcastClosingVideo));
             if (input != null) input.Role = InputRole.ClosingVideo;
 
-            input = state.Inputs.FirstOrDefault(i => i.Title == config.Get<string>(SettingParams.BroadcastOverlayImage));
+            input = state.Inputs.FirstOrDefault(i => i.Title == config.Get<string>(VmixSettingParams.BroadcastOverlayImage));
             if (input != null) input.Role = InputRole.LogoOverlay;
 
             var audioInputs =
@@ -393,7 +393,7 @@ namespace forte.devices.services.clients
             }
 
             var config = _configurationManager.GetDeviceConfig();
-            var presetTemplateFilePath = config.Get<string>(SettingParams.VmixExePath);
+            var presetTemplateFilePath = config.Get<string>(VmixSettingParams.VmixExePath);
 
             if (!File.Exists(presetTemplateFilePath))
             {
@@ -429,7 +429,7 @@ namespace forte.devices.services.clients
         public Process GetVmixProcess()
         {
             var config = _configurationManager.GetDeviceConfig();
-            var presetTemplateFilePath = config.Get<string>(SettingParams.VmixExePath);
+            var presetTemplateFilePath = config.Get<string>(VmixSettingParams.VmixExePath);
             FileSystemInfo fileInfo = new FileInfo(presetTemplateFilePath);
             var sExeName = fileInfo.Name.Replace(fileInfo.Extension, "");
 
@@ -446,8 +446,8 @@ namespace forte.devices.services.clients
             var vmixProcessHandle = EnsureVmixIsRunning(startFresh: true);
 
             var config = _configurationManager.GetDeviceConfig();
-            var presetTemplateFilePath = config.Get<string>(SettingParams.VmixPresetTemplateFilePath);
-            var vmixPresetOutputFolder = config.Get<string>(SettingParams.VmixPresetFolderPath) ?? Path.GetTempPath();
+            var presetTemplateFilePath = config.Get<string>(VmixSettingParams.VmixPresetTemplateFilePath);
+            var vmixPresetOutputFolder = config.Get<string>(VmixSettingParams.VmixPresetFolderPath) ?? Path.GetTempPath();
             var timeStamp = DateTime.UtcNow.ToString(CultureInfo.InvariantCulture).Replace(":", "").Replace("/", "");
             var vmixPresetOutputFile = $"{timeStamp}-{Guid.NewGuid()}.vmix";
             vmixPresetOutputFile = Path.Combine(vmixPresetOutputFolder, vmixPresetOutputFile);
@@ -469,7 +469,7 @@ namespace forte.devices.services.clients
 
             const int fiveSeconds = 5000;
             const int twoMinutes = 120;
-            var timeout = config.Get(SettingParams.VmixLoadTimeout, defaultValue: twoMinutes);
+            var timeout = config.Get(VmixSettingParams.VmixLoadTimeout, defaultValue: twoMinutes);
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 

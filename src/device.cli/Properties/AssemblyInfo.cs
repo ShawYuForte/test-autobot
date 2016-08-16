@@ -5,13 +5,13 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("device.console")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("Device CLI")]
+[assembly: AssemblyDescription("Forte Streaming Device Command Line Interface")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("device.console")]
-[assembly: AssemblyCopyright("Copyright ©  2016")]
-[assembly: AssemblyTrademark("")]
+[assembly: AssemblyCompany("Forte Nexus, LLC")]
+[assembly: AssemblyProduct("Forte")]
+[assembly: AssemblyCopyright("Copyright © 2016")]
+[assembly: AssemblyTrademark("Forte")]
 [assembly: AssemblyCulture("")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 

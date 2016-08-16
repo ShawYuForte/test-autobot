@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Net;
 using System.Threading;
-using System.Threading.Tasks;
 using AutoMapper;
 using forte.devices.data;
 using forte.devices.entities;
@@ -9,7 +8,6 @@ using forte.devices.extensions;
 using forte.devices.models;
 using forte.models.devices;
 using forte.services;
-using Microsoft.AspNet.SignalR.Client;
 using RestSharp;
 using StreamingDeviceState = forte.devices.models.StreamingDeviceState;
 using StreamingDeviceStatuses = forte.devices.models.StreamingDeviceStatuses;
@@ -25,7 +23,7 @@ namespace forte.devices.services
     ///  - Saves command state on the server
     ///  - Publishes new client state
     /// </summary>
-    public class StreamingDevice : IStreamingDevice
+    public class DeviceDaemon : IDeviceDaemon
     {
         public delegate void MessageReceivedDelegate(string message);
 
@@ -35,16 +33,14 @@ namespace forte.devices.services
         private readonly IDeviceRepository _deviceRepository;
         private readonly ILogger _logger;
         private readonly IConfigurationManager _configurationManager;
+        private readonly IServerListener _serverListener;
 
         private readonly IStreamingClient _streamingClient;
-
-        private IHubProxy _deviceInteractionHubProxy;
-
-        private HubConnection _hubConnection;
-        private Timer _timer;
         private static readonly object Key = new object();
+        private static readonly object StopKey = new object();
 
-        public StreamingDevice(IDeviceRepository deviceRepository, IStreamingClient streamingClient, ILogger logger, IConfigurationManager configurationManager)
+        public DeviceDaemon(IDeviceRepository deviceRepository, IStreamingClient streamingClient, ILogger logger, 
+            IConfigurationManager configurationManager, IServerListener serverListener)
         {
             _deviceRepository = deviceRepository;
             _streamingClient = streamingClient;
@@ -55,6 +51,14 @@ namespace forte.devices.services
             _client = new RestClient($"{config.Get<string>(SettingParams.ServerApiPath)}/devices/");
             _streamClient = new RestClient($"{config.Get<string>(SettingParams.ServerApiPath)}/streams/");
             _deviceId = config.DeviceId;
+            _serverListener = serverListener;
+            serverListener.MessageReceived += OnServerMessageReceived;
+        }
+
+        private void OnServerMessageReceived(string message)
+        {
+            if (message != "CommandAvailable") return;
+            FetchRequested = true;
         }
 
         private void SetDefaultSettings()
@@ -65,7 +69,7 @@ namespace forte.devices.services
             if (string.IsNullOrWhiteSpace(config.Get<string>(SettingParams.ServerApiPath)))
                 config = _configurationManager.UpdateSetting(SettingParams.ServerApiPath, "http://forte-devapi.azurewebsites.net/api");
             if (config.DeviceId == Guid.Empty)
-                config = _configurationManager.UpdateSetting(nameof(config.DeviceId), Guid.Parse("602687AA-37BD-4E92-B0F8-05FEFFB4A1E0"));
+                _configurationManager.UpdateSetting(nameof(config.DeviceId), Guid.Parse("602687AA-37BD-4E92-B0F8-05FEFFB4A1E0"));
         }
 
         public bool StartStreaming(DeviceCommandModel command)
@@ -111,6 +115,9 @@ namespace forte.devices.services
 
             return true;
         }
+
+        private bool Stopped { get; set; }
+        private bool FetchRequested { get; set; }
 
         public bool StartProgram(DeviceCommandModel command)
         {
@@ -240,20 +247,6 @@ namespace forte.devices.services
             return true;
         }
 
-        public event services.MessageReceivedDelegate MessageReceived;
-
-        public void Connect()
-        {
-            try
-            {
-                ConnectAsync().Wait();
-            }
-            catch (Exception exception)
-            {
-                _logger.Error(exception, "Could not connect to hub");
-                OnHubConnectionOnClosed();
-            }
-        }
 
         public void FetchCommand()
         {
@@ -334,58 +327,6 @@ namespace forte.devices.services
             _deviceRepository.SaveCommand(commandEntity);
         }
 
-        public void Disconnect()
-        {
-            //_cancellationTokenSource.Cancel();
-            _hubConnection.Dispose();
-        }
-
-        public async Task Send(string message)
-        {
-            await _deviceInteractionHubProxy.Invoke("SendHello", message);
-            await _deviceInteractionHubProxy.Invoke("RequestState", Guid.Parse("602687aa-37bd-4e92-b0f8-05feffb4a1e0"));
-        }
-
-        private async Task ConnectAsync()
-        {
-            if (_hubConnection != null)
-            {
-                await _hubConnection.Start();
-                return;
-            }
-
-            var config = _configurationManager.GetDeviceConfig();
-            var serverUrl = config.Get<string>(SettingParams.ServerRootPath);
-            _hubConnection = new HubConnection(serverUrl);
-            _deviceInteractionHubProxy = _hubConnection.CreateHubProxy("DeviceInteractionHub");
-            _deviceInteractionHubProxy.On("CommandAvailable", deviceId =>
-            {
-                // If not our event, ignore
-                if (Guid.Parse(deviceId) != _deviceId) return;
-                _logger.Debug($"Server notified us of a command available for device {deviceId}");
-                FetchCommand();
-            });
-
-            _hubConnection.Closed += OnHubConnectionOnClosed;
-            _hubConnection.ConnectionSlow += () => _logger.Warning("Connection slow... might close!");
-            _hubConnection.Error += exception => _logger.Error($"Connection error: {exception.Message}");
-            _hubConnection.Reconnected += () => _logger.Debug($"Connection re-established");
-            _hubConnection.Reconnecting += () => _logger.Debug($"Re-connecting...");
-            _hubConnection.StateChanged += state => _logger.Warning($"Connection state changed from {state.OldState} to {state.NewState}");
-            _hubConnection.Received += data => _logger.Debug($"Received {data}");
-            await _hubConnection.Start();
-        }
-
-        private void OnHubConnectionOnClosed()
-        {
-            _logger.Debug("Connection closed, will retry in 10 seconds!");
-            _timer = new Timer(state =>
-            {
-                _logger.Debug("Attempting to re-connect");
-                Connect();
-                _timer.Dispose();
-            }, null, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(1));
-        }
 
         private void ExecuteCommand(DeviceCommandModelEx command)
         {
@@ -418,6 +359,11 @@ namespace forte.devices.services
             command.ExecutedOn = DateTime.UtcNow;
         }
 
+        public void QueryServer()
+        {
+            FetchRequested = true;
+        }
+
         /// <summary>
         ///     Publish device state to the server
         /// </summary>
@@ -443,6 +389,28 @@ namespace forte.devices.services
             _logger.Debug("State published");
 
             return true;
+        }
+
+        public void Run()
+        {
+            var seconds = 10;
+            _serverListener.Connect();
+            while (!Stopped)
+            {
+                seconds--;
+                if (seconds <= 0 || FetchRequested)
+                {
+                    FetchRequested = false;
+                    seconds = 10;
+                    FetchCommand();
+                }
+                Thread.Sleep(1000);
+            }
+        }
+
+        public void Stop()
+        {
+            Stopped = true;
         }
 
         /// <summary>
@@ -502,11 +470,6 @@ namespace forte.devices.services
             }
             _deviceRepository.SaveVideoStream(Mapper.Map<VideoStream>(response.Data));
             return response.Data;
-        }
-
-        private void OnMessageReceived(string message)
-        {
-            MessageReceived?.Invoke(message);
         }
     }
 }

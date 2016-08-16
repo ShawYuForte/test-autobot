@@ -11,10 +11,13 @@ namespace device.logging
 {
     public class LoggerModule
     {
-        public static void RegisterDependencies(IUnityContainer unityContainer)
+        public static class Registrar
         {
-            unityContainer.RegisterType<ILogger, SeriLoggerEx>();
-            unityContainer.RegisterType<IDeviceLogger, SeriLoggerEx>();
+            public static void RegisterDependencies(IUnityContainer unityContainer)
+            {
+                unityContainer.RegisterType<ILogger, SeriLoggerEx>();
+                unityContainer.RegisterType<IDeviceLogger, SeriLoggerEx>();
+            }
         }
     }
 }

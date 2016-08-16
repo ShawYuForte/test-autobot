@@ -1,6 +1,6 @@
 ﻿namespace forte.devices.models
 {
-    public static class SettingParams
+    public static class VmixSettingParams
     {
         public static string VmixApiPath => "vmix-api-path";
         public static string VmixExePath => "vmix-exe-path";

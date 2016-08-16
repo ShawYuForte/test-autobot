@@ -21,7 +21,8 @@ namespace forte.devices
             public static void RegisterDependencies(IUnityContainer container)
             {
                 container.RegisterType<IDeviceRepository, DeviceRepository>(new HierarchicalLifetimeManager());
-                container.RegisterType<IStreamingDevice, StreamingDevice>(new HierarchicalLifetimeManager());
+                container.RegisterType<IDeviceDaemon, DeviceDaemon>(new HierarchicalLifetimeManager());
+                container.RegisterType<IServerListener, ServerListener>(new HierarchicalLifetimeManager());
                 container.RegisterType<IConfigurationManager, ConfigurationManager>(new HierarchicalLifetimeManager());
             }
 

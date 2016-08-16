@@ -11,11 +11,6 @@ namespace forte.devices.data
 {
     public class DeviceRepository : IDeviceRepository
     {
-        //public Settings GetSettings()
-        //{
-        //    return new Settings { ApiPath = "http://dev-api.forte.fit/api"};
-        //}
-
         public List<DeviceSetting> GetSettings()
         {
             using (var dbContext = new DeviceDbContext())

@@ -1,8 +1,6 @@
 ﻿#region
 
 using System.Web.Http;
-using device.logging;
-using forte.devices;
 using Microsoft.Owin;
 using Microsoft.Owin.FileSystems;
 using Microsoft.Owin.StaticFiles;
@@ -11,7 +9,7 @@ using Owin;
 
 #endregion
 
-namespace device.client.web.server
+namespace device.web.server
 {
     public class Startup
     {
@@ -37,23 +35,7 @@ namespace device.client.web.server
             });
             appBuilder.UseStaticFiles("/client");
 
-            ConfigureUnity(config);
-        }
-
-        private void ConfigureUnity(HttpConfiguration config)
-        {
-            var container = new UnityContainer();
-            config.DependencyResolver = new UnityDependencyResolver(container);
-
-            LoggerModule.RegisterDependencies(container);
-
-            ClientModule.Registrar.RegisterDependencies(container);
-            ClientModule.Registrar.RegisterMappings();
-
-            VmixClientModule.Registrar.RegisterDependencies(container);
-            VmixClientModule.Registrar.RegisterMappings();
-
-            CoreModule.SetDefaultSerializerSettings();
+            config.DependencyResolver = UnityResolver.Default;
         }
     }
 }
