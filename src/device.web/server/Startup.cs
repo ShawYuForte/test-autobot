@@ -1,6 +1,7 @@
 ﻿#region
 
 using System.Web.Http;
+using forte.devices;
 using Microsoft.Owin;
 using Microsoft.Owin.FileSystems;
 using Microsoft.Owin.StaticFiles;
@@ -36,6 +37,14 @@ namespace device.web.server
             appBuilder.UseStaticFiles("/client");
 
             config.DependencyResolver = UnityResolver.Default;
+
+            var formatters = config.Formatters;
+            var jsonFormatter = formatters.JsonFormatter;
+            //jsonFormatter.SerializerSettings = CoreModule.GetSerializerSettings(jsonFormatter.SerializerSettings);
+            CoreModule.SetDefaultSerializerSettings(jsonFormatter.SerializerSettings);
+
+            // remove XML support for Web API calls
+            formatters.Remove(formatters.XmlFormatter);
         }
     }
 }

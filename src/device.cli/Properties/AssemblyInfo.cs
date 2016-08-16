@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Forte Nexus, LLC")]
 [assembly: AssemblyProduct("Forte")]
-[assembly: AssemblyCopyright("Copyright © 2016")]
+[assembly: AssemblyCopyright("Copyright Forte Nexus, LLC © 2016")]
 [assembly: AssemblyTrademark("Forte")]
 [assembly: AssemblyCulture("")]
 

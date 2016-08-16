@@ -16,20 +16,18 @@ namespace forte.devices
     {
         public static class Registrar
         {
-            private static readonly object MapperLock = new object();
-
             public static void RegisterDependencies(IUnityContainer container)
             {
                 container.RegisterType<IDeviceRepository, DeviceRepository>(new HierarchicalLifetimeManager());
                 container.RegisterType<IDeviceDaemon, DeviceDaemon>(new HierarchicalLifetimeManager());
                 container.RegisterType<IServerListener, ServerListener>(new HierarchicalLifetimeManager());
                 container.RegisterType<IConfigurationManager, ConfigurationManager>(new HierarchicalLifetimeManager());
+                // singleton reference
+                container.RegisterType<IRuntimeConfig, RuntimeConfig>(new ContainerControlledLifetimeManager());
             }
 
             public static void RegisterMappings()
             {
-                //cfg.CreateMap<Audio, VmixAudio>();
-
                 Mapper.CreateMap<DeviceConfig, StreamingDeviceConfig>();
                 Mapper.CreateMap<StreamingDeviceConfig, DeviceConfig>();
 

@@ -7,7 +7,11 @@ namespace forte.devices.data
 {
     public class DeviceDbContext : DbContext
     {
-        public DeviceDbContext() : base("local-db")
+        DeviceDbContext() : this("local-db")
+        {
+        }
+
+        public DeviceDbContext(string connectionString) : base(connectionString)
         {
             Database.CreateIfNotExists();
         }

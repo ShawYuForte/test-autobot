@@ -23,9 +23,14 @@ namespace forte.devices
 
             var container = new UnityContainer();
             WebModule.Registrar.RegisterDependencies(container);
+            WebModule.Registrar.RegisterMappings();
 
             ClientModule.Registrar.RegisterDependencies(container);
             ClientModule.Registrar.RegisterMappings();
+
+            var runtimeConfig = container.Resolve<IRuntimeConfig>();
+            runtimeConfig.DataPath = cliOptions.DataPath;
+            runtimeConfig.LogPath = cliOptions.LogPath;
 
             VmixClientModule.Registrar.RegisterDependencies(container);
             VmixClientModule.Registrar.RegisterMappings();

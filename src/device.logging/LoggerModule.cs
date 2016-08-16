@@ -13,10 +13,18 @@ namespace device.logging
     {
         public static class Registrar
         {
+            /// <summary>
+            /// Register logger dependencies. Depends on IRuntimeConfig
+            /// </summary>
+            /// <param name="unityContainer"></param>
             public static void RegisterDependencies(IUnityContainer unityContainer)
             {
-                unityContainer.RegisterType<ILogger, SeriLoggerEx>();
-                unityContainer.RegisterType<IDeviceLogger, SeriLoggerEx>();
+                unityContainer.RegisterType<SeriLoggerEx, SeriLoggerEx>(new ContainerControlledLifetimeManager());
+                var seriLogger = unityContainer.Resolve<SeriLoggerEx>();
+                seriLogger.Configure();
+
+                unityContainer.RegisterInstance<ILogger>(seriLogger);
+                unityContainer.RegisterInstance<IDeviceLogger>(seriLogger);
             }
         }
     }
