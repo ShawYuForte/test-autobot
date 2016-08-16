@@ -1,4 +1,5 @@
 ﻿using System;
+using device.logging;
 using forte.devices.models;
 using forte.devices.services;
 using forte.models;
@@ -17,7 +18,6 @@ namespace forte.devices
             Console.Write("Starting client connection... ");
             var container = new UnityContainer();
 
-            //ServiceModule.Registrar.RegisterDependencies(container);
             ClientModule.Registrar.RegisterDependencies(container);
             ClientModule.Registrar.RegisterMappings();
 

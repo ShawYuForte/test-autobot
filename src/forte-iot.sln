@@ -38,6 +38,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "device.client.console", "de
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "device.client.web", "device.client.web\device.client.web.csproj", "{30D61209-29E3-4FC7-9BC1-3A5CE830DB25}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "device.logging", "device.logging\device.logging.csproj", "{9DB2F28E-0F35-4270-94B5-509E821FAACF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -72,6 +74,10 @@ Global
 		{30D61209-29E3-4FC7-9BC1-3A5CE830DB25}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{30D61209-29E3-4FC7-9BC1-3A5CE830DB25}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{30D61209-29E3-4FC7-9BC1-3A5CE830DB25}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9DB2F28E-0F35-4270-94B5-509E821FAACF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9DB2F28E-0F35-4270-94B5-509E821FAACF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9DB2F28E-0F35-4270-94B5-509E821FAACF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9DB2F28E-0F35-4270-94B5-509E821FAACF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
