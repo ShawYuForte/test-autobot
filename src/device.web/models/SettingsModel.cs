@@ -11,9 +11,9 @@ namespace device.web.models
     {
         public SettingsModel()
         {
-            Settings = new Dictionary<string, object>();
+            Settings = new Dictionary<string, DataValue>();
         }
 
-        public Dictionary<string, object> Settings { get; set; }
+        public Dictionary<string, DataValue> Settings { get; set; }
     }
 }

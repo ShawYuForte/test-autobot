@@ -19,12 +19,12 @@ namespace device.web
 
             public static void RegisterMappings()
             {
-                Mapper.CreateMap<DataValue, object>()
-                    .ConvertUsing(source => source.Get());
+                //Mapper.CreateMap<DataValue, object>()
+                //    .ConvertUsing(source => source.Get());
 
                 Mapper.CreateMap<StreamingDeviceConfig, SettingsModel>()
                     .ForMember(destination => destination.Settings,
-                        config => config.MapFrom(source => source.ToDictionary()));
+                        config => config.MapFrom(source => source.ToDictionary(false)));
             }
         }
     }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using forte.models;
 
 namespace forte.devices.models
@@ -53,9 +54,31 @@ namespace forte.devices.models
             return Equals(value, default(T)) ? defaultValue : value;
         }
 
-        public IDictionary<string, DataValue> ToDictionary()
+        public object Get(string setting)
         {
-            return new ReadOnlyDictionary<string, DataValue>(_settings);
+            return _settings.ContainsKey(setting) ? _settings[setting].Get() : null;
+        }
+
+        public bool Contains(string setting)
+        {
+            return _settings.ContainsKey(setting);
+        }
+
+        public IDictionary<string, DataValue> ToDictionary(bool includeRestricted = false)
+        {
+            var settings = _settings;
+
+            if (!includeRestricted)
+            {
+                settings = settings.Where(setting => 
+                        setting.Key != nameof(DeviceId) && 
+                        setting.Key != nameof(OperatingSystem) &&
+                        setting.Key != nameof(Processor) &&
+                        setting.Key != nameof(Memory))
+                    .ToDictionary(x => x.Key, x => x.Value);
+            }
+
+            return new ReadOnlyDictionary<string, DataValue>(settings);
         }
     }
 }

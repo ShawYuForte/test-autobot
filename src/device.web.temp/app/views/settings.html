@@ -1,0 +1,23 @@
+﻿<fieldset>
+    <legend>Streaming Device Settings</legend>
+
+    <form class="form-horizontal" name="model.settingsForm">
+
+        <div class="form-group" ng-repeat="(setting, value) in settings">
+
+            <label class="col-md-4 control-label" ng-bind="setting"></label>
+
+            <div class="col-md-6">
+                <input type="text" class="form-control" ng-model="value.stringValue" name="setting_{{$index}}"/>
+            </div>
+
+            <div class="col-md-2" ng-if="model.settingsForm['setting_' + $index].$dirty">
+                <button type="submit" class="btn btn-primary" ng-click="save(setting, value)">Save</button>
+                <button type="button" class="btn btn-warning" ng-click="cancel()">Cancel</button>
+            </div>
+
+        </div>
+
+    </form>
+
+</fieldset>
