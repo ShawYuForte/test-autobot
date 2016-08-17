@@ -22,6 +22,8 @@
     "angular-route": "^1.5.8",
     "angular-resource": "^1.5.8",
     "angular-loading-bar": "^0.9.0",
-    "signalr": "^2.2.1"
+    "signalr": "^2.2.1",
+    "moment": "^2.14.1",
+    "toastr": "^2.1.3"
   }
 }

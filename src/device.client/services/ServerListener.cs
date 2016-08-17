@@ -14,6 +14,7 @@ namespace forte.devices.services
         private readonly IConfigurationManager _configurationManager;
         private readonly ILogger _logger;
         private Timer _timer;
+        private bool _retry;
 
         public ServerListener(IConfigurationManager configurationManager, ILogger logger)
         {
@@ -26,11 +27,14 @@ namespace forte.devices.services
         public void Disconnect()
         {
             //_cancellationTokenSource.Cancel();
+            _retry = false;
+            _hubConnection.Stop();
             _hubConnection.Dispose();
         }
 
         private async Task ConnectAsync()
         {
+            _retry = true;
             if (_hubConnection != null)
             {
                 await _hubConnection.Start();
@@ -87,6 +91,7 @@ namespace forte.devices.services
 
         private void OnHubConnectionOnClosed()
         {
+            if (!_retry) return;
             _logger.Debug("Connection closed, will retry in 10 seconds!");
             _timer = new Timer(state =>
             {

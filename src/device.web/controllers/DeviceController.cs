@@ -31,6 +31,27 @@ namespace device.web.controllers
             return Ok(_deviceDaemon.GetState());
         }
 
+        [Route("shutdown"), HttpPost]
+        public IHttpActionResult Shutdown()
+        {
+            _deviceDaemon.Stop();
+            return Ok();
+        }
+
+        [Route("fetch"), HttpPost]
+        public IHttpActionResult FetchCommand()
+        {
+            _deviceDaemon.QueryServer();
+            return Ok();
+        }
+
+        [Route("publish"), HttpPost]
+        public IHttpActionResult PublishState()
+        {
+            _deviceDaemon.PublishState();
+            return Ok();
+        }
+
         [Route("settings"), HttpGet]
         public IHttpActionResult GetSettings()
         {

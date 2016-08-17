@@ -410,6 +410,7 @@ namespace forte.devices.services
 
         public void Stop()
         {
+            _serverListener.Disconnect();
             Stopped = true;
         }
 
