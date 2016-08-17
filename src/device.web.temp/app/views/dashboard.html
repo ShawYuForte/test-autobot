@@ -1,6 +1,62 @@
 ﻿<fieldset>
     <legend>Streaming Device Dashboard</legend>
 
-    
+    <div class="btn-group btn-group-justified">
+        <div class="btn-group">
+            <button type="button" class="btn btn-success">Fetch Command</button>
+        </div>
+        <div class="btn-group">
+            <button type="button" class="btn btn-primary">Refresh State</button>
+        </div>
+        <div class="btn-group">
+            <button type="button" class="btn btn-primary">Publish State</button>
+        </div>
+        <div class="btn-group">
+            <button type="button" class="btn btn-danger">Shutdown</button>
+        </div>
+    </div>
+
+    <br />
+
+    <table class="table table-responsive table-hover table-striped">
+        <thead>
+            <tr>
+                <th>Device identifier</th>
+                <th>Device status</th>
+                <th>State captured on</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td ng-bind="state.deviceId"></td>
+                <td ng-bind="state.status"></td>
+                <td ng-bind="state.stateCapturedOn | date: 'MM/dd/yyyy h:mma'"></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4>
+                LOGS
+            </h4>
+        </div>
+        <table class="table table-fixed">
+            <thead>
+                <tr>
+                    <th class="col-xs-2">Time</th>
+                    <th class="col-xs-1">Level</th>
+                    <th class="col-xs-9">Message</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="log in logs" ng-class="toCss(log.level)">
+                    <td class="col-xs-2" ng-bind="log.timestamp | date: 'MM/dd/yyyy h:mma'"></td>
+                    <td class="col-xs-1 text-uppercase" ng-bind="log.level"></td>
+                    <td class="col-xs-9" ng-bind="log.renderedMessage"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 
 </fieldset>

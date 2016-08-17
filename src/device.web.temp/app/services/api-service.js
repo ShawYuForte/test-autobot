@@ -7,11 +7,16 @@
 
         var service = $resource(serviceUrl, { }, {
             fetchSettings: { method: 'GET', url: serviceUrl + 'settings' },
+            fetchState: { method: 'GET' },
             updateSetting: { method: 'POST', url: serviceUrl + 'settings/:setting' }
         });
 
         var fetchSettings = function() {
             return service.fetchSettings().$promise;
+        }
+
+        var fetchState = function () {
+            return service.fetchState().$promise;
         }
 
         var updateSetting = function(setting, value) {
@@ -20,6 +25,7 @@
 
         return {
             fetchSettings: fetchSettings,
+            fetchState: fetchState,
             updateSetting: updateSetting
         }
     }

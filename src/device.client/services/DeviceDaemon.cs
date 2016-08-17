@@ -441,7 +441,7 @@ namespace forte.devices.services
             throw new Exception(response.ErrorMessage ?? response.StatusDescription);
         }
 
-        private StreamingDeviceState GetState()
+        public StreamingDeviceState GetState()
         {
             var state = _deviceRepository.GetDeviceState();
             if (state != null) return state;

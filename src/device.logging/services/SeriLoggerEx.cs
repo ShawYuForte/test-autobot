@@ -11,23 +11,19 @@ using Serilog;
 
 namespace device.logging.services
 {
-    public class SeriLoggerEx : SeriLogger, IDeviceLogger
+    public class SeriLoggerEx : SeriLogger
     {
         private LoggerConfiguration _loggerConfiguration;
         private readonly IRuntimeConfig _runtimeConfig;
+        private readonly IHubContext _hubContext;
 
-        public SeriLoggerEx(IRuntimeConfig runtimeConfig)
+        public SeriLoggerEx(IRuntimeConfig runtimeConfig, IHubContext hubContext)
         {
             _runtimeConfig = runtimeConfig;
+            _hubContext = hubContext;
         }
 
-        public void ConfigureSignalRSink(IHubContext hubContext)
-        {
-            _loggerConfiguration.WriteTo.SignalR(hubContext);
-            Log.Logger = _loggerConfiguration.CreateLogger();
-        }
-
-        protected override LoggerConfiguration ConfigureSerilog()
+        protected override LoggerConfiguration ConfigureSinks()
         {
             if (!string.IsNullOrWhiteSpace(_runtimeConfig.LogPath))
             {
@@ -35,7 +31,10 @@ namespace device.logging.services
                     Directory.CreateDirectory(_runtimeConfig.LogPath);
                 FileSinkPattern = $"{_runtimeConfig.LogPath}\\device-{{Date}}.log";
             }
-            _loggerConfiguration = base.ConfigureSerilog();
+
+            _loggerConfiguration = base.ConfigureSinks();
+            _loggerConfiguration.WriteTo.SignalR(_hubContext);
+
             return _loggerConfiguration;
         }
     }

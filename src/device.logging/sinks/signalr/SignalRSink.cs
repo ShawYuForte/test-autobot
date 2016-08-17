@@ -15,6 +15,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.AspNet.SignalR;
+using Newtonsoft.Json;
 using Serilog.Sinks.PeriodicBatching;
 using LogEvent = device.logging.sinks.signalr.data.LogEvent;
 
@@ -31,7 +32,7 @@ namespace device.logging.sinks.signalr
         /// A reasonable default for the number of events posted in
         /// each batch.
         /// </summary>
-        public const int DefaultBatchPostingLimit = 5;
+        public const int DefaultBatchPostingLimit = 1;
 
         /// <summary>
         /// A reasonable default time to wait between checking for event batches.
@@ -49,7 +50,7 @@ namespace device.logging.sinks.signalr
             : base(batchPostingLimit, period)
         {
             if (context == null)
-                throw new ArgumentNullException("context");
+                throw new ArgumentNullException(nameof(context));
             _formatProvider = formatProvider;
             _context = context;
         }
@@ -67,7 +68,9 @@ namespace device.logging.sinks.signalr
 
             foreach (var logEvent in events)
             {
-                _context.Clients.All.sendLogEvent(new LogEvent(logEvent, logEvent.RenderMessage(_formatProvider)));
+                var logEventJson =
+                    JsonConvert.SerializeObject(new LogEvent(logEvent, logEvent.RenderMessage(_formatProvider)));
+                _context.Clients.All.sendLogEvent(logEventJson);
             }
         }
     }

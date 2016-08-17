@@ -4,6 +4,7 @@ using device.web.models;
 using device.web.server;
 using forte.devices.models;
 using forte.models;
+using Microsoft.AspNet.SignalR;
 using Microsoft.Practices.Unity;
 
 namespace device.web
@@ -15,6 +16,8 @@ namespace device.web
             public static void RegisterDependencies(IUnityContainer container)
             {
                 UnityResolver.CreateDefault(container);
+
+                container.RegisterInstance(GlobalHost.ConnectionManager.GetHubContext<NotificationHub>());
             }
 
             public static void RegisterMappings()

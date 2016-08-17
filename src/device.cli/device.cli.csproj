@@ -69,8 +69,8 @@
       <HintPath>..\packages\FluentValidation.6.2.1.0\lib\Net45\FluentValidation.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="forte.modules.serilog, Version=1.0.5.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\forte.modules.serilog.1.0.5\lib\net45\forte.modules.serilog.dll</HintPath>
+    <Reference Include="forte.modules.serilog, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\forte.modules.serilog.1.1.0\lib\net45\forte.modules.serilog.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="forte.specs, Version=1.0.4.0, Culture=neutral, processorArchitecture=MSIL">

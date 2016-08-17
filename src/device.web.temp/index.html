@@ -14,8 +14,8 @@
 
     <!-- Bootstrap core CSS -->
     <link href="bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link href="bower_components/font-awesome/css/font-awesome.min.css" rel="stylesheet"/>
-    <link href="bower_components/angular-loading-bar/build/loading-bar.css" rel="stylesheet"/>
+    <link href="bower_components/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="bower_components/angular-loading-bar/build/loading-bar.css" rel="stylesheet" />
 
     <!-- Custom styles for this template -->
     <link href="css/client.css" rel="stylesheet">
@@ -69,8 +69,8 @@
             </div><!--/.container-fluid -->
         </nav>
 
-        <div class="container">
-            <div ng-view class="row" onload="activate()"></div>
+        <div class="row">
+            <div ng-view class="col-md-12" onload="activate()"></div>
         </div>
 
     </div> <!-- /container -->
@@ -79,6 +79,9 @@
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script>
+    <!--<script src="bower_components/signalr/jquery.signalR.min.js"></script>
+    <script src="signalr/hubs"></script>-->
+    <script src="bower_components/moment/moment.js"></script>
     <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
     <script src="bower_components/angular/angular.min.js"></script>
     <script src="bower_components/angular-route/angular-route.min.js"></script>
@@ -86,6 +89,7 @@
     <script src="bower_components/angular-loading-bar/build/loading-bar.min.js"></script>
     <script src="app/dashboard-app.js"></script>
     <script src="app/services/api-service.js"></script>
+    <script src="app/services/signalr-service.js"></script>
     <script src="app/controllers/dashboard.js"></script>
     <script src="app/controllers/settings.js"></script>
 </body>

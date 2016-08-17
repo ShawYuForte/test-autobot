@@ -20,13 +20,23 @@ namespace device.web.server
         {
             // Configure Web API for self-host. 
             var config = new HttpConfiguration();
+
+            config.MapHttpAttributeRoutes();
             config.Routes.MapHttpRoute(
                 "DefaultApi",
                 "api/{controller}/{id}",
-                new {id = RouteParameter.Optional}
+                new {id = RouteParameter.Optional }
             );
 
+            var formatters = config.Formatters;
+            var jsonFormatter = formatters.JsonFormatter;
+            CoreModule.SetDefaultSerializerSettings(jsonFormatter.SerializerSettings);
+
+            // remove XML support for Web API calls
+            formatters.Remove(formatters.XmlFormatter);
+
             appBuilder.UseWebApi(config);
+            appBuilder.MapSignalR();
 
             appBuilder.UseFileServer(new FileServerOptions()
             {
@@ -37,14 +47,6 @@ namespace device.web.server
             appBuilder.UseStaticFiles("/client");
 
             config.DependencyResolver = UnityResolver.Default;
-
-            var formatters = config.Formatters;
-            var jsonFormatter = formatters.JsonFormatter;
-            //jsonFormatter.SerializerSettings = CoreModule.GetSerializerSettings(jsonFormatter.SerializerSettings);
-            CoreModule.SetDefaultSerializerSettings(jsonFormatter.SerializerSettings);
-
-            // remove XML support for Web API calls
-            formatters.Remove(formatters.XmlFormatter);
         }
     }
 }

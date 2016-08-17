@@ -24,7 +24,6 @@ namespace device.logging
                 seriLogger.Configure();
 
                 unityContainer.RegisterInstance<ILogger>(seriLogger);
-                unityContainer.RegisterInstance<IDeviceLogger>(seriLogger);
             }
         }
     }
