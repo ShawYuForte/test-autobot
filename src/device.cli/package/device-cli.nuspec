@@ -4,8 +4,8 @@
   <metadata>
     <!-- Read this before publishing packages to chocolatey.org: https://github.com/chocolatey/chocolatey/wiki/CreatePackages -->
     <id>device-cli</id>
-    <title>device-cli (Install)</title>
-    <version>1.0</version>
+    <title>Device CLI (Install)</title>
+    <version>1.0.0</version>
     <authors>Forte Tech</authors>
     <owners>Forte Nexus, LLC</owners>
     <summary>Forte Device Command Line Interface</summary>
@@ -26,11 +26,11 @@
       <dependency id="" version="__VERSION__" />
       <dependency id="" />
     </dependencies>-->
-    <releaseNotes>__REPLACE_OR_REMOVE__MarkDown_Okay</releaseNotes>
+    <releaseNotes>First release of the device daemon</releaseNotes>
     <!--<provides></provides>-->
   </metadata>
   <files>
     <file src="tools\**" target="tools" />
-    <file src="..\bin\release\**" target="tools" />
+    <file src="..\bin\release\**" target="tools\cli" />
   </files>
 </package>

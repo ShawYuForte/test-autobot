@@ -201,14 +201,20 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="options\RunOptions.cs" />
     <Compile Include="options\CliOptions.cs" />
+    <Compile Include="options\UpgradeOptions.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="device.cli.nuspec" />
     <None Include="packages.config" />
+    <None Include="package\device-cli.nuspec" />
+    <None Include="package\tools\chocolateyBeforeModify.ps1" />
+    <None Include="package\tools\chocolateyinstall.ps1" />
+    <None Include="package\tools\chocolateyuninstall.ps1" />
+    <None Include="package\tools\ReadMe.md" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\device.client.vmix\device.client.vmix.csproj">
