@@ -8,15 +8,18 @@ using forte.devices.entities;
 using forte.devices.models;
 using forte.devices.services;
 using forte.models;
+using forte.services;
 
 namespace forte.devices.data
 {
     public class DeviceRepository : IDeviceRepository
     {
         private readonly string _connectionString;
+        private readonly ILogger _logger;
 
-        public DeviceRepository(IRuntimeConfig runtimeConfig)
+        public DeviceRepository(IRuntimeConfig runtimeConfig, ILogger logger)
         {
+            _logger = logger;
             if (!Directory.Exists(runtimeConfig.DataPath))
                 Directory.CreateDirectory(runtimeConfig.DataPath);
 
@@ -37,10 +40,7 @@ namespace forte.devices.data
         {
             using (var dbContext = new DeviceDbContext(_connectionString))
             {
-                return dbContext.DeviceConfig.FirstOrDefault() ?? new DeviceConfig
-                {
-                    DeviceId = Guid.Parse("602687AA-37BD-4E92-B0F8-05FEFFB4A1E0")
-                };
+                return dbContext.DeviceConfig.FirstOrDefault();
             }
         }
 
@@ -102,8 +102,6 @@ namespace forte.devices.data
         {
             using (var dbContext = new DeviceDbContext(_connectionString))
             {
-                if (deviceState.DeviceId == Guid.Empty)
-                    deviceState.DeviceId = Guid.Parse("602687AA-37BD-4E92-B0F8-05FEFFB4A1E0");
                 deviceState.StateCapturedOn = DateTime.UtcNow;
 
                 var existing = dbContext.DeviceState.Count();

@@ -67,9 +67,7 @@ namespace forte.devices.services
             if (string.IsNullOrWhiteSpace(config.Get<string>(SettingParams.ServerRootPath)))
                 config = _configurationManager.UpdateSetting(SettingParams.ServerRootPath, "http://forte-devapi.azurewebsites.net");
             if (string.IsNullOrWhiteSpace(config.Get<string>(SettingParams.ServerApiPath)))
-                config = _configurationManager.UpdateSetting(SettingParams.ServerApiPath, "http://forte-devapi.azurewebsites.net/api");
-            if (config.DeviceId == Guid.Empty)
-                _configurationManager.UpdateSetting(nameof(config.DeviceId), Guid.Parse("602687AA-37BD-4E92-B0F8-05FEFFB4A1E0"));
+                _configurationManager.UpdateSetting(SettingParams.ServerApiPath, "http://forte-devapi.azurewebsites.net/api");
         }
 
         public bool StartStreaming(DeviceCommandModel command)
@@ -448,6 +446,7 @@ namespace forte.devices.services
             if (state != null) return state;
 
             var config = _configurationManager.GetDeviceConfig();
+
             state = new StreamingDeviceState
             {
                 DeviceId = config.DeviceId,

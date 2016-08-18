@@ -1,8 +1,10 @@
-﻿using AutoMapper;
+﻿using System;
+using AutoMapper;
 using forte.devices.data;
 using forte.devices.extensions;
 using forte.devices.models;
 using forte.models;
+using forte.services;
 
 namespace forte.devices.services
 {
@@ -10,10 +12,12 @@ namespace forte.devices.services
     {
         private readonly IDeviceRepository _deviceRepository;
         private StreamingDeviceConfig _deviceConfig;
+        private readonly ILogger _logger;
 
-        public ConfigurationManager(IDeviceRepository deviceRepository)
+        public ConfigurationManager(IDeviceRepository deviceRepository, ILogger logger)
         {
             _deviceRepository = deviceRepository;
+            _logger = logger;
         }
 
         public StreamingDeviceConfig GetDeviceConfig()
@@ -25,7 +29,14 @@ namespace forte.devices.services
             {
                 _deviceConfig[setting.Name] = setting.ToValue();
             }
-            return _deviceConfig;
+
+            if (_deviceConfig.DeviceId != Guid.Empty) return _deviceConfig;
+
+            _logger.Warning(
+                "Device identifier is empty. If this not the first run, then this is an error and will break the integration flows");
+            var deviceId = Guid.NewGuid();
+            _logger.Information("Assigning new device identifier {@id}", deviceId);
+            return UpdateSetting(nameof(_deviceConfig.DeviceId), deviceId);
         }
 
         public StreamingDeviceConfig UpdateSetting<T>(string setting, T value)

@@ -10,7 +10,7 @@
 
             notifications.client.sendLogEvent = function (event) {
                 event = angular.fromJson(event);
-                $log.debug('Log event', event);
+                //$log.debug('Log event', event);
                 $rootScope.$broadcast('log-event', event);
             }
 

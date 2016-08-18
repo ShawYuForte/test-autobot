@@ -44,7 +44,7 @@
         $scope.logs = [];
 
         $scope.$on('log-event', function (e, logEvent) {
-            $log.debug('Received log event', logEvent);
+            //$log.debug('Received log event', logEvent);
             $scope.$apply(function() {
                 $scope.logs.unshift(logEvent);
                 if ($scope.logs.length > 100) {
@@ -76,6 +76,7 @@
         }
 
         function shutdownSucceeded() {
+            toastr.success('Server shut down successfully');
             $window.close();
         }
 
