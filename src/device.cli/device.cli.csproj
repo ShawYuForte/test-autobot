@@ -241,7 +241,7 @@
     xcopy /s /y "$(SolutionDir)packages\Microsoft.SqlServer.Compact.4.0.8876.1\NativeBinaries\amd64\*.*" "$(TargetDir)amd64"</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent>xcopy /s /y /e $(SolutionDir)\device.web\client $(TargetDir)\client</PreBuildEvent>
+    <PreBuildEvent>xcopy /s /y /e /I $(SolutionDir)\device.web\client $(TargetDir)\client</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- Do not remove this test for UTF-8: if “Ω” doesn’t appear as greek uppercase omega letter enclosed in quotation marks, you should use an editor that supports UTF-8, not this one. -->
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <!-- Read this before publishing packages to chocolatey.org: https://github.com/chocolatey/chocolatey/wiki/CreatePackages -->
+    <id>device-cli</id>
+    <title>device-cli (Install)</title>
+    <version>1.0</version>
+    <authors>Forte Tech</authors>
+    <owners>Forte Nexus, LLC</owners>
+    <summary>Forte Device Command Line Interface</summary>
+    <description>Forte device CLI and streaming daemon. 
+    </description>
+    <projectUrl>https://forte.fit</projectUrl>
+    <!-- <packageSourceUrl></packageSourceUrl> -->
+    <!--<projectSourceUrl></projectSourceUrl>
+    <docsUrl></docsUrl>
+    <mailingListUrl></mailingListUrl>
+    <bugTrackerUrl></bugTrackerUrl>-->
+    <tags>device-cli admin forte streaming</tags>
+    <copyright></copyright>
+    <!-- <licenseUrl></licenseUrl> -->
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <!--<iconUrl>http://cdn.rawgit.com/__REPLACE_YOUR_REPO__/master/icons/device-cli.png</iconUrl>-->
+    <!--<dependencies>
+      <dependency id="" version="__VERSION__" />
+      <dependency id="" />
+    </dependencies>-->
+    <releaseNotes>__REPLACE_OR_REMOVE__MarkDown_Okay</releaseNotes>
+    <!--<provides></provides>-->
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+    <file src="..\bin\release\**" target="tools" />
+  </files>
+</package>
