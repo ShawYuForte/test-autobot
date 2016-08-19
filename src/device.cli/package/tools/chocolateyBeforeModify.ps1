@@ -8,5 +8,5 @@
 }
 Catch
 {
-	Write-Host "Could not issue command, the server might already be shut down"
+	#Write-Host "Could not issue command, the server might already be shut down"
 }

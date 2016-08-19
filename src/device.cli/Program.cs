@@ -25,15 +25,19 @@ namespace forte.devices
     {
         private static void Main(string[] args)
         {
-            var options = new CliOptions();
-            if (!Parser.Default.ParseArguments(args, options, ExecuteOptions))
+            string verb = null;
+            object options = null;
+
+            var cliOptions = new CliOptions();
+            if (!Parser.Default.ParseArguments(args, cliOptions, (parsedVerb, parsedOptions) =>
+            {
+                verb = parsedVerb;
+                options = parsedOptions;
+            }))
             {
                 Environment.Exit(Parser.DefaultExitCodeFail);
             }
-        }
 
-        private static void ExecuteOptions(string verb, object options)
-        {
             switch (verb)
             {
                 case RunOptions.VerbName:
@@ -54,7 +58,8 @@ namespace forte.devices
             {
                 var stateJson = FetchRunningDaemonState();
                 var parsedState = JObject.Parse(stateJson);
-                var status = parsedState.SelectToken("status").Value<StreamingDeviceStatuses>();
+                var statusString = parsedState.SelectToken("status").Value<string>();
+                var status = (StreamingDeviceStatuses)Enum.Parse(typeof(StreamingDeviceStatuses), statusString);
                 switch (status)
                 {
                     case StreamingDeviceStatuses.Idle:
@@ -79,12 +84,13 @@ namespace forte.devices
                 // Ignore
             }
 
-            var process = new Process();
-            var startup = new ProcessStartInfo
+            var startup = new ProcessStartInfo("choco.exe")
             {
                  UseShellExecute = true,
-                 
+                 CreateNoWindow = false,
+                 Arguments = $"upgrade device-cli --source {options.Source} -y"
             };
+            Process.Start(startup);
         }
 
         #region IsAlreadyRunning
