@@ -85,7 +85,8 @@ namespace forte.devices.commands
                 WorkingDirectory = _options.Repo
             };
             var process = Process.Start(startup);
-            Console.WriteLine(process.StandardOutput.ReadToEnd());
+            process.OutputDataReceived += Process_OutputDataReceived;
+            //Console.WriteLine(process.StandardOutput.ReadToEnd());
             process.WaitForExit();
             if (process.ExitCode != 0)
             {
@@ -100,6 +101,11 @@ namespace forte.devices.commands
             }
 
             Console.WriteLine("No new versions found.");
+        }
+
+        private void Process_OutputDataReceived(object sender, DataReceivedEventArgs e)
+        {
+            Console.WriteLine(e.Data);
         }
     }
 }

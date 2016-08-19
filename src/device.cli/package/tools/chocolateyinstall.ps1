@@ -30,6 +30,7 @@ Install-ChocolateyPath c:\forte\device-cli
 
 # Create scheduled upgrade task
 $ScriptPath = Split-Path $MyInvocation.InvocationName
+Write-Host "Executing $ScriptPath\createscheduledtask.ps1..."
 Invoke-Expression "$ScriptPath\createscheduledtask.ps1"
 
 Update-SessionEnvironment
