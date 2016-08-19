@@ -27,9 +27,9 @@ Write-Host "Copying forte device-cli files..."
 Move-Item "$($env:chocolateyPackageFolder)\tools\cli" "c:\forte\device-cli" -Confirm:$false
 Install-ChocolateyPath c:\forte\device-cli
 
-#$action = New-ScheduledTaskAction -Execute 'Powershell.exe' -Argument '-NoProfile -WindowStyle Hidden -command "& {get-eventlog -logname Application -After ((get-date).AddDays(-1)) | Export-Csv -Path c:\fso\applog.csv -Force -NoTypeInformation}"'
-#$trigger = New-ScheduledTaskTrigger -Daily -At 2am
+$action = New-ScheduledTaskAction -Execute 'device-cli.exe' -Argument 'upgrade --source C:\dev\forte\iot\src\device.cli\package'
+$trigger = New-ScheduledTaskTrigger -Daily -At 2am
 
-#Register-ScheduledTask -Action $action -Trigger $trigger -TaskName "Forte.Device-CLI.Upgrade" -Description "Forte Device CLI Version Upgrade (if available)."
+Register-ScheduledTask -Action $action -Trigger $trigger -TaskName "Forte device-cli upgrade" -Description "Forte Device CLI Version Upgrade (if available)."
 
 Update-SessionEnvironment
