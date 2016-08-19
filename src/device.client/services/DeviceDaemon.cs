@@ -399,7 +399,7 @@ namespace forte.devices.services
                 if (seconds <= 0 || FetchRequested)
                 {
                     FetchRequested = false;
-                    seconds = 10;
+                    seconds = 30;
                     FetchCommand();
                 }
                 Thread.Sleep(1000);

@@ -75,19 +75,30 @@ namespace forte.devices.commands
 
             var existingPackages = Directory.GetDirectories(_options.Repo);
             Console.WriteLine("Looking for updates from nuget feed...");
+            Console.WriteLine();
 
-            var startup = new ProcessStartInfo("nuget.exe")
+            var process = new Process
             {
-                UseShellExecute = false,
-                //CreateNoWindow = true,
-                RedirectStandardOutput = true,
-                Arguments = string.IsNullOrWhiteSpace(_options.Source) ? "install device-cli" : $"install device-cli -source {_options.Source}",
-                WorkingDirectory = _options.Repo
+                StartInfo =
+                {
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    Arguments = string.IsNullOrWhiteSpace(_options.Source)
+                        ? "install device-cli"
+                        : $"install device-cli -source {_options.Source}",
+                    WorkingDirectory = _options.Repo
+                }
             };
-            var process = Process.Start(startup);
             process.OutputDataReceived += Process_OutputDataReceived;
-            //Console.WriteLine(process.StandardOutput.ReadToEnd());
+
+            process.Start();
+
+            // Start the asynchronous read of the sort output stream.
+            process.BeginOutputReadLine();
+
             process.WaitForExit();
+
+            Console.WriteLine();
             if (process.ExitCode != 0)
             {
                 Console.WriteLine($"Nuget process exited with code {process.ExitCode}");
