@@ -29,6 +29,7 @@ Move-Item "$($env:chocolateyPackageFolder)\tools\cli" "c:\forte\device-cli" -Con
 Install-ChocolateyPath c:\forte\device-cli
 
 # Create scheduled upgrade task
-Invoke-Expression createscheduledtask.ps1
+$ScriptPath = Split-Path $MyInvocation.InvocationName
+Invoke-Expression "$ScriptPath\createscheduledtask.ps1"
 
 Update-SessionEnvironment
