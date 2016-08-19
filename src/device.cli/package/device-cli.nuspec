@@ -5,7 +5,7 @@
     <!-- Read this before publishing packages to chocolatey.org: https://github.com/chocolatey/chocolatey/wiki/CreatePackages -->
     <id>device-cli</id>
     <title>Device CLI (Install)</title>
-    <version>1.0.4</version>
+    <version>1.0.5</version>
     <authors>Forte Tech</authors>
     <owners>Forte Nexus, LLC</owners>
     <summary>Forte Device Command Line Interface</summary>
@@ -26,7 +26,7 @@
       <dependency id="" version="__VERSION__" />
       <dependency id="" />
     </dependencies>-->
-    <releaseNotes>First release of the device daemon</releaseNotes>
+    <releaseNotes>Updated wait time for checking for new commands from 10 s to 30 s</releaseNotes>
     <!--<provides></provides>-->
   </metadata>
   <files>

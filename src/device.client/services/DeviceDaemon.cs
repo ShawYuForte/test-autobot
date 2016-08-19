@@ -391,7 +391,7 @@ namespace forte.devices.services
 
         public void Run()
         {
-            var seconds = 10;
+            var seconds = 30;
             _serverListener.Connect();
             while (!Stopped)
             {
