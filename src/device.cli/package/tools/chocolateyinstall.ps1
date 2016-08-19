@@ -23,13 +23,12 @@ if (Test-Path c:\forte\device-cli -PathType Container){
 	Remove-Item c:\forte\device-cli -Recurse:$true -Force:$true -Confirm:$false
 }
 
+# Copy files into the forte folder
 Write-Host "Copying forte device-cli files..."
 Move-Item "$($env:chocolateyPackageFolder)\tools\cli" "c:\forte\device-cli" -Confirm:$false
 Install-ChocolateyPath c:\forte\device-cli
 
-$action = New-ScheduledTaskAction -Execute 'device-cli.exe' -Argument 'upgrade --source C:\dev\forte\iot\src\device.cli\package'
-$trigger = New-ScheduledTaskTrigger -Daily -At 2am
-
-Register-ScheduledTask -Action $action -Trigger $trigger -TaskName "Forte device-cli upgrade" -Description "Forte Device CLI Version Upgrade (if available)."
+# Create scheduled upgrade task
+Invoke-Expression createscheduledtask.ps1
 
 Update-SessionEnvironment

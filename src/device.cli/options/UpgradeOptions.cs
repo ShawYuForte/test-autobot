@@ -11,8 +11,11 @@ namespace forte.devices.options
     {
         public const string VerbName = "upgrade";
 
-        [Option("source", Required = true, HelpText = "Updated package source.")]
+        [Option("source", Required = false, HelpText = "Updated package source.")]
         public string Source { get; set; }
+
+        [Option("repo", DefaultValue = @"c:\forte\repo", HelpText = "Local NuGet package repo.")]
+        public string Repo { get; set; }
 
         [HelpOption]
         public string GetUsage()

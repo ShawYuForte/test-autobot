@@ -201,17 +201,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="commands\RunCommand.cs" />
+    <Compile Include="commands\UpgradeCommand.cs" />
     <Compile Include="options\RunOptions.cs" />
     <Compile Include="options\CliOptions.cs" />
     <Compile Include="options\UpgradeOptions.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="utils\RuntimeUtility.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
     <None Include="package\device-cli.nuspec" />
-    <None Include="package\tools\chocolateyBeforeModify.ps1" />
+    <None Include="package\tools\chocolateybeforemodify.ps1" />
+    <None Include="package\tools\createscheduledtask.ps1" />
     <None Include="package\tools\chocolateyinstall.ps1" />
     <None Include="package\tools\chocolateyuninstall.ps1" />
     <None Include="package\tools\ReadMe.md" />
