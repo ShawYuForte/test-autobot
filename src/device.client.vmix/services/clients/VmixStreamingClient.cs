@@ -37,7 +37,7 @@ namespace forte.devices.services.clients
             if (string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.VmixApiPath)))
                 config = _configurationManager.UpdateSetting(VmixSettingParams.VmixApiPath, "http://localhost:8088/api");
             if (string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.VmixExePath)))
-                config = _configurationManager.UpdateSetting(VmixSettingParams.VmixExePath, @"c:\Program Files (x86)\vMix\vMix.exe");
+                config = _configurationManager.UpdateSetting(VmixSettingParams.VmixExePath, @"C:\Program Files (x86)\vMix\vMix64.exe");
             if (string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.VmixPlaylistName)))
                 config = _configurationManager.UpdateSetting(VmixSettingParams.VmixPlaylistName, "CameraSwitchingProgram");
             if (string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.VmixPresetTemplateFilePath)))

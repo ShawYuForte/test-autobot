@@ -81,6 +81,7 @@ namespace forte.devices.commands
             {
                 StartInfo =
                 {
+                    FileName = "nuget.exe",
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                     Arguments = string.IsNullOrWhiteSpace(_options.Source)
