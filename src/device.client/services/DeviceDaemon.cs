@@ -400,7 +400,15 @@ namespace forte.devices.services
                 {
                     FetchRequested = false;
                     seconds = 30;
-                    FetchCommand();
+
+                    try
+                    {
+                        FetchCommand();
+                    }
+                    catch (Exception exception)
+                    {
+                        _logger.Error(exception, exception.Message);
+                    }
                 }
                 Thread.Sleep(1000);
             }
