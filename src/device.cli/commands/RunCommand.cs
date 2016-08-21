@@ -2,6 +2,7 @@
 
 using System;
 using System.IO;
+using CommandLine;
 using device.logging;
 using device.web;
 using device.web.server;
@@ -61,11 +62,20 @@ namespace forte.devices.commands
 
             CoreModule.SetDefaultSerializerSettings();
 
+            var configManager = container.Resolve<IConfigurationManager>();
             if (!string.IsNullOrWhiteSpace(_options.ServerUrl))
             {
-                var configManager = container.Resolve<IConfigurationManager>();
                 configManager.UpdateSetting(SettingParams.ServerRootPath, _options.ServerUrl);
                 configManager.UpdateSetting(SettingParams.ServerApiPath, $"{_options.ServerUrl}/api");
+            }
+            else
+            {
+                var config = configManager.GetDeviceConfig();
+                if (string.IsNullOrWhiteSpace(config.Get<string>(SettingParams.ServerApiPath)))
+                {
+                    Console.WriteLine("Server URL is required when running for the first time.");
+                    Environment.Exit(Parser.DefaultExitCodeFail);
+                }
             }
 
             var logger = container.Resolve<ILogger>();
