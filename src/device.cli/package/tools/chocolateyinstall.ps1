@@ -37,4 +37,4 @@ Invoke-Expression $scheduledtaskscript
 
 Update-SessionEnvironment
 
-c:\forte\device-cli\device-cli.exe
+c:\forte\device-cli\device-cli.exe run
