@@ -4,7 +4,7 @@ $TaskName = "Forte device-cli upgrade"
 # The description of the task
 $TaskDescr = "Forte Device CLI Version Upgrade (if available)."
 # The Task Action command
-$TaskCommand = "device-cli.exe"
+$TaskCommand = "c:\forte\device-cli\device-cli.exe"
 # The Task Action command argument
 $TaskArg = "upgrade"
 

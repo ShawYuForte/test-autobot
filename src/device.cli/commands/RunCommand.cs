@@ -61,9 +61,12 @@ namespace forte.devices.commands
 
             CoreModule.SetDefaultSerializerSettings();
 
-            var configManager = container.Resolve<IConfigurationManager>();
-            configManager.UpdateSetting(SettingParams.ServerRootPath, _options.ServerUrl);
-            configManager.UpdateSetting(SettingParams.ServerApiPath, $"{_options.ServerUrl}/api");
+            if (!string.IsNullOrWhiteSpace(_options.ServerUrl))
+            {
+                var configManager = container.Resolve<IConfigurationManager>();
+                configManager.UpdateSetting(SettingParams.ServerRootPath, _options.ServerUrl);
+                configManager.UpdateSetting(SettingParams.ServerApiPath, $"{_options.ServerUrl}/api");
+            }
 
             var logger = container.Resolve<ILogger>();
 

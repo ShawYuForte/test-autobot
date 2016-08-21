@@ -25,12 +25,16 @@ if (Test-Path c:\forte\device-cli -PathType Container){
 
 # Copy files into the forte folder
 Write-Host "Copying forte device-cli files..."
+Remove-Item c:\forte\device-cli -Recurse:$true -Force:$true -Confirm:$false
 Move-Item "$($env:chocolateyPackageFolder)\tools\cli" "c:\forte\device-cli" -Confirm:$false
 Install-ChocolateyPath c:\forte\device-cli
 
 # Create scheduled upgrade task
+Write-Host "Scheduling automatic upgrade task..."
 $scheduledtaskscript = "$($env:chocolateyPackageFolder)\tools\createscheduledtask.ps1"
 Write-Host "Executing $scheduledtaskscript..."
 Invoke-Expression $scheduledtaskscript
 
 Update-SessionEnvironment
+
+c:\forte\device-cli\device-cli.exe

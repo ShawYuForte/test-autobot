@@ -7,7 +7,7 @@ namespace forte.devices.options
     {
         public const string VerbName = "run";
 
-        [Option('s', "server", Required = true, HelpText = "API server root url.")]
+        [Option('s', "server", Required = false, HelpText = "API server root url.")]
         public string ServerUrl { get; set; }
 
         [Option('p', "port", Required = false, HelpText = "Local server UI port.", DefaultValue = 9000)]
