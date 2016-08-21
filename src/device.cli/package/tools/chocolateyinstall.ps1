@@ -20,12 +20,12 @@ if (!(Test-Path c:\forte\logs -PathType Container))
 }
 
 if (Test-Path c:\forte\device-cli -PathType Container){
+	Write-Host "Removing previous version..."
 	Remove-Item c:\forte\device-cli -Recurse:$true -Force:$true -Confirm:$false
 }
 
 # Copy files into the forte folder
 Write-Host "Copying forte device-cli files..."
-Remove-Item c:\forte\device-cli -Recurse:$true -Force:$true -Confirm:$false
 Move-Item "$($env:chocolateyPackageFolder)\tools\cli" "c:\forte\device-cli" -Confirm:$false
 Install-ChocolateyPath c:\forte\device-cli
 
