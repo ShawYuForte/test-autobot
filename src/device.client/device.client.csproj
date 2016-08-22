@@ -62,8 +62,8 @@
       <HintPath>..\packages\FluentValidation.6.2.1.0\lib\Net45\FluentValidation.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="forte.specs, Version=1.0.4.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\forte.specs.1.0.4\lib\net45\forte.specs.dll</HintPath>
+    <Reference Include="forte.specs, Version=1.0.5.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\forte.specs.1.0.5\lib\net45\forte.specs.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.AspNet.SignalR.Client, Version=2.2.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -138,6 +138,11 @@
     <Compile Include="entities\Entity.cs" />
     <Compile Include="entities\VideoStream.cs" />
     <Compile Include="extensions\DataExtensions.cs" />
+    <Compile Include="Migrations\201608221716027_Init.cs" />
+    <Compile Include="Migrations\201608221716027_Init.Designer.cs">
+      <DependentUpon>201608221716027_Init.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="models\SettingParams.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="services\ConfigurationManager.cs" />
@@ -154,6 +159,11 @@
       <Project>{4fc451ca-14c1-46da-95ff-5c177463cfd4}</Project>
       <Name>device.core</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Migrations\201608221716027_Init.resx">
+      <DependentUpon>201608221716027_Init.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

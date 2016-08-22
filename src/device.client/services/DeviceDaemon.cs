@@ -74,9 +74,9 @@ namespace forte.devices.services
         {
             _logger.Debug("Starting streaming for command {@command}", command);
 
-            if (!command.Data.ContainsKey(CommonEntityParams.VideoStreamId))
+            if (command.VideoStreamId == null)
                 throw new Exception("Video stream id not provided, cannot start streaming");
-            var videoStreamId = command.Data[CommonEntityParams.VideoStreamId].Get<Guid>();
+            var videoStreamId = command.VideoStreamId.Value;
 
             var videoStream = DownloadStreamInformation(videoStreamId);
             if (videoStream == null)
@@ -121,9 +121,9 @@ namespace forte.devices.services
         {
             _logger.Debug("Starting program for command {@command}", command);
 
-            if (!command.Data.ContainsKey(CommonEntityParams.VideoStreamId))
+            if (command.VideoStreamId == null)
                 throw new Exception("Video stream id not provided, cannot start program");
-            var videoStreamId = command.Data[CommonEntityParams.VideoStreamId].Get<Guid>();
+            var videoStreamId = command.VideoStreamId.Value;
 
             var state = GetState();
             if (state.ActiveVideoStreamId != videoStreamId)
@@ -348,6 +348,9 @@ namespace forte.devices.services
                 case DeviceCommands.StopProgram:
                     result = StopProgram(command);
                     break;
+                case DeviceCommands.ResetToIdle:
+                    result = ResetToIdle(command);
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -355,6 +358,42 @@ namespace forte.devices.services
             command.ExecutionMessages = resultMessage;
             command.Status = result ? ExecutionStatus.Executed : ExecutionStatus.Failed;
             command.ExecutedOn = DateTime.UtcNow;
+        }
+
+        private bool ResetToIdle(DeviceCommandModelEx command)
+        {
+            _logger.Debug("Resetting device to idle for command {@command}", command);
+
+            var state = GetState();
+
+            switch (state.Status)
+            {
+                case StreamingDeviceStatuses.Idle:
+                    // already idle, asssume it worked
+                    return true;
+                case StreamingDeviceStatuses.Streaming:
+                case StreamingDeviceStatuses.StreamingAndRecording:
+                case StreamingDeviceStatuses.Recording:
+                case StreamingDeviceStatuses.StreamingProgram:
+                case StreamingDeviceStatuses.StreamingAndRecordingProgram:
+                case StreamingDeviceStatuses.RecordingProgram:
+                    if (state.ActiveVideoStreamId != command.VideoStreamId)
+                        return false;
+                    _streamingClient.ShutDown();
+                    state.Status = StreamingDeviceStatuses.Idle;
+                    break;
+                case StreamingDeviceStatuses.Offline:
+                case StreamingDeviceStatuses.Error:
+                    throw new Exception($"Device with status {state.Status} cannot accept commands");
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            _deviceRepository.Save(state);
+
+            _logger.Debug("Device reset to idle.");
+
+            return true;
         }
 
         public void QueryServer()

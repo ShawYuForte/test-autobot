@@ -12,7 +12,7 @@ namespace forte.devices.extensions
         public static DataValue ToValue(this DeviceSetting setting)
         {
             if (setting == null) return null;
-            var value = new DataValue();
+            var value = new DataValue(string.Empty);
 
             if (setting.BoolValue.HasValue) value.BoolValue = setting.BoolValue;
             if (setting.ByteArrayValue != null && setting.ByteArrayValue.Length > 0)

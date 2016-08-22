@@ -84,6 +84,15 @@ namespace forte.devices.services.clients
             return presetIdentifier;
         }
 
+        public void ShutDown()
+        {
+            var state = GetVmixState();
+            if (state == null) return;
+            if (state.Streaming)
+                StopStreaming();
+            StopVmix();
+        }
+
         void IStreamingClient.StartStreaming()
         {
             _logger.Debug("Loading static image intro...");

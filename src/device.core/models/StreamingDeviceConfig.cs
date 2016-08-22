@@ -36,7 +36,7 @@ namespace forte.devices.models
         {
             get
             {
-                if (!_settings.ContainsKey(setting)) _settings.Add(setting, new DataValue());
+                if (!_settings.ContainsKey(setting)) _settings.Add(setting, new DataValue(string.Empty));
                 return _settings[setting];
             }
             set
