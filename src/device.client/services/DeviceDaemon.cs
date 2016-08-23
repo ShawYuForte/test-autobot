@@ -360,6 +360,18 @@ namespace forte.devices.services
             command.ExecutedOn = DateTime.UtcNow;
         }
 
+        public void ForceResetToIdle()
+        {
+            _logger.Warning("Force resetting device to idle");
+
+            var state = GetState();
+            _streamingClient.ShutDown();
+            state.Status = StreamingDeviceStatuses.Idle;
+            _deviceRepository.Save(state);
+
+            _logger.Debug("Device reset to idle!");
+        }
+
         private bool ResetToIdle(DeviceCommandModelEx command)
         {
             _logger.Debug("Resetting device to idle for command {@command}", command);
