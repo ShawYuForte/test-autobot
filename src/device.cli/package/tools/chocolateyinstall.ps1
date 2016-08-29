@@ -41,7 +41,9 @@ Update-SessionEnvironment
 
 try 
 {
-	c:\forte\device-cli\device-cli.exe run -b
+	$app = "c:\forte\device-cli\device-cli.exe"
+	$args = "run -b"
+	Start-Process $app $args
 }
 catch
 {
