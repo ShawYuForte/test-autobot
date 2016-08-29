@@ -52,6 +52,13 @@ namespace device.web.controllers
             return Ok();
         }
 
+        [Route("reset"), HttpPost]
+        public IHttpActionResult Reset()
+        {
+            _deviceDaemon.ForceResetToIdle();
+            return Ok();
+        }
+
         [Route("settings"), HttpGet]
         public IHttpActionResult GetSettings()
         {

@@ -10,6 +10,7 @@
             fetchSettings: { method: 'GET', url: serviceUrl + 'settings' },
             fetchState: { method: 'GET' },
             publishState: { method: 'POST', url: serviceUrl + 'publish' },
+            reset: { method: 'POST', url: serviceUrl + 'reset' },
             shutdown: { method: 'POST', url: serviceUrl + 'shutdown' },
             updateSetting: { method: 'POST', url: serviceUrl + 'settings/:setting' }
         });
@@ -30,6 +31,10 @@
             return service.publishState().$promise;
         }
 
+        var reset = function () {
+            return service.reset().$promise;
+        }
+
         var shutdown = function () {
             return service.shutdown().$promise;
         }
@@ -43,6 +48,7 @@
             fetchSettings: fetchSettings,
             fetchState: fetchState,
             publishState: publishState,
+            reset: reset,
             shutdown: shutdown,
             updateSetting: updateSetting
         }

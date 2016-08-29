@@ -69,6 +69,12 @@
                .catch(couldExecuteOperation);
         }
 
+        $scope.reset = function () {
+            apiService.reset()
+               .then(operationSucceeded)
+               .catch(couldExecuteOperation);
+        }
+
         $scope.shutdown = function () {
             apiService.shutdown()
                .then(shutdownSucceeded)

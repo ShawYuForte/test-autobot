@@ -9,9 +9,9 @@ namespace forte.devices.services
     public interface IDeviceDaemon
     {
         /// <summary>
-        ///     Fetches the next command, if available, from the server
+        ///     Force resets the device to idle, closing the streaming client in the process
         /// </summary>
-        void QueryServer();
+        void ForceResetToIdle();
 
         /// <summary>
         ///     Retrieve current device state
@@ -23,6 +23,11 @@ namespace forte.devices.services
         ///     Publish device state to the server
         /// </summary>
         bool PublishState();
+
+        /// <summary>
+        ///     Fetches the next command, if available, from the server
+        /// </summary>
+        void QueryServer();
 
         /// <summary>
         ///     Run and block
