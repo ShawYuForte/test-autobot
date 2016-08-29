@@ -39,4 +39,12 @@ Write-Host "Scheduled tasks created!"
 
 Update-SessionEnvironment
 
-c:\forte\device-cli\device-cli.exe run -b
+try 
+{
+	c:\forte\device-cli\device-cli.exe run -b
+}
+catch
+{
+	$ErrorMessage = $_.Exception.Message
+	Write-Host "Installed successfully, but couldn't run due to: $ErrorMessage"
+}
