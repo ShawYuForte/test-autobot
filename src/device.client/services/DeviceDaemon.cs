@@ -273,7 +273,7 @@ namespace forte.devices.services
             }
             if (response.StatusCode != HttpStatusCode.OK)
             {
-                // TODO handle logging / exceptions
+                _logger.Error("Failed fetching command, response {@response}", response);
                 throw new Exception(response.ErrorMessage ?? response.StatusDescription);
             }
 
