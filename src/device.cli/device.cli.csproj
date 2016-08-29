@@ -215,7 +215,8 @@
     <None Include="packages.config" />
     <None Include="package\device-cli.nuspec" />
     <None Include="package\tools\chocolateybeforemodify.ps1" />
-    <None Include="package\tools\createscheduledtask.ps1" />
+    <None Include="package\tools\schedulerun.ps1" />
+    <None Include="package\tools\scheduleupgrade.ps1" />
     <None Include="package\tools\chocolateyinstall.ps1" />
     <None Include="package\tools\chocolateyuninstall.ps1" />
     <None Include="package\tools\ReadMe.md" />

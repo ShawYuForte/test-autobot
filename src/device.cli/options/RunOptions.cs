@@ -1,4 +1,5 @@
-﻿using CommandLine;
+﻿using System.Text;
+using CommandLine;
 using CommandLine.Text;
 
 namespace forte.devices.options
@@ -19,10 +20,32 @@ namespace forte.devices.options
         [Option('l', "logpath", DefaultValue = @"c:\forte\logs", HelpText = "Path where local logs will be stored.")]
         public string LogPath { get; set; }
 
+        [Option('b', "background", HelpText = "Runs the daemon in the background (no console).")]
+        public bool Background { get; set; }
+
         [HelpOption]
         public string GetUsage()
         {
             return HelpText.AutoBuild(this, (HelpText current) => HelpText.DefaultParsingErrorsHandler(this, current));
+        }
+
+        public string ToArgs()
+        {
+            var buffer = new StringBuilder();
+
+            buffer.Append("run");
+
+            if (!string.IsNullOrWhiteSpace(ServerUrl))
+                buffer.Append($" -s {ServerUrl}");
+
+            buffer.Append($" -p {Port}");
+            buffer.Append($" -d {DataPath}");
+            buffer.Append($" -l {LogPath}");
+
+            if (Background)
+                buffer.Append(" -b");
+
+            return buffer.ToString();
         }
     }
 }

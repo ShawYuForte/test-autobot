@@ -1,7 +1,9 @@
 ﻿#region
 
 using System;
+using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
 using CommandLine;
 using device.logging;
 using device.web;
@@ -21,6 +23,10 @@ namespace forte.devices.commands
     {
         private readonly RunOptions _options;
 
+        [DllImport("kernel32.dll")]
+        static extern bool FreeConsole();
+
+
         public RunCommand(RunOptions options)
         {
             _options = options;
@@ -31,6 +37,13 @@ namespace forte.devices.commands
             if (RuntimeUtility.IsAlreadyRunning())
             {
                 Console.WriteLine("Daemon is already running.");
+                return;
+            }
+
+            if (_options.Background)
+            {
+                Console.WriteLine("Running in the background...");
+                RunSilent();
                 return;
             }
 
@@ -82,6 +95,12 @@ namespace forte.devices.commands
 
             var daemon = container.Resolve<IDeviceDaemon>();
 
+            if (_options.Background)
+            {
+                Console.WriteLine("Running silent...");
+                //FreeConsole();
+            }
+
             logger.Information("Running device local UI web server.");
             using (var server = container.Resolve<ApiServer>().Run(_options.Port))
             {
@@ -90,6 +109,27 @@ namespace forte.devices.commands
             }
 
             logger.Information("Closing device daemon.");
+        }
+
+        private void RunSilent()
+        {
+            // next run should not be silent, otherwise it will keep looping
+            _options.Background = false;
+            Console.WriteLine($"device-cli.exe {_options.ToArgs()}");
+
+            var process = new Process
+            {
+                StartInfo =
+                {
+                    FileName = "device-cli.exe",
+                    UseShellExecute = false,
+                    CreateNoWindow = true, 
+                    WindowStyle = ProcessWindowStyle.Hidden,
+                    Arguments = _options.ToArgs()
+                }
+            };
+
+            process.Start();
         }
     }
 }
