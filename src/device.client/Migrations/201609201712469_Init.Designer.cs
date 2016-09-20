@@ -13,7 +13,7 @@ namespace forte.devices.Migrations
         
         string IMigrationMetadata.Id
         {
-            get { return "201608221716027_Init"; }
+            get { return "201609201712469_Init"; }
         }
         
         string IMigrationMetadata.Source

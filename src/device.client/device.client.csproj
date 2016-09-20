@@ -138,9 +138,9 @@
     <Compile Include="entities\Entity.cs" />
     <Compile Include="entities\VideoStream.cs" />
     <Compile Include="extensions\DataExtensions.cs" />
-    <Compile Include="Migrations\201608221716027_Init.cs" />
-    <Compile Include="Migrations\201608221716027_Init.Designer.cs">
-      <DependentUpon>201608221716027_Init.cs</DependentUpon>
+    <Compile Include="Migrations\201609201712469_Init.cs" />
+    <Compile Include="Migrations\201609201712469_Init.Designer.cs">
+      <DependentUpon>201609201712469_Init.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="models\SettingParams.cs" />
@@ -161,8 +161,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\201608221716027_Init.resx">
-      <DependentUpon>201608221716027_Init.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\201609201712469_Init.resx">
+      <DependentUpon>201609201712469_Init.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
