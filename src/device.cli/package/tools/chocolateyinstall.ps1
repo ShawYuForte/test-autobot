@@ -29,13 +29,17 @@ Write-Host "Copying forte device-cli files..."
 Move-Item "$($env:chocolateyPackageFolder)\tools\cli" "c:\forte\device-cli" -Confirm:$false
 Install-ChocolateyPath c:\forte\device-cli
 
-# Create scheduled upgrade task
 Write-Host "Scheduling automatic upgrade and run tasks..."
+
+# Create scheduled upgrade task
 $scheduledtaskscript = "$($env:chocolateyPackageFolder)\tools\scheduleupgrade.ps1"
 Invoke-Expression $scheduledtaskscript
-#$scheduledtaskscript = "$($env:chocolateyPackageFolder)\tools\schedulerun.ps1"
-#Invoke-Expression $scheduledtaskscript
-Write-Host "Scheduled tasks created!"
+Write-Host "Scheduled upgrade task created!"
+
+# Create scheduled run task
+$scheduledtaskscript = "$($env:chocolateyPackageFolder)\tools\schedulerun.ps1"
+Invoke-Expression $scheduledtaskscript
+Write-Host "Scheduled run task created!"
 
 Update-SessionEnvironment
 
