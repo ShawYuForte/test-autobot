@@ -2,16 +2,13 @@
 
 $TASK_TRIGGER_DAILY = 2
 # The name of the scheduled task
-$TaskName = "Forte device-cli upgrade"
+$TaskName = "Forte device-cli run on system startup"
 # The description of the task
-$TaskDescr = "Forte Device CLI Version Upgrade (if available)."
+$TaskDescr = "Forte Device CLI Run on System Startup."
 # The Task Action command
 $TaskCommand = "c:\forte\device-cli\device-cli.exe"
 # The Task Action command argument
-$TaskArg = "upgrade"
-
-# The time zone offset used to calculate when to start daily
-$TimezoneOffset = [Regex]::Match([TimeZoneInfo]::Local.BaseUtcOffset.ToString(), '-[0-9]{2}:[0-9]{2}').Value
+$TaskArg = "run -b"
 
 # attach the Task Scheduler com object
 $service = new-object -ComObject("Schedule.Service")
@@ -27,9 +24,7 @@ $TaskDefinition.Settings.AllowDemandStart = $true
 
 $triggers = $TaskDefinition.Triggers
 #http://msdn.microsoft.com/en-us/library/windows/desktop/aa383915(v=vs.85).aspx
-$trigger = $triggers.Create($TASK_TRIGGER_DAILY) # Creates a "Daily" trigger
-$trigger.DaysInterval = 1
-$trigger.StartBoundary = "2016-01-01T02:00:00$($TimezoneOffset)"
+$trigger = $triggers.Create(8) # Creates a trigger on boot
 $trigger.Enabled = $true
 
 # http://msdn.microsoft.com/en-us/library/windows/desktop/aa381841(v=vs.85).aspx
