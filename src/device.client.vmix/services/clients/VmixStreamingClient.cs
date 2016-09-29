@@ -73,6 +73,7 @@ namespace forte.devices.services.clients
         {
             var request = new RestRequest("", Method.GET);
             var response = _client.Execute<VmixState>(request);
+            _logger.Debug("VMIX state {@state}", response);
             return response.StatusCode != HttpStatusCode.OK ? null : MatchPresetStateRoles(response.Data);
         }
 
@@ -86,6 +87,7 @@ namespace forte.devices.services.clients
 
         public void ShutDown()
         {
+            _logger.Debug("Shutting down VMIX");
             var state = GetVmixState();
             if (state == null) return;
             if (state.Streaming)
@@ -336,6 +338,7 @@ namespace forte.devices.services.clients
                 var webRequest =
                     WebRequest.CreateHttp($"{config.Get<string>(VmixSettingParams.VmixApiPath)}{operation}");
                 var response = (HttpWebResponse) webRequest.GetResponse();
+                _logger.Debug("VMIX command HTTP response {@response}", response);
                 if (response.StatusCode == HttpStatusCode.OK) return GetVmixState();
 
                 var error = $"Could not {description} ({response.StatusDescription}";
@@ -467,6 +470,7 @@ namespace forte.devices.services.clients
                 new VmixStreamDestination("Primary", videoStream.PrimaryIngestUrl),
                 new VmixStreamDestination("Secondary", videoStream.SecondaryIngestUrl)
             };
+            _logger.Debug("Saving preset file {@vmixPresetOutputFile} for {@vmixPreset}", vmixPresetOutputFile, vmixPreset);
             vmixPreset.ToFile(vmixPresetOutputFile);
 
             var requestUrl = $"/?Function=OpenPreset&Value={vmixPresetOutputFile}";
@@ -474,7 +478,8 @@ namespace forte.devices.services.clients
             {
                 Timeout = 1
             };
-            _client.Execute<VmixState>(request);
+            var response = _client.Execute<VmixState>(request);
+            _logger.Debug("Open preset command HTTP resposne {@response}", response);
 
             const int fiveSeconds = 5000;
             const int twoMinutes = 120;
