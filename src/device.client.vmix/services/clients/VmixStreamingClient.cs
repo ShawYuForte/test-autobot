@@ -459,7 +459,8 @@ namespace forte.devices.services.clients
 
             var config = _configurationManager.GetDeviceConfig();
             var presetTemplateFilePath = config.Get<string>(VmixSettingParams.VmixPresetTemplateFilePath);
-            var vmixPresetOutputFolder = config.Get<string>(VmixSettingParams.VmixPresetFolderPath) ?? Path.GetTempPath();
+            var vmixPresetOutputFolder = config.Get<string>(VmixSettingParams.VmixPresetFolderPath);
+            if (string.IsNullOrWhiteSpace(vmixPresetOutputFolder)) vmixPresetOutputFolder = Path.GetTempPath();
             _logger.Debug("Using preset output path {@vmixPresetOutputFolder}", vmixPresetOutputFolder);
             var timeStamp = DateTime.UtcNow.ToString(CultureInfo.InvariantCulture).Replace(":", "").Replace("/", "");
             var vmixPresetOutputFile = $"{timeStamp}-{Guid.NewGuid()}.vmix";
