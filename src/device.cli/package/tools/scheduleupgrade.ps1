@@ -35,5 +35,12 @@ $Action = $TaskDefinition.Actions.Create(0)
 $action.Path = "$TaskCommand"
 $action.Arguments = "$TaskArg"
 
+# https://www.autoitscript.com/forum/topic/124400-create-task-scheduler-scripting-objects/
+$osversion = [System.Environment]::OSVersion.Version.Major
+if ($osversion -ge 10){
+	$principal = $TaskDefinition.Principal()
+	$principal.RunLevel = 1
+}
+
 #http://msdn.microsoft.com/en-us/library/windows/desktop/aa381365(v=vs.85).aspx
-$rootFolder.RegisterTaskDefinition("$TaskName",$TaskDefinition,6,"System",$null,5)
+$rootFolder.RegisterTaskDefinition("$TaskName",$TaskDefinition,6,"Forte\Forte",$null,3)
