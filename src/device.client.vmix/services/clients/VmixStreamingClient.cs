@@ -198,19 +198,25 @@ namespace forte.devices.services.clients
         /// <returns></returns>
         public VmixState StartStreaming()
         {
-            var state = CallAndFetchState("/?Function=StartStreaming", "start streaming");
+            // approximately one minute 
+            var retries = 20;
 
-            var retries = 10;
-
-            while (!state.Streaming && retries-- > 0)
+            while (retries-- > 0)
             {
-                Thread.Sleep(1000);
-                state = GetVmixState();
+                var state = CallAndFetchState("/?Function=StartStreaming", "start streaming");
+
+                // wait for 3 seconds max to give vmix enough time to respond
+                var seconds = 3;
+                while (!state.Streaming && seconds-- > 0)
+                {
+                    Thread.Sleep(1000);
+                    state = GetVmixState();
+                }
+
+                if (state.Streaming) return state;
             }
 
-            if (!state.Streaming) throw new Exception("Could not start streaming");
-
-            return state;
+            throw new Exception("Could not start streaming");
         }
 
         /// <summary>
