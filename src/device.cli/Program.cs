@@ -46,6 +46,9 @@ namespace forte.devices
                 case RunOptions.VerbName:
                     new RunCommand((RunOptions)options).Run();
                     break;
+                case SimulatorOptions.VerbName:
+                    new SimulatorCommand((SimulatorOptions)options).Run();
+                    break;
                 case UpgradeOptions.VerbName:
                     new UpgradeCommand((UpgradeOptions)options).Run();
                     break;

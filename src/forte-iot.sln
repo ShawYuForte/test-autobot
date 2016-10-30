@@ -38,6 +38,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "device.cli", "device.cli\de
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "device.web", "device.web\device.web.csproj", "{FBAB6E6A-2A8E-4FA9-B975-2755A14110AF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "device.client.simulator", "device.client.simulator\device.client.simulator.csproj", "{CE1CE7DC-1E7A-4354-8CA5-FF7B3834B69F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -76,6 +78,10 @@ Global
 		{FBAB6E6A-2A8E-4FA9-B975-2755A14110AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FBAB6E6A-2A8E-4FA9-B975-2755A14110AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FBAB6E6A-2A8E-4FA9-B975-2755A14110AF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CE1CE7DC-1E7A-4354-8CA5-FF7B3834B69F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE1CE7DC-1E7A-4354-8CA5-FF7B3834B69F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE1CE7DC-1E7A-4354-8CA5-FF7B3834B69F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE1CE7DC-1E7A-4354-8CA5-FF7B3834B69F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

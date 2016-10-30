@@ -201,8 +201,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="commands\SimulatorCommand.cs" />
     <Compile Include="commands\RunCommand.cs" />
     <Compile Include="commands\UpgradeCommand.cs" />
+    <Compile Include="options\SimulatorOptions.cs" />
     <Compile Include="options\RunOptions.cs" />
     <Compile Include="options\CliOptions.cs" />
     <Compile Include="options\UpgradeOptions.cs" />
@@ -222,6 +224,10 @@
     <None Include="package\tools\ReadMe.md" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\device.client.simulator\device.client.simulator.csproj">
+      <Project>{ce1ce7dc-1e7a-4354-8ca5-ff7b3834b69f}</Project>
+      <Name>device.client.simulator</Name>
+    </ProjectReference>
     <ProjectReference Include="..\device.client.vmix\device.client.vmix.csproj">
       <Project>{bd82769b-e2b9-47d8-9962-ab7844548496}</Project>
       <Name>device.client.vmix</Name>
