@@ -54,11 +54,16 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="services\DeviceSimulator.cs" />
+    <Compile Include="services\SimulatorConfigManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\device.client\device.client.csproj">
+      <Project>{EE82A4F2-712F-4E3D-B1AA-DAC254E33AA6}</Project>
+      <Name>device.client</Name>
+    </ProjectReference>
     <ProjectReference Include="..\device.core\device.core.csproj">
       <Project>{4fc451ca-14c1-46da-95ff-5c177463cfd4}</Project>
       <Name>device.core</Name>

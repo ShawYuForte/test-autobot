@@ -49,21 +49,21 @@ namespace forte.devices.services
             {
                 // If not our event, ignore
                 if (Guid.Parse(deviceId) != DeviceId) return;
-                _logger.Debug($"Server notified us of a command available for device {deviceId}");
+                _logger?.Debug($"Server notified us of a command available for device {deviceId}");
                 OnMessageReceived("CommandAvailable");
             });
 
             _hubConnection.Closed += OnHubConnectionOnClosed;
-            _hubConnection.ConnectionSlow += () => _logger.Warning("Connection slow...!");
-            _hubConnection.Error += exception => _logger.Error($"Connection error: {exception.Message}");
-            _hubConnection.Reconnected += () => _logger.Debug($"Connection re-established");
-            _hubConnection.Reconnecting += () => _logger.Debug($"Re-connecting...");
-            _hubConnection.StateChanged += state => _logger.Warning($"Connection state changed from {state.OldState} to {state.NewState}");
-            _hubConnection.Received += data => _logger.Debug($"Received {data}");
+            _hubConnection.ConnectionSlow += () => _logger?.Warning("Connection slow...!");
+            _hubConnection.Error += exception => _logger?.Error($"Connection error: {exception.Message}");
+            _hubConnection.Reconnected += () => _logger?.Debug($"Connection re-established");
+            _hubConnection.Reconnecting += () => _logger?.Debug($"Re-connecting...");
+            _hubConnection.StateChanged += state => _logger?.Warning($"Connection state changed from {state.OldState} to {state.NewState}");
+            _hubConnection.Received += data => _logger?.Debug($"Received {data}");
             await _hubConnection.Start();
         }
 
-        private Guid? _deviceId = null;
+        private Guid? _deviceId;
 
         private Guid DeviceId
         {
@@ -84,7 +84,7 @@ namespace forte.devices.services
             }
             catch (Exception exception)
             {
-                _logger.Error(exception, "Could not connect to hub");
+                _logger?.Error(exception, "Could not connect to hub");
                 OnHubConnectionOnClosed();
             }
         }
@@ -92,10 +92,10 @@ namespace forte.devices.services
         private void OnHubConnectionOnClosed()
         {
             if (!_retry) return;
-            _logger.Debug("Connection closed, will retry in 10 seconds!");
+            _logger?.Debug("Connection closed, will retry in 10 seconds!");
             _timer = new Timer(state =>
             {
-                _logger.Debug("Attempting to re-connect");
+                _logger?.Debug("Attempting to re-connect");
                 Connect();
                 _timer.Dispose();
             }, null, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(1));

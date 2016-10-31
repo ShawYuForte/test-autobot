@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using System.Threading;
 using forte.devices.extensions;
 using forte.devices.models;
 using forte.models.devices;
@@ -16,7 +17,15 @@ namespace forte.devices.services
         {
             Server = server;
             DeviceId = deviceId;
+
+            _configurationManager.UpdateSetting("DeviceId", deviceId);
+            _configurationManager.UpdateSetting(SettingParams.ServerApiPath, server);
+
+            _serverListener = new ServerListener(_configurationManager, null);
         }
+
+        private readonly IConfigurationManager _configurationManager = new SimulatorConfigManager();
+        private readonly IServerListener _serverListener;
 
         public Guid DeviceId { get; private set; }
         public string Server { get; }
@@ -45,12 +54,13 @@ namespace forte.devices.services
         {
             PrintHeading("available commands");
             Console.WriteLine("* clear: clear the screen");
+            Console.WriteLine("* delay [s]: delay responses by 's' seconds");
             Console.WriteLine("* device [id]: get/set device identifier");
             Console.WriteLine("* help: this help");
             Console.WriteLine("* peek: peek at an available message, without processing it");
             Console.WriteLine("* receive [params]: receive and process message, additional params:");
-            Console.WriteLine("  - s: (default) simulate successful response");
-            Console.WriteLine("  - f: simulate failure response");
+            Console.WriteLine("  - s or f: simulate (s)uccessful or (f)ailure response ('s' is default)");
+            Console.WriteLine("  - auto: auto listen to messages (using WebSockets)");
             Console.WriteLine("* send: send current simulated state to the server");
             Console.WriteLine("* state: get/set device state, additional params:");
             Console.WriteLine("* - status [value]: set device status");
@@ -83,14 +93,25 @@ namespace forte.devices.services
         {
             PrintHeading("peek next command");
             var remoteCommand = FetchCommand();
-            Console.WriteLine(JsonConvert.SerializeObject(remoteCommand, Formatting.Indented));
+            if (remoteCommand == null)
+            {
+                Console.WriteLine("No command available");
+            }
+            else
+            {
+                Console.WriteLine(JsonConvert.SerializeObject(remoteCommand, Formatting.Indented));
+            }
             PrintFooter("peek next command");
         }
 
+        private int _delay;
+
         public void Run()
         {
-            Console.WriteLine("Device Simulator, enter command (type 'help' to learn more):");
+            Console.WriteLine("Device Simulator, enter command (type 'help' to learn more)");
             string command;
+            Console.WriteLine();
+            Console.Write("Command: ");
             while ((command = Console.ReadLine()) != null)
             {
                 switch (command.ToLower())
@@ -103,36 +124,143 @@ namespace forte.devices.services
                         Console.WriteLine();
                         Console.WriteLine($"Current device identifier '{DeviceId}");
                         Console.WriteLine();
-                        continue;
+                        break;
 
                     case "help":
                         Help();
-                        continue;
+                        break;
 
                     case "peek":
                         Peek();
-                        continue;
+                        break;
+
+                    case "receive":
+                        Receive(true);
+                        break;
 
                     case "quit":
                         return;
 
                     case "send":
                         Send();
-                        continue;
+                        break;
 
                     case "state":
                         PrintState();
-                        continue;
+                        break;
+
+                    default:
+                        if (command.ToLower().StartsWith("delay"))
+                        {
+                            _delay = int.Parse(command.Split(' ')[1]);
+                        }
+                        if (command.ToLower().StartsWith("device"))
+                        {
+                            PrintHeading("set device identifier");
+                            Guid deviceId;
+                            Guid.TryParse(command.Split(' ')[1], out deviceId);
+                            DeviceId = deviceId;
+                            _configurationManager.UpdateSetting("DeviceId", deviceId);
+                            PrintFooter("set device identifier");
+                        }
+                        if (command.ToLower().StartsWith("receive"))
+                        {
+                            var commandParams = command.Split(' ');
+                            var success = commandParams[1] != "f";
+                            if ((commandParams.Length > 2 && commandParams[2] == "auto") || commandParams[1] == "auto")
+                            {
+                                AutoReceive(success, true);
+                            }
+                            else
+                            {
+                                AutoReceive(success, false);
+                            }
+                            Receive(success);
+                        }
+                        if (command.ToLower().StartsWith("state"))
+                        {
+                            var field = command.Split(' ')[1];
+                            if (field == "status")
+                            {
+                                Status = (StreamingDeviceStatuses)Enum.Parse(typeof(StreamingDeviceStatuses), command.Split(' ')[2]);
+                            }
+                            else if (field == "stream")
+                            {
+                                ActiveVideoStreamId = Guid.Parse(command.Split(' ')[2]);
+                            }
+                            else
+                            {
+                                Console.WriteLine($"Unknown field '{field}'");
+                            }
+                            PrintState();
+                        }
+                        break;
                 }
-                if (command.ToLower().StartsWith("device"))
-                {
-                    PrintHeading("set device identifier");
-                    Guid deviceId;
-                    Guid.TryParse(command.Split(' ')[1], out deviceId);
-                    DeviceId = deviceId;
-                    PrintFooter("set device identifier");
-                }
+
+                Console.Write("Command: ");
             }
+        }
+
+        private bool _autoSucceed;
+
+        private void AutoReceive(bool succeed, bool enabled)
+        {
+            _autoSucceed = succeed;
+            if (enabled)
+            {
+                _serverListener.Connect();
+                _serverListener.MessageReceived += _serverListener_MessageReceived;
+            }
+            else
+            {
+                _serverListener.Disconnect();
+                _serverListener.MessageReceived -= _serverListener_MessageReceived;
+            }
+        }
+
+        private void _serverListener_MessageReceived(string message)
+        {
+            Receive(_autoSucceed);
+        }
+
+        private void Receive(bool succeed)
+        {
+            var title = "receive command, respond with " + (succeed ? "success" : "failure");
+            PrintHeading(title);
+            var command = FetchCommand();
+            if (command == null)
+            {
+                Console.WriteLine("No command available");
+                PrintFooter(title);
+                return;
+            }
+            switch (command.Command)
+            {
+                case DeviceCommands.StartStreaming:
+                    Status = succeed ? StreamingDeviceStatuses.Streaming : StreamingDeviceStatuses.Error;
+                    break;
+                case DeviceCommands.StartProgram:
+                    Status = succeed ? StreamingDeviceStatuses.StreamingProgram : StreamingDeviceStatuses.Error;
+                    break;
+                case DeviceCommands.StopStreaming:
+                    Status = succeed ? StreamingDeviceStatuses.Idle : StreamingDeviceStatuses.Error;
+                    break;
+                case DeviceCommands.StopProgram:
+                    Status = succeed ? StreamingDeviceStatuses.Streaming : StreamingDeviceStatuses.Error;
+                    break;
+                case DeviceCommands.ResetToIdle:
+                    Status = succeed ? StreamingDeviceStatuses.Idle : StreamingDeviceStatuses.Error;
+                    break;
+                case DeviceCommands.UpdateState:
+                default:
+                    break;
+            }
+
+            if (_delay > 0)
+            {
+                Thread.Sleep(_delay);
+            }
+            Send();
         }
 
         private void PrintState()
@@ -168,11 +296,19 @@ namespace forte.devices.services
             request.AddJsonBody(deviceState);
             var response = _client.Execute(request);
 
+            PrintHeading("sending state");
             if (response.StatusCode != HttpStatusCode.OK)
             {
                 // Log error
-                throw new Exception(response.ErrorMessage ?? $"Publishing state, response was {response.StatusCode}");
+                Console.WriteLine("ERROR: " +
+                                  (response.ErrorMessage ?? $"Publishing state, response was {response.StatusCode}"));
+                Console.WriteLine(response.Content);
             }
+            else
+            {
+                Console.WriteLine("SUCCESS");
+            }
+            PrintFooter("sending state");
         }
     }
 }
