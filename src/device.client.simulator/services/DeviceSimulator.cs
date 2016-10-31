@@ -150,49 +150,62 @@ namespace forte.devices.services
                         break;
 
                     default:
-                        if (command.ToLower().StartsWith("delay"))
-                        {
-                            _delay = int.Parse(command.Split(' ')[1]);
-                        }
-                        if (command.ToLower().StartsWith("device"))
-                        {
-                            PrintHeading("set device identifier");
-                            Guid deviceId;
-                            Guid.TryParse(command.Split(' ')[1], out deviceId);
-                            DeviceId = deviceId;
-                            _configurationManager.UpdateSetting("DeviceId", deviceId);
-                            PrintFooter("set device identifier");
-                        }
-                        if (command.ToLower().StartsWith("receive"))
+                        try
                         {
                             var commandParams = command.Split(' ');
-                            var success = commandParams[1] != "f";
-                            if ((commandParams.Length > 2 && commandParams[2] == "auto") || commandParams[1] == "auto")
+                            if (command.ToLower().StartsWith("delay"))
                             {
-                                AutoReceive(success, true);
+                                _delay = int.Parse(commandParams[1]);
                             }
-                            else
+                            if (command.ToLower().StartsWith("device"))
                             {
-                                AutoReceive(success, false);
+                                PrintHeading("set device identifier");
+                                Guid deviceId;
+                                Guid.TryParse(commandParams[1], out deviceId);
+                                DeviceId = deviceId;
+                                _configurationManager.UpdateSetting("DeviceId", deviceId);
+                                PrintFooter("set device identifier");
                             }
-                            Receive(success);
+                            if (command.ToLower().StartsWith("receive"))
+                            {
+                                var success = commandParams[1] != "f";
+                                if ((commandParams.Length > 2 && commandParams[2] == "auto") ||
+                                    commandParams[1] == "auto")
+                                {
+                                    AutoReceive(success, true);
+                                }
+                                else
+                                {
+                                    AutoReceive(success, false);
+                                }
+                                Receive(success);
+                            }
+                            if (command.ToLower().StartsWith("state"))
+                            {
+                                var field = commandParams[1];
+                                if (field == "status")
+                                {
+                                    Status =
+                                        (StreamingDeviceStatuses)
+                                            Enum.Parse(typeof(StreamingDeviceStatuses), commandParams[2]);
+                                }
+                                else if (field == "stream")
+                                {
+                                    ActiveVideoStreamId = commandParams.Length > 2
+                                        ? Guid.Parse(commandParams[2])
+                                        : (Guid?) null;
+                                }
+                                else
+                                {
+                                    Console.WriteLine($"Unknown field '{field}'");
+                                }
+                                PrintState();
+                            }
                         }
-                        if (command.ToLower().StartsWith("state"))
+                        catch(Exception exception)
                         {
-                            var field = command.Split(' ')[1];
-                            if (field == "status")
-                            {
-                                Status = (StreamingDeviceStatuses)Enum.Parse(typeof(StreamingDeviceStatuses), command.Split(' ')[2]);
-                            }
-                            else if (field == "stream")
-                            {
-                                ActiveVideoStreamId = Guid.Parse(command.Split(' ')[2]);
-                            }
-                            else
-                            {
-                                Console.WriteLine($"Unknown field '{field}'");
-                            }
-                            PrintState();
+                            Console.WriteLine(exception.Message);
+                            Console.WriteLine();
                         }
                         break;
                 }
