@@ -54,13 +54,13 @@ namespace forte.devices.services
         {
             PrintHeading("available commands");
             Console.WriteLine("* clear: clear the screen");
-            Console.WriteLine("* delay [s]: delay responses by 's' seconds");
+            //Console.WriteLine("* delay [s]: delay responses by 's' seconds");
             Console.WriteLine("* device [id]: get/set device identifier");
             Console.WriteLine("* help: this help");
             Console.WriteLine("* peek: peek at an available message, without processing it");
             Console.WriteLine("* receive [params]: receive and process message, additional params:");
             Console.WriteLine("  - s or f: simulate (s)uccessful or (f)ailure response ('s' is default)");
-            Console.WriteLine("  - auto: auto listen to messages (using WebSockets)");
+            //Console.WriteLine("  - auto: auto listen to messages (using WebSockets)");
             Console.WriteLine("* send: send current simulated state to the server");
             Console.WriteLine("* state: get/set device state, additional params:");
             Console.WriteLine("* - status [value]: set device status");
