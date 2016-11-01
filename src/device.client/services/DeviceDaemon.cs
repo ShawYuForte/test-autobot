@@ -1,4 +1,6 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Net;
 using System.Threading;
 using AutoMapper;
@@ -12,32 +14,35 @@ using RestSharp;
 using StreamingDeviceState = forte.devices.models.StreamingDeviceState;
 using StreamingDeviceStatuses = forte.devices.models.StreamingDeviceStatuses;
 
+#endregion
+
 namespace forte.devices.services
 {
     /// <summary>
-    /// Streaming device manager, responds to WebSocket messages when there are new commands, and then for each command:
-    ///  - Fetches command
-    ///  - Saves locally
-    ///  - Executes the command
-    ///  - Saves state locally
-    ///  - Saves command state on the server
-    ///  - Publishes new client state
+    ///     Streaming device manager, responds to WebSocket messages when there are new commands, and then for each command:
+    ///     - Fetches command
+    ///     - Saves locally
+    ///     - Executes the command
+    ///     - Saves state locally
+    ///     - Saves command state on the server
+    ///     - Publishes new client state
     /// </summary>
     public class DeviceDaemon : IDeviceDaemon
     {
         public delegate void MessageReceivedDelegate(string message);
 
+        private static readonly object Key = new object();
+        private static readonly object StopKey = new object();
+
         private readonly RestClient _client;
-        private readonly RestClient _streamClient;
+        private readonly IConfigurationManager _configurationManager;
         private readonly Guid _deviceId;
         private readonly IDeviceRepository _deviceRepository;
         private readonly ILogger _logger;
-        private readonly IConfigurationManager _configurationManager;
         private readonly IServerListener _serverListener;
+        private readonly RestClient _streamClient;
 
         private readonly IStreamingClient _streamingClient;
-        private static readonly object Key = new object();
-        private static readonly object StopKey = new object();
 
         public DeviceDaemon(IDeviceRepository deviceRepository, IStreamingClient streamingClient, ILogger logger,
             IConfigurationManager configurationManager, IServerListener serverListener)
@@ -55,19 +60,156 @@ namespace forte.devices.services
             serverListener.MessageReceived += OnServerMessageReceived;
         }
 
-        private void OnServerMessageReceived(string message)
+        private bool FetchRequested { get; set; }
+
+        private bool Stopped { get; set; }
+
+        public void ForceResetToIdle()
         {
-            if (message != "CommandAvailable") return;
+            _logger.Warning("Force resetting device to idle");
+
+            var state = GetState();
+            _streamingClient.ShutDown();
+            state.Status = StreamingDeviceStatuses.Idle;
+            _deviceRepository.Save(state);
+
+            _logger.Debug("Device reset to idle!");
+        }
+
+        public StreamingDeviceState GetState()
+        {
+            var state = _deviceRepository.GetDeviceState();
+            if (state != null) return state;
+
+            var config = _configurationManager.GetDeviceConfig();
+
+            state = new StreamingDeviceState
+            {
+                DeviceId = config.DeviceId,
+                StateCapturedOn = DateTime.UtcNow,
+                Status = StreamingDeviceStatuses.Idle
+            };
+            _deviceRepository.Save(state);
+            return state;
+        }
+
+        /// <summary>
+        ///     Publish device state to the server
+        /// </summary>
+        public bool PublishState()
+        {
+            _logger.Debug("Publishing state");
+
+            var deviceState = GetState();
+            var request = new RestRequest($"{deviceState.DeviceId}/state", Method.POST)
+            {
+                JsonSerializer = NewtonsoftJsonSerializer.Default
+            };
+            request.AddHeader("Content-Type", "application/json; charset=utf-8");
+            request.AddJsonBody(deviceState);
+            var response = _client.Execute(request);
+
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                // Log error
+                throw new Exception(response.ErrorMessage ?? $"Publishing state, response was {response.StatusCode}");
+            }
+
+            _logger.Debug("State published");
+
+            return true;
+        }
+
+        public void QueryServer()
+        {
             FetchRequested = true;
         }
 
-        private void SetDefaultSettings()
+        public void Run()
         {
-            var config = _configurationManager.GetDeviceConfig();
-            if (string.IsNullOrWhiteSpace(config.Get<string>(SettingParams.ServerRootPath)))
-                config = _configurationManager.UpdateSetting(SettingParams.ServerRootPath, "http://forte-devapi.azurewebsites.net");
-            if (string.IsNullOrWhiteSpace(config.Get<string>(SettingParams.ServerApiPath)))
-                _configurationManager.UpdateSetting(SettingParams.ServerApiPath, "http://forte-devapi.azurewebsites.net/api");
+            var seconds = 30;
+            _serverListener.Connect();
+            while (!Stopped)
+            {
+                seconds--;
+                if ((seconds <= 0) || FetchRequested)
+                {
+                    FetchRequested = false;
+                    seconds = 30;
+
+                    try
+                    {
+                        FetchCommand();
+                    }
+                    catch (Exception exception)
+                    {
+                        _logger.Error(exception, exception.Message);
+                    }
+                }
+                Thread.Sleep(1000);
+            }
+        }
+
+        public void Stop()
+        {
+            _serverListener.Disconnect();
+            Stopped = true;
+        }
+
+
+        public void FetchCommand()
+        {
+            lock (Key)
+            {
+                ThreadSafeFetchCommand();
+            }
+        }
+
+        public bool StartProgram(DeviceCommandModel command)
+        {
+            _logger.Debug("Starting program for command {@command}", command);
+
+            if (command.VideoStreamId == null)
+                throw new Exception("Video stream id not provided, cannot start program");
+            var videoStreamId = command.VideoStreamId.Value;
+
+            var state = GetState();
+            if (state.ActiveVideoStreamId != videoStreamId)
+            {
+                _logger.Fatal(
+                    "Cannot stream for program {@newVideoStream}, prepared to stream for video stream {@oldVideoStream}",
+                    videoStreamId, state.ActiveVideoStreamId);
+                throw new Exception("Cannot stream, device prepared to stream for a different stream");
+            }
+
+            switch (state.Status)
+            {
+                case StreamingDeviceStatuses.Idle:
+                    _logger.Error("Request to start program against idle device (expected streaming)");
+                    return false;
+                case StreamingDeviceStatuses.Streaming:
+                case StreamingDeviceStatuses.Recording:
+                case StreamingDeviceStatuses.StreamingAndRecording:
+                    _streamingClient.StartProgram();
+                    break;
+                case StreamingDeviceStatuses.StreamingProgram:
+                case StreamingDeviceStatuses.StreamingAndRecordingProgram:
+                case StreamingDeviceStatuses.RecordingProgram:
+                    _logger.Warning("Request to start program against device with started program");
+                    return false;
+                case StreamingDeviceStatuses.Offline:
+                case StreamingDeviceStatuses.Error:
+                    throw new Exception($"Device with status {state.Status} cannot accept commands");
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            state.Status = StreamingDeviceStatuses.StreamingProgram;
+            _deviceRepository.Save(state);
+
+            _logger.Debug("Program started.");
+
+            return true;
         }
 
         public bool StartStreaming(DeviceCommandModel command)
@@ -114,39 +256,33 @@ namespace forte.devices.services
             return true;
         }
 
-        private bool Stopped { get; set; }
-        private bool FetchRequested { get; set; }
-
-        public bool StartProgram(DeviceCommandModel command)
+        /// <summary>
+        ///     Stop streaming for the specified video stream identifier. The video stream identifier is there to ensure that the
+        ///     request is coming for the right stream
+        /// </summary>
+        /// <param name="command"></param>
+        public bool StopProgram(DeviceCommandModel command)
         {
-            _logger.Debug("Starting program for command {@command}", command);
-
-            if (command.VideoStreamId == null)
-                throw new Exception("Video stream id not provided, cannot start program");
-            var videoStreamId = command.VideoStreamId.Value;
+            _logger.Debug("Stopping program for command {@command}", command);
 
             var state = GetState();
-            if (state.ActiveVideoStreamId != videoStreamId)
-            {
-                _logger.Fatal("Cannot stream for program {@newVideoStream}, prepared to stream for video stream {@oldVideoStream}", videoStreamId, state.ActiveVideoStreamId);
-                throw new Exception("Cannot stream, device prepared to stream for a different stream");
-            }
 
             switch (state.Status)
             {
                 case StreamingDeviceStatuses.Idle:
-                    _logger.Error("Request to start program against idle device (expected streaming)");
+                    _logger.Error("Request to stop program against idle device (expected streaming program)");
                     return false;
                 case StreamingDeviceStatuses.Streaming:
-                case StreamingDeviceStatuses.Recording:
                 case StreamingDeviceStatuses.StreamingAndRecording:
-                    _streamingClient.StartProgram();
-                    break;
+                case StreamingDeviceStatuses.Recording:
+                    _logger.Warning("Request to stop program against device without a running program. {@state}", state);
+                    return false;
                 case StreamingDeviceStatuses.StreamingProgram:
                 case StreamingDeviceStatuses.StreamingAndRecordingProgram:
                 case StreamingDeviceStatuses.RecordingProgram:
-                    _logger.Warning("Request to start program against device with started program");
-                    return false;
+                    _streamingClient.StopProgram();
+                    state.Status = StreamingDeviceStatuses.Streaming;
+                    break;
                 case StreamingDeviceStatuses.Offline:
                 case StreamingDeviceStatuses.Error:
                     throw new Exception($"Device with status {state.Status} cannot accept commands");
@@ -154,10 +290,9 @@ namespace forte.devices.services
                     throw new ArgumentOutOfRangeException();
             }
 
-            state.Status = StreamingDeviceStatuses.StreamingProgram;
             _deviceRepository.Save(state);
 
-            _logger.Debug("Program started.");
+            _logger.Debug("Program stopped.");
 
             return true;
         }
@@ -204,61 +339,19 @@ namespace forte.devices.services
             return true;
         }
 
-        /// <summary>
-        ///     Stop streaming for the specified video stream identifier. The video stream identifier is there to ensure that the
-        ///     request is coming for the right stream
-        /// </summary>
-        /// <param name="command"></param>
-        public bool StopProgram(DeviceCommandModel command)
+        private DeviceCommandModelEx ApplyLocalCommandAttributes(DeviceCommandModelEx command)
         {
-            _logger.Debug("Stopping program for command {@command}", command);
-
-            var state = GetState();
-
-            switch (state.Status)
-            {
-                case StreamingDeviceStatuses.Idle:
-                    _logger.Error("Request to stop program against idle device (expected streaming program)");
-                    return false;
-                case StreamingDeviceStatuses.Streaming:
-                case StreamingDeviceStatuses.StreamingAndRecording:
-                case StreamingDeviceStatuses.Recording:
-                    _logger.Warning("Request to stop program against device without a running program. {@state}", state);
-                    return false;
-                case StreamingDeviceStatuses.StreamingProgram:
-                case StreamingDeviceStatuses.StreamingAndRecordingProgram:
-                case StreamingDeviceStatuses.RecordingProgram:
-                    _streamingClient.StopProgram();
-                    state.Status = StreamingDeviceStatuses.Streaming;
-                    break;
-                case StreamingDeviceStatuses.Offline:
-                case StreamingDeviceStatuses.Error:
-                    throw new Exception($"Device with status {state.Status} cannot accept commands");
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-
-            _deviceRepository.Save(state);
-
-            _logger.Debug("Program stopped.");
-
-            return true;
-        }
-
-
-        public void FetchCommand()
-        {
-            lock (Key)
-            {
-                ThreadSafeFetchCommand();
-            }
+            var existing = _deviceRepository.GetCommand(command.Id);
+            if (existing == null) return command;
+            _logger.Debug("Found local command {@command}", existing);
+            command.RetryCount = existing.retry
+            command = Mapper.Map<DeviceCommandModelEx>(existing);
         }
 
         public void ThreadSafeFetchCommand()
         {
             _logger.Debug("Fetching command...");
 
-            // TODO handle duplicates and queuing
             var request = new RestRequest($"{_deviceId}/commands/next", Method.GET)
             {
                 JsonSerializer = NewtonsoftJsonSerializer.Default
@@ -313,7 +406,7 @@ namespace forte.devices.services
 
             SaveCommandLocally(command);
 
-            if (command.Status == ExecutionStatus.Failed && command.RetryCount >= 3)
+            if ((command.Status == ExecutionStatus.Failed) && (command.RetryCount >= 3))
             {
                 command.ExecutedOn = DateTime.UtcNow;
                 SaveCommandOnServer(command);
@@ -325,10 +418,21 @@ namespace forte.devices.services
             PublishState();
         }
 
-        private void SaveCommandLocally(DeviceCommandModel command)
+        private VideoStreamModel DownloadStreamInformation(Guid videoStreamId)
         {
-            var commandEntity = Mapper.Map<DeviceCommandEntity>(command);
-            _deviceRepository.SaveCommand(commandEntity);
+            var request = new RestRequest($"{videoStreamId}?extended=true", Method.GET);
+            var response = _streamClient.Execute<VideoStreamModel>(request);
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                var message = response.ErrorMessage ?? response.StatusDescription;
+                // TODO handle logging / exceptions
+                _logger.Fatal(
+                    "Could not retrieve video stream details for {@videoStreamId} due to {@message} from response {@response}",
+                    videoStreamId, message, response);
+                throw new Exception($"Could not retrieve video stream details for {videoStreamId} due to {message}");
+            }
+            _deviceRepository.SaveVideoStream(Mapper.Map<VideoStream>(response.Data));
+            return response.Data;
         }
 
 
@@ -366,16 +470,10 @@ namespace forte.devices.services
             command.ExecutedOn = DateTime.UtcNow;
         }
 
-        public void ForceResetToIdle()
+        private void OnServerMessageReceived(string message)
         {
-            _logger.Warning("Force resetting device to idle");
-
-            var state = GetState();
-            _streamingClient.ShutDown();
-            state.Status = StreamingDeviceStatuses.Idle;
-            _deviceRepository.Save(state);
-
-            _logger.Debug("Device reset to idle!");
+            if (message != "CommandAvailable") return;
+            FetchRequested = true;
         }
 
         private bool ResetToIdle(DeviceCommandModelEx command)
@@ -414,71 +512,14 @@ namespace forte.devices.services
             return true;
         }
 
-        public void QueryServer()
+        private void SaveCommandLocally(DeviceCommandModel command)
         {
-            FetchRequested = true;
+            var commandEntity = Mapper.Map<DeviceCommandEntity>(command);
+            _deviceRepository.SaveCommand(commandEntity);
         }
 
         /// <summary>
-        ///     Publish device state to the server
-        /// </summary>
-        public bool PublishState()
-        {
-            _logger.Debug("Publishing state");
-
-            var deviceState = GetState();
-            var request = new RestRequest($"{deviceState.DeviceId}/state", Method.POST)
-            {
-                JsonSerializer = NewtonsoftJsonSerializer.Default
-            };
-            request.AddHeader("Content-Type", "application/json; charset=utf-8");
-            request.AddJsonBody(deviceState);
-            var response = _client.Execute(request);
-
-            if (response.StatusCode != HttpStatusCode.OK)
-            {
-                // Log error
-                throw new Exception(response.ErrorMessage ?? $"Publishing state, response was {response.StatusCode}");
-            }
-
-            _logger.Debug("State published");
-
-            return true;
-        }
-
-        public void Run()
-        {
-            var seconds = 30;
-            _serverListener.Connect();
-            while (!Stopped)
-            {
-                seconds--;
-                if (seconds <= 0 || FetchRequested)
-                {
-                    FetchRequested = false;
-                    seconds = 30;
-
-                    try
-                    {
-                        FetchCommand();
-                    }
-                    catch (Exception exception)
-                    {
-                        _logger.Error(exception, exception.Message);
-                    }
-                }
-                Thread.Sleep(1000);
-            }
-        }
-
-        public void Stop()
-        {
-            _serverListener.Disconnect();
-            Stopped = true;
-        }
-
-        /// <summary>
-        /// Saves command state on the server
+        ///     Saves command state on the server
         /// </summary>
         /// <param name="commandModel"></param>
         /// <exception cref="Exception">If server update fails</exception>
@@ -503,40 +544,20 @@ namespace forte.devices.services
 
             if (response.StatusCode == HttpStatusCode.OK) return;
 
-            _logger.Error("Could not update command because of {@status}, response {@resposne}", response.ErrorMessage ?? response.StatusDescription, response);
+            _logger.Error("Could not update command because of {@status}, response {@resposne}",
+                response.ErrorMessage ?? response.StatusDescription, response);
             throw new Exception(response.ErrorMessage ?? response.StatusDescription);
         }
 
-        public StreamingDeviceState GetState()
+        private void SetDefaultSettings()
         {
-            var state = _deviceRepository.GetDeviceState();
-            if (state != null) return state;
-
             var config = _configurationManager.GetDeviceConfig();
-
-            state = new StreamingDeviceState
-            {
-                DeviceId = config.DeviceId,
-                StateCapturedOn = DateTime.UtcNow,
-                Status = StreamingDeviceStatuses.Idle
-            };
-            _deviceRepository.Save(state);
-            return state;
-        }
-
-        private VideoStreamModel DownloadStreamInformation(Guid videoStreamId)
-        {
-            var request = new RestRequest($"{videoStreamId}?extended=true", Method.GET);
-            var response = _streamClient.Execute<VideoStreamModel>(request);
-            if (response.StatusCode != HttpStatusCode.OK)
-            {
-                var message = response.ErrorMessage ?? response.StatusDescription;
-                // TODO handle logging / exceptions
-                _logger.Fatal("Could not retrieve video stream details for {@videoStreamId} due to {@message} from response {@response}", videoStreamId, message, response);
-                throw new Exception($"Could not retrieve video stream details for {videoStreamId} due to {message}");
-            }
-            _deviceRepository.SaveVideoStream(Mapper.Map<VideoStream>(response.Data));
-            return response.Data;
+            if (string.IsNullOrWhiteSpace(config.Get<string>(SettingParams.ServerRootPath)))
+                config = _configurationManager.UpdateSetting(SettingParams.ServerRootPath,
+                    "http://forte-devapi.azurewebsites.net");
+            if (string.IsNullOrWhiteSpace(config.Get<string>(SettingParams.ServerApiPath)))
+                _configurationManager.UpdateSetting(SettingParams.ServerApiPath,
+                    "http://forte-devapi.azurewebsites.net/api");
         }
     }
 }
