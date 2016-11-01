@@ -60,6 +60,13 @@ namespace forte.devices.data
         DeviceCommandEntity SaveCommand(DeviceCommandEntity deviceCommandEntity);
 
         /// <summary>
+        /// Get already stored command based on id
+        /// </summary>
+        /// <param name="commandId"></param>
+        /// <returns></returns>
+        DeviceCommandEntity GetCommand(Guid commandId);
+
+        /// <summary>
         /// Save a particular setting value
         /// </summary>
         /// <typeparam name="T"></typeparam>

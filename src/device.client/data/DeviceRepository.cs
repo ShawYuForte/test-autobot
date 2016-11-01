@@ -142,6 +142,14 @@ namespace forte.devices.data
             };
         }
 
+        public DeviceCommandEntity GetCommand(Guid commandId)
+        {
+            using (var dbContext = new DeviceDbContext(_connectionString))
+            {
+                return dbContext.Commands.FirstOrDefault(cmd => cmd.Id == commandId);
+            };
+        }
+
         public void SaveSetting<T>(string setting, T value)
         {
             DeviceSetting existing;

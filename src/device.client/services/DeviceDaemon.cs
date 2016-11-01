@@ -39,7 +39,7 @@ namespace forte.devices.services
         private static readonly object Key = new object();
         private static readonly object StopKey = new object();
 
-        public DeviceDaemon(IDeviceRepository deviceRepository, IStreamingClient streamingClient, ILogger logger, 
+        public DeviceDaemon(IDeviceRepository deviceRepository, IStreamingClient streamingClient, ILogger logger,
             IConfigurationManager configurationManager, IServerListener serverListener)
         {
             _deviceRepository = deviceRepository;
@@ -280,7 +280,11 @@ namespace forte.devices.services
             _logger.Debug("Command retrieved {@command}", response.Data);
             var command = response.Data;
 
-            SaveCommandLocally(command);
+            var existing = _deviceRepository.GetCommand(command.Id);
+            if (existing != null)
+                command = Mapper.Map<DeviceCommandModelEx>(existing);
+            else
+                SaveCommandLocally(command);
 
             try
             {
@@ -311,6 +315,8 @@ namespace forte.devices.services
 
             if (command.Status == ExecutionStatus.Failed && command.RetryCount >= 3)
             {
+                command.ExecutedOn = DateTime.UtcNow;
+                SaveCommandOnServer(command);
                 var deviceState = GetState();
                 deviceState.Status = StreamingDeviceStatuses.Error;
                 _deviceRepository.Save(deviceState);
@@ -488,7 +494,9 @@ namespace forte.devices.services
             request.AddHeader("Content-Type", "application/json; charset=utf-8");
             var commandPatch = new
             {
-                ExecutionSucceeded = commandModel.Status == ExecutionStatus.Executed, commandModel.ExecutedOn, commandModel.ExecutionMessages
+                ExecutionSucceeded = commandModel.Status == ExecutionStatus.Executed,
+                commandModel.ExecutedOn,
+                commandModel.ExecutionMessages
             };
             request.AddJsonBody(commandPatch);
             var response = _client.Execute<DeviceCommandModel>(request);
