@@ -31,13 +31,13 @@ namespace forte.devices
                 Mapper.CreateMap<DeviceConfig, StreamingDeviceConfig>();
                 Mapper.CreateMap<StreamingDeviceConfig, DeviceConfig>();
 
-                Mapper.CreateMap<DeviceCommandEntity, DeviceCommandModel>()
+                Mapper.CreateMap<StreamingDeviceCommandEntity, StreamingDeviceCommandModel>()
                     .ForMember(entity => entity.ExecutionSucceeded,
                         map => map.MapFrom(model => model.Status == ExecutionStatus.Executed))
                     .ForMember(entity => entity.Data,
                         map => map.MapFrom(
                                 model => JsonConvert.DeserializeObject<Dictionary<string, DataValue>>(model.Data)));
-                Mapper.CreateMap<DeviceCommandModel, DeviceCommandEntity>()
+                Mapper.CreateMap<StreamingDeviceCommandModel, StreamingDeviceCommandEntity>()
                     .ForMember(model => model.Status, map => map.UseValue(ExecutionStatus.Received))
                     .ForMember(model => model.Data,
                         map => map.MapFrom(entity => JsonConvert.SerializeObject(entity.Data)));

@@ -30,8 +30,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="forte.specs, Version=1.1.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\forte.specs.1.1.1\lib\net45\forte.specs.dll</HintPath>
+    <Reference Include="forte.specs, Version=1.1.2.3178, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\forte.specs.1.1.2\lib\net45\forte.specs.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
@@ -57,6 +57,7 @@
     <Compile Include="services\SimulatorConfigManager.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

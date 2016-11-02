@@ -30,8 +30,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="forte.specs, Version=1.1.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\forte.specs.1.1.1\lib\net45\forte.specs.dll</HintPath>
+    <Reference Include="forte.specs, Version=1.1.2.3178, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\forte.specs.1.1.2\lib\net45\forte.specs.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.AspNet.SignalR.Core, Version=2.2.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -90,7 +90,6 @@
     <Compile Include="extensions\NewtonsoftJsonSerializer.cs" />
     <Compile Include="models\Audio.cs" />
     <Compile Include="models\CommonEntityParams.cs" />
-    <Compile Include="models\DeviceCommandModelEx.cs" />
     <Compile Include="models\ExecutionStatus.cs" />
     <Compile Include="models\StreamingDeviceConfig.cs" />
     <Compile Include="models\DeviceState.cs" />

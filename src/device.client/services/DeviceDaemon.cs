@@ -165,7 +165,7 @@ namespace forte.devices.services
             }
         }
 
-        public bool StartProgram(DeviceCommandModel command)
+        public bool StartProgram(StreamingDeviceCommandModel command)
         {
             _logger.Debug("Starting program for command {@command}", command);
 
@@ -212,7 +212,7 @@ namespace forte.devices.services
             return true;
         }
 
-        public bool StartStreaming(DeviceCommandModel command)
+        public bool StartStreaming(StreamingDeviceCommandModel command)
         {
             _logger.Debug("Starting streaming for command {@command}", command);
 
@@ -261,7 +261,7 @@ namespace forte.devices.services
         ///     request is coming for the right stream
         /// </summary>
         /// <param name="command"></param>
-        public bool StopProgram(DeviceCommandModel command)
+        public bool StopProgram(StreamingDeviceCommandModel command)
         {
             _logger.Debug("Stopping program for command {@command}", command);
 
@@ -302,7 +302,7 @@ namespace forte.devices.services
         ///     request is coming for the right stream
         /// </summary>
         /// <param name="command"></param>
-        public bool StopStreaming(DeviceCommandModel command)
+        public bool StopStreaming(StreamingDeviceCommandModel command)
         {
             _logger.Debug("Stopping streaming for command {@command}", command);
 
@@ -316,7 +316,7 @@ namespace forte.devices.services
                 case StreamingDeviceStatuses.Streaming:
                 case StreamingDeviceStatuses.StreamingAndRecording:
                 case StreamingDeviceStatuses.Recording:
-                    _streamingClient.StopStreaming(shutdownClient: true);
+                    _streamingClient.StopStreaming(true);
                     state.Status = StreamingDeviceStatuses.Idle;
                     break;
                 case StreamingDeviceStatuses.StreamingProgram:
@@ -339,15 +339,6 @@ namespace forte.devices.services
             return true;
         }
 
-        private DeviceCommandModelEx ApplyLocalCommandAttributes(DeviceCommandModelEx command)
-        {
-            var existing = _deviceRepository.GetCommand(command.Id);
-            if (existing == null) return command;
-            _logger.Debug("Found local command {@command}", existing);
-            command.RetryCount = existing.retry
-            command = Mapper.Map<DeviceCommandModelEx>(existing);
-        }
-
         public void ThreadSafeFetchCommand()
         {
             _logger.Debug("Fetching command...");
@@ -356,7 +347,7 @@ namespace forte.devices.services
             {
                 JsonSerializer = NewtonsoftJsonSerializer.Default
             };
-            var response = _client.Execute<DeviceCommandModelEx>(request);
+            var response = _client.Execute<StreamingDeviceCommandModel>(request);
             // Not found if no command
             if (response.StatusCode == HttpStatusCode.NotFound)
             {
@@ -373,23 +364,38 @@ namespace forte.devices.services
             _logger.Debug("Command retrieved {@command}", response.Data);
             var command = response.Data;
 
-            var existing = _deviceRepository.GetCommand(command.Id);
-            if (existing != null)
-                command = Mapper.Map<DeviceCommandModelEx>(existing);
-            else
-                SaveCommandLocally(command);
+            SaveCommandLocally(command);
 
             try
             {
+                command.ExecutionAttempts++;
                 ExecuteCommand(command);
+                command.ExecutedOn = DateTime.UtcNow;
+                command.ExecutionSucceeded = true;
+                PublishState();
             }
             catch (Exception exception)
             {
-                command.ExecutionSucceeded = false;
-                command.Status = ExecutionStatus.Failed;
-                command.ExecutionMessages = exception.Message;
-                command.RetryCount++;
-                _logger.Error(exception, "Could not execute command {@command}", command);
+                if (string.IsNullOrWhiteSpace(command.ExecutionMessages))
+                {
+                    command.ExecutionMessages = exception.Message;
+                }
+                else
+                {
+                    command.ExecutionMessages += $"{exception.Message};\n\r";
+                }
+
+                if (command.ExecutionAttempts > command.MaxAttemptsAllowed)
+                {
+                    command.ExecutedOn = DateTime.UtcNow;
+                    command.ExecutionSucceeded = false;
+                    PublishTemporaryFailedState();
+                    _logger.Fatal(exception, "Could not execute command {@command}", command);
+                }
+                else
+                {
+                    _logger.Error(exception, "Could not execute command {@command}", command);
+                }
             }
 
             SaveCommandLocally(command);
@@ -397,25 +403,28 @@ namespace forte.devices.services
             try
             {
                 SaveCommandOnServer(command);
-                command.PublishedOn = DateTime.UtcNow;
             }
             catch (Exception exception)
             {
-                command.ExecutionMessages = exception.Message;
+                _logger.Fatal(exception, "Could not save command on the server {@command}", command);
             }
+        }
 
-            SaveCommandLocally(command);
-
-            if ((command.Status == ExecutionStatus.Failed) && (command.RetryCount >= 3))
+        private void PublishTemporaryFailedState()
+        {
+            var state = GetState();
+            var status = state.Status;
+            if (status != StreamingDeviceStatuses.Error)
             {
-                command.ExecutedOn = DateTime.UtcNow;
-                SaveCommandOnServer(command);
-                var deviceState = GetState();
-                deviceState.Status = StreamingDeviceStatuses.Error;
-                _deviceRepository.Save(deviceState);
+                state.Status = StreamingDeviceStatuses.Error;
+                _deviceRepository.Save(state);
             }
-
             PublishState();
+            if (status != state.Status)
+            {
+                state.Status = status;
+                _deviceRepository.Save(state);
+            }
         }
 
         private VideoStreamModel DownloadStreamInformation(Guid videoStreamId)
@@ -436,29 +445,29 @@ namespace forte.devices.services
         }
 
 
-        private void ExecuteCommand(DeviceCommandModelEx command)
+        private void ExecuteCommand(StreamingDeviceCommandModel command)
         {
             var result = true;
             var resultMessage = string.Empty;
 
             switch (command.Command)
             {
-                case DeviceCommands.UpdateState:
+                case StreamingDeviceCommands.UpdateState:
                     result = PublishState();
                     break;
-                case DeviceCommands.StartStreaming:
+                case StreamingDeviceCommands.StartStreaming:
                     result = StartStreaming(command);
                     break;
-                case DeviceCommands.StopStreaming:
+                case StreamingDeviceCommands.StopStreaming:
                     result = StopStreaming(command);
                     break;
-                case DeviceCommands.StartProgram:
+                case StreamingDeviceCommands.StartProgram:
                     result = StartProgram(command);
                     break;
-                case DeviceCommands.StopProgram:
+                case StreamingDeviceCommands.StopProgram:
                     result = StopProgram(command);
                     break;
-                case DeviceCommands.ResetToIdle:
+                case StreamingDeviceCommands.ResetToIdle:
                     result = ResetToIdle(command);
                     break;
                 default:
@@ -466,7 +475,7 @@ namespace forte.devices.services
             }
 
             command.ExecutionMessages = resultMessage;
-            command.Status = result ? ExecutionStatus.Executed : ExecutionStatus.Failed;
+            command.ExecutionSucceeded = result;
             command.ExecutedOn = DateTime.UtcNow;
         }
 
@@ -476,7 +485,7 @@ namespace forte.devices.services
             FetchRequested = true;
         }
 
-        private bool ResetToIdle(DeviceCommandModelEx command)
+        private bool ResetToIdle(StreamingDeviceCommandModel command)
         {
             _logger.Debug("Resetting device to idle for command {@command}", command);
 
@@ -512,9 +521,9 @@ namespace forte.devices.services
             return true;
         }
 
-        private void SaveCommandLocally(DeviceCommandModel command)
+        private void SaveCommandLocally(StreamingDeviceCommandModel command)
         {
-            var commandEntity = Mapper.Map<DeviceCommandEntity>(command);
+            var commandEntity = Mapper.Map<StreamingDeviceCommandEntity>(command);
             _deviceRepository.SaveCommand(commandEntity);
         }
 
@@ -523,9 +532,9 @@ namespace forte.devices.services
         /// </summary>
         /// <param name="commandModel"></param>
         /// <exception cref="Exception">If server update fails</exception>
-        private void SaveCommandOnServer(DeviceCommandModelEx commandModel)
+        private void SaveCommandOnServer(StreamingDeviceCommandModel commandModel)
         {
-            _deviceRepository.SaveCommand(Mapper.Map<DeviceCommandEntity>(commandModel));
+            _deviceRepository.SaveCommand(Mapper.Map<StreamingDeviceCommandEntity>(commandModel));
 
             // TODO handle duplicates and queuing
             var request = new RestRequest($"{_deviceId}/commands/{commandModel.Id}", Method.PUT)
@@ -533,14 +542,8 @@ namespace forte.devices.services
                 JsonSerializer = NewtonsoftJsonSerializer.Default
             };
             request.AddHeader("Content-Type", "application/json; charset=utf-8");
-            var commandPatch = new
-            {
-                ExecutionSucceeded = commandModel.Status == ExecutionStatus.Executed,
-                commandModel.ExecutedOn,
-                commandModel.ExecutionMessages
-            };
-            request.AddJsonBody(commandPatch);
-            var response = _client.Execute<DeviceCommandModel>(request);
+            request.AddJsonBody(commandModel);
+            var response = _client.Execute<StreamingDeviceCommandModel>(request);
 
             if (response.StatusCode == HttpStatusCode.OK) return;
 

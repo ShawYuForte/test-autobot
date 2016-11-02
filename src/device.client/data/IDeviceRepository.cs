@@ -55,16 +55,16 @@ namespace forte.devices.data
         /// <summary>
         /// Save command to local repo
         /// </summary>
-        /// <param name="deviceCommandEntity"></param>
+        /// <param name="streamingDeviceCommandEntity"></param>
         /// <returns></returns>
-        DeviceCommandEntity SaveCommand(DeviceCommandEntity deviceCommandEntity);
+        StreamingDeviceCommandEntity SaveCommand(StreamingDeviceCommandEntity streamingDeviceCommandEntity);
 
         /// <summary>
         /// Get already stored command based on id
         /// </summary>
         /// <param name="commandId"></param>
         /// <returns></returns>
-        DeviceCommandEntity GetCommand(Guid commandId);
+        StreamingDeviceCommandEntity GetCommand(Guid commandId);
 
         /// <summary>
         /// Save a particular setting value

@@ -3,7 +3,7 @@ using forte.devices.entities;
 
 namespace forte.devices.data.configs
 {
-    public class DeviceCommandConfig : EntityTypeConfiguration<DeviceCommandEntity>
+    public class DeviceCommandConfig : EntityTypeConfiguration<StreamingDeviceCommandEntity>
     {
         public DeviceCommandConfig()
         {

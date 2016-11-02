@@ -119,30 +119,30 @@ namespace forte.devices.data
             }
         }
 
-        public DeviceCommandEntity SaveCommand(DeviceCommandEntity deviceCommandEntity)
+        public StreamingDeviceCommandEntity SaveCommand(StreamingDeviceCommandEntity streamingDeviceCommandEntity)
         {
             using (var dbContext = new DeviceDbContext(_connectionString))
             {
-                if (deviceCommandEntity.Created == DateTime.MinValue) deviceCommandEntity.Created = DateTime.UtcNow;
-                if (deviceCommandEntity.LastModified == DateTime.MinValue) deviceCommandEntity.LastModified = DateTime.UtcNow;
+                if (streamingDeviceCommandEntity.Created == DateTime.MinValue) streamingDeviceCommandEntity.Created = DateTime.UtcNow;
+                if (streamingDeviceCommandEntity.LastModified == DateTime.MinValue) streamingDeviceCommandEntity.LastModified = DateTime.UtcNow;
 
-                if (dbContext.Commands.Count(command => command.Id == deviceCommandEntity.Id) > 0)
+                if (dbContext.Commands.Count(command => command.Id == streamingDeviceCommandEntity.Id) > 0)
                 {
-                    dbContext.Commands.Attach(deviceCommandEntity);
-                    dbContext.Entry(deviceCommandEntity).State = EntityState.Modified;
+                    dbContext.Commands.Attach(streamingDeviceCommandEntity);
+                    dbContext.Entry(streamingDeviceCommandEntity).State = EntityState.Modified;
                 }
                 else
                 {
-                    dbContext.Commands.Add(deviceCommandEntity);
+                    dbContext.Commands.Add(streamingDeviceCommandEntity);
                 }
 
                 dbContext.SaveChanges();
 
-                return deviceCommandEntity;
+                return streamingDeviceCommandEntity;
             };
         }
 
-        public DeviceCommandEntity GetCommand(Guid commandId)
+        public StreamingDeviceCommandEntity GetCommand(Guid commandId)
         {
             using (var dbContext = new DeviceDbContext(_connectionString))
             {

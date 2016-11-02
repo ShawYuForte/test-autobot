@@ -8,9 +8,9 @@ using forte.models.devices;
 
 namespace forte.devices.entities
 {
-    public class DeviceCommandEntity : Entity
+    public class StreamingDeviceCommandEntity : Entity
     {
-        public DeviceCommands Command { get; set; }
+        public StreamingDeviceCommands Command { get; set; }
         public string Data { get; set; }
         public Guid DeviceId { get; set; }
         public DateTime? ExecutedOn { get; set; }

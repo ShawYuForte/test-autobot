@@ -68,14 +68,14 @@ namespace forte.devices.services
             PrintFooter("available commands");
         }
 
-        private DeviceCommandModel FetchCommand()
+        private StreamingDeviceCommandModel FetchCommand()
         {
             var _client = new RestClient($"{Server}/devices/");
             var request = new RestRequest($"{DeviceId}/commands/next", Method.GET)
             {
                 JsonSerializer = NewtonsoftJsonSerializer.Default
             };
-            var response = _client.Execute<DeviceCommandModelEx>(request);
+            var response = _client.Execute<StreamingDeviceCommandModel>(request);
             // Not found if no command
             if (response.StatusCode == HttpStatusCode.NotFound)
             {
@@ -249,22 +249,22 @@ namespace forte.devices.services
             }
             switch (command.Command)
             {
-                case DeviceCommands.StartStreaming:
+                case StreamingDeviceCommands.StartStreaming:
                     Status = succeed ? StreamingDeviceStatuses.Streaming : StreamingDeviceStatuses.Error;
                     break;
-                case DeviceCommands.StartProgram:
+                case StreamingDeviceCommands.StartProgram:
                     Status = succeed ? StreamingDeviceStatuses.StreamingProgram : StreamingDeviceStatuses.Error;
                     break;
-                case DeviceCommands.StopStreaming:
+                case StreamingDeviceCommands.StopStreaming:
                     Status = succeed ? StreamingDeviceStatuses.Idle : StreamingDeviceStatuses.Error;
                     break;
-                case DeviceCommands.StopProgram:
+                case StreamingDeviceCommands.StopProgram:
                     Status = succeed ? StreamingDeviceStatuses.Streaming : StreamingDeviceStatuses.Error;
                     break;
-                case DeviceCommands.ResetToIdle:
+                case StreamingDeviceCommands.ResetToIdle:
                     Status = succeed ? StreamingDeviceStatuses.Idle : StreamingDeviceStatuses.Error;
                     break;
-                case DeviceCommands.UpdateState:
+                case StreamingDeviceCommands.UpdateState:
                 default:
                     break;
             }
