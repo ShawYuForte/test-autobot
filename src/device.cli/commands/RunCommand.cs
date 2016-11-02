@@ -101,6 +101,23 @@ namespace forte.devices.commands
                 //FreeConsole();
             }
 
+            logger.Information("Initializing...");
+            if (!string.IsNullOrWhiteSpace(_options.DeviceId))
+            {
+                Guid deviceId;
+
+                if (_options.DeviceId.ToLower() == "new")
+                {
+                    deviceId = Guid.NewGuid();
+                }
+                else if (!Guid.TryParse(_options.DeviceId, out deviceId))
+                {
+                    Console.WriteLine("Device identifier is not a valid Guid.");
+                    Environment.Exit(Parser.DefaultExitCodeFail);
+                }
+                daemon.ini
+            }
+
             logger.Information("Running device local UI web server.");
             using (var server = container.Resolve<ApiServer>().Run(_options.Port))
             {
@@ -123,7 +140,7 @@ namespace forte.devices.commands
                 {
                     FileName = "device-cli.exe",
                     UseShellExecute = false,
-                    CreateNoWindow = true, 
+                    CreateNoWindow = true,
                     WindowStyle = ProcessWindowStyle.Hidden,
                     Arguments = _options.ToArgs()
                 }

@@ -1,19 +1,16 @@
-#region
-
 using System.Data.Entity.Migrations;
-
-#endregion
+using forte.devices.data;
 
 namespace forte.devices.Migrations
 {
-    internal sealed class Configuration : DbMigrationsConfiguration<forte.devices.data.DeviceDbContext>
+    internal sealed class Configuration : DbMigrationsConfiguration<DeviceDbContext>
     {
         public Configuration()
         {
             AutomaticMigrationsEnabled = true;
         }
 
-        protected override void Seed(data.DeviceDbContext context)
+        protected override void Seed(DeviceDbContext context)
         {
             //  This method will be called after migrating to the latest version.
 

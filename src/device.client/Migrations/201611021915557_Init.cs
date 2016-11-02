@@ -1,44 +1,36 @@
-#region
-
-using System.Data.Entity.Migrations;
-
-#endregion
-
 namespace forte.devices.Migrations
 {
+    using System;
+    using System.Data.Entity.Migrations;
+    
     public partial class Init : DbMigration
     {
-        public override void Down()
-        {
-            DropTable("dbo.DeviceSettings");
-            DropTable("dbo.StreamingDeviceStates");
-            DropTable("dbo.DeviceConfigs");
-            DropTable("dbo.DeviceCommandEntities");
-        }
-
         public override void Up()
         {
             CreateTable(
-                    "dbo.DeviceCommandEntities",
-                    c => new
+                "dbo.StreamingDeviceCommands",
+                c => new
                     {
                         Id = c.Guid(nullable: false),
-                        DeviceId = c.Guid(nullable: false),
+                        CanceledOn = c.DateTime(),
                         Command = c.Int(nullable: false),
-                        IssuedOn = c.DateTime(nullable: false),
-                        ExecutedOn = c.DateTime(),
-                        Status = c.Int(nullable: false),
-                        PublishedOn = c.DateTime(),
-                        ExecutionMessages = c.String(maxLength: 4000),
                         Data = c.String(maxLength: 4000),
+                        ExecutedOn = c.DateTime(),
+                        ExecutionAttempts = c.Int(nullable: false),
+                        ExecutionMessages = c.String(maxLength: 4000),
+                        ExecutionSucceeded = c.Boolean(nullable: false),
+                        IssuedOn = c.DateTime(nullable: false),
+                        MaxAttemptsAllowed = c.Int(nullable: false),
+                        StreamingDeviceId = c.Guid(nullable: false),
+                        VideoStreamId = c.Guid(),
                         Created = c.DateTime(nullable: false),
                         LastModified = c.DateTime(nullable: false),
                     })
                 .PrimaryKey(t => t.Id);
-
+            
             CreateTable(
-                    "dbo.DeviceConfigs",
-                    c => new
+                "dbo.DeviceConfigs",
+                c => new
                     {
                         Id = c.Guid(nullable: false),
                         DeviceId = c.Guid(nullable: false),
@@ -50,10 +42,10 @@ namespace forte.devices.Migrations
                         Version = c.Binary(nullable: false, fixedLength: true, timestamp: true, storeType: "rowversion"),
                     })
                 .PrimaryKey(t => t.Id);
-
+            
             CreateTable(
-                    "dbo.StreamingDeviceStates",
-                    c => new
+                "dbo.StreamingDeviceStates",
+                c => new
                     {
                         DeviceId = c.Guid(nullable: false),
                         StateCapturedOn = c.DateTime(nullable: false),
@@ -62,10 +54,10 @@ namespace forte.devices.Migrations
                         StreamingPresetLoadHash = c.String(maxLength: 4000),
                     })
                 .PrimaryKey(t => t.DeviceId);
-
+            
             CreateTable(
-                    "dbo.DeviceSettings",
-                    c => new
+                "dbo.DeviceSettings",
+                c => new
                     {
                         Id = c.Guid(nullable: false),
                         Name = c.String(maxLength: 4000),
@@ -79,6 +71,15 @@ namespace forte.devices.Migrations
                         LastModified = c.DateTime(nullable: false),
                     })
                 .PrimaryKey(t => t.Id);
+            
+        }
+        
+        public override void Down()
+        {
+            DropTable("dbo.DeviceSettings");
+            DropTable("dbo.StreamingDeviceStates");
+            DropTable("dbo.DeviceConfigs");
+            DropTable("dbo.StreamingDeviceCommands");
         }
     }
 }
