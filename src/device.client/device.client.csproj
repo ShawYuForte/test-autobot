@@ -142,6 +142,10 @@
     <Compile Include="Migrations\201609201712469_Init.Designer.cs">
       <DependentUpon>201609201712469_Init.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201611021834184_StandardEntity.cs" />
+    <Compile Include="Migrations\201611021834184_StandardEntity.Designer.cs">
+      <DependentUpon>201611021834184_StandardEntity.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="models\SettingParams.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -163,6 +167,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Migrations\201609201712469_Init.resx">
       <DependentUpon>201609201712469_Init.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201611021834184_StandardEntity.resx">
+      <DependentUpon>201611021834184_StandardEntity.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

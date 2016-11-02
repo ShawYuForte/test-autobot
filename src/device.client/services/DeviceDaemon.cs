@@ -34,13 +34,13 @@ namespace forte.devices.services
         private static readonly object Key = new object();
         private static readonly object StopKey = new object();
 
-        private readonly RestClient _client;
+        private RestClient _client;
         private readonly IConfigurationManager _configurationManager;
-        private readonly Guid _deviceId;
+        private Guid _deviceId;
         private readonly IDeviceRepository _deviceRepository;
         private readonly ILogger _logger;
         private readonly IServerListener _serverListener;
-        private readonly RestClient _streamClient;
+        private RestClient _streamClient;
 
         private readonly IStreamingClient _streamingClient;
 
@@ -51,13 +51,34 @@ namespace forte.devices.services
             _streamingClient = streamingClient;
             _logger = logger;
             _configurationManager = configurationManager;
+            _serverListener = serverListener;
+            serverListener.MessageReceived += OnServerMessageReceived;
+        }
+
+        public void Init()
+        {
+            Init(Guid.Empty);
+        }
+        public void Init(Guid deviceId)
+        {
             SetDefaultSettings();
             var config = _configurationManager.GetDeviceConfig();
+            if (deviceId != Guid.Empty)
+            {
+                if (config.DeviceId != Guid.Empty && config.DeviceId != deviceId)
+                {
+                    _logger.Warning("New device identifier specified, changing from {@oldId} to {@newId}",
+                        config.DeviceId, deviceId);
+                }
+                else
+                {
+                    _logger.Information("New device identifier {@newId}", deviceId);
+                }
+                _configurationManager.UpdateSetting(nameof(models.StreamingDeviceConfig.DeviceId), deviceId);
+            }
             _client = new RestClient($"{config.Get<string>(SettingParams.ServerApiPath)}/devices/");
             _streamClient = new RestClient($"{config.Get<string>(SettingParams.ServerApiPath)}/streams/");
             _deviceId = config.DeviceId;
-            _serverListener = serverListener;
-            serverListener.MessageReceived += OnServerMessageReceived;
         }
 
         private bool FetchRequested { get; set; }
@@ -127,6 +148,10 @@ namespace forte.devices.services
 
         public void Run()
         {
+            var config = _configurationManager.GetDeviceConfig();
+            if (config.DeviceId == Guid.Empty)
+                throw new NotSupportedException("No device identifier configured");
+
             var seconds = 30;
             _serverListener.Connect();
             while (!Stopped)

@@ -17,6 +17,9 @@ namespace forte.devices.options
         [Option('d', "datapath", DefaultValue = @"c:\forte\data", HelpText = "Path where local data will be stored.")]
         public string DataPath { get; set; }
 
+        [Option("deviceid", Required = false, HelpText = "Device identifier, if you are setting up a new device.")]
+        public string DeviceId { get; set; }
+
         [Option('l', "logpath", DefaultValue = @"c:\forte\logs", HelpText = "Path where local logs will be stored.")]
         public string LogPath { get; set; }
 

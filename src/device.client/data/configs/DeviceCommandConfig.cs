@@ -7,6 +7,8 @@ namespace forte.devices.data.configs
     {
         public DeviceCommandConfig()
         {
+            ToTable("StreamingDeviceCommands");
+
             HasKey(e => e.Id);
             //Property(e => e.Version).IsRowVersion();
             Ignore(e => e.Version);

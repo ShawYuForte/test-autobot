@@ -30,13 +30,7 @@ namespace forte.devices.services
                 _deviceConfig[setting.Name] = setting.ToValue();
             }
 
-            if (_deviceConfig.DeviceId != Guid.Empty) return _deviceConfig;
-
-            _logger.Warning(
-                "Device identifier is empty. If this not the first run, then this is an error and will break the integration flows");
-            var deviceId = Guid.NewGuid();
-            _logger.Information("Assigning new device identifier {@id}", deviceId);
-            return UpdateSetting(nameof(_deviceConfig.DeviceId), deviceId);
+            return _deviceConfig;
         }
 
         public StreamingDeviceConfig UpdateSetting<T>(string setting, T value)
