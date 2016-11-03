@@ -1,6 +1,4 @@
-﻿using System;
-using AutoMapper;
-using forte.devices.data;
+﻿using forte.devices.data;
 using forte.devices.extensions;
 using forte.devices.models;
 using forte.models;

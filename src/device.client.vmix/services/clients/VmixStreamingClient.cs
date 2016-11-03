@@ -7,6 +7,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading;
 using AutoMapper;
@@ -21,6 +22,10 @@ namespace forte.devices.services.clients
 {
     public class VmixStreamingClient : IStreamingClient
     {
+        [DllImport("user32")]
+        private static extern int IsWindowEnabled(int hWnd);
+
+
         private readonly Regex _cameraRegex = new Regex(@"RTSPTCP rtsp:\/\/root:pass@[0-9.]*\/axis-media\/media\.amp");
         private readonly RestClient _client;
         private readonly IConfigurationManager _configurationManager;
@@ -285,9 +290,21 @@ namespace forte.devices.services.clients
         /// <returns></returns>
         public VmixState StartStreaming()
         {
-            var state = CallAndFetchState("/?Function=StartStreaming", "start streaming");
-            if (state.Streaming) return state;
+            CallAndFetchState("/?Function=StartStreaming", "start streaming");
+            Thread.Sleep(5000);
+            var state = GetVmixState();
+            // When streaming fails, API returns true, but an error dialog is displayed, so make sure no dialogs open
+            if (state.Streaming && !VmixDialogsOpen()) return state;
             throw new Exception("Could not start streaming");
+        }
+
+        private bool VmixDialogsOpen()
+        {
+            var vmixProcess = GetVmixProcess();
+            if (vmixProcess == null) throw new Exception("VMix process is not running");
+            var vmixWindowEnabled = IsWindowEnabled(vmixProcess.MainWindowHandle.ToInt32()) != 0;
+            // VMix Window will be disabled, if there are dialogs showing
+            return !vmixWindowEnabled;
         }
 
         public VmixState StopPlaylist()
@@ -354,7 +371,7 @@ namespace forte.devices.services.clients
                 var config = _configurationManager.GetDeviceConfig();
                 var webRequest =
                     WebRequest.CreateHttp($"{config.Get<string>(VmixSettingParams.VmixApiPath)}{operation}");
-                var response = (HttpWebResponse) webRequest.GetResponse();
+                var response = (HttpWebResponse)webRequest.GetResponse();
                 _logger.Debug("VMIX command HTTP response {@response}", response);
                 if (response.StatusCode == HttpStatusCode.OK) return GetVmixState();
 

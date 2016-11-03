@@ -1,24 +1,9 @@
 ﻿#region
 
 using System;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Reflection;
-using System.Runtime.InteropServices;
 using CommandLine;
-using device.logging;
-using device.web;
-using device.web.server;
 using forte.devices.commands;
-using forte.devices.models;
 using forte.devices.options;
-using forte.devices.services;
-using forte.devices.utils;
-using forte.services;
-using Microsoft.Practices.Unity;
-using Newtonsoft.Json.Linq;
 
 #endregion
 

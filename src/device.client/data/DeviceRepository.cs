@@ -4,6 +4,7 @@ using System.Data.Entity;
 using System.IO;
 using System.Linq;
 using AutoMapper;
+using EntityFramework.Extensions;
 using forte.devices.entities;
 using forte.devices.models;
 using forte.devices.services;
@@ -104,17 +105,12 @@ namespace forte.devices.data
             {
                 deviceState.StateCapturedOn = DateTime.UtcNow;
 
-                var existing = dbContext.DeviceState.Count();
-                if (existing > 0)
+                if (dbContext.DeviceState.Any())
                 {
-                    dbContext.DeviceState.Attach(deviceState);
-                    dbContext.Entry(deviceState).State = EntityState.Modified;
-                }
-                else
-                {
-                    dbContext.DeviceState.Add(deviceState);
+                    dbContext.Database.ExecuteSqlCommand("DELETE FROM StreamingDeviceStates");
                 }
 
+                dbContext.DeviceState.Add(deviceState);
                 dbContext.SaveChanges();
             }
         }

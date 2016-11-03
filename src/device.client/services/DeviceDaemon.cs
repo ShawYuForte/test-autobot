@@ -32,7 +32,6 @@ namespace forte.devices.services
         public delegate void MessageReceivedDelegate(string message);
 
         private static readonly object Key = new object();
-        private static readonly object StopKey = new object();
 
         private RestClient _client;
         private readonly IConfigurationManager _configurationManager;
@@ -41,6 +40,7 @@ namespace forte.devices.services
         private readonly ILogger _logger;
         private readonly IServerListener _serverListener;
         private RestClient _streamClient;
+        private DateTime _lastPublishTime = DateTime.MinValue;
 
         private readonly IStreamingClient _streamingClient;
 
@@ -69,16 +69,19 @@ namespace forte.devices.services
                 {
                     _logger.Warning("New device identifier specified, changing from {@oldId} to {@newId}",
                         config.DeviceId, deviceId);
+                    _configurationManager.UpdateSetting(nameof(models.StreamingDeviceConfig.DeviceId), deviceId);
+                    var storedState = GetState();
+                    if (storedState.DeviceId != deviceId)
+                    {
+                        storedState.DeviceId = deviceId;
+                        _deviceRepository.Save(storedState);
+                    }
                 }
-                else
-                {
-                    _logger.Information("New device identifier {@newId}", deviceId);
-                }
-                _configurationManager.UpdateSetting(nameof(models.StreamingDeviceConfig.DeviceId), deviceId);
             }
             _client = new RestClient($"{config.Get<string>(SettingParams.ServerApiPath)}/devices/");
             _streamClient = new RestClient($"{config.Get<string>(SettingParams.ServerApiPath)}/streams/");
             _deviceId = config.DeviceId;
+            _logger.Information("Devide unique identifier {@deviceId}", _deviceId);
         }
 
         private bool FetchRequested { get; set; }
@@ -114,6 +117,18 @@ namespace forte.devices.services
             return state;
         }
 
+        private void TryPublishState()
+        {
+            try
+            {
+                PublishState();
+            }
+            catch (Exception exception)
+            {
+                _logger.Error(exception, "Could not publish state");
+            }
+        }
+
         /// <summary>
         ///     Publish device state to the server
         /// </summary>
@@ -136,6 +151,7 @@ namespace forte.devices.services
                 throw new Exception(response.ErrorMessage ?? $"Publishing state, response was {response.StatusCode}");
             }
 
+            _lastPublishTime = DateTime.Now;
             _logger.Debug("State published");
 
             return true;
@@ -171,6 +187,11 @@ namespace forte.devices.services
                         _logger.Error(exception, exception.Message);
                     }
                 }
+
+                // Keep the server informed that we are alive
+                if ((DateTime.Now - _lastPublishTime).Minutes > 30)
+                    TryPublishState();
+
                 Thread.Sleep(1000);
             }
         }
@@ -410,7 +431,7 @@ namespace forte.devices.services
                     command.ExecutionMessages += $"{exception.Message};\n\r";
                 }
 
-                if (command.ExecutionAttempts > command.MaxAttemptsAllowed)
+                if (command.ExecutionAttempts >= command.MaxAttemptsAllowed)
                 {
                     command.ExecutedOn = DateTime.UtcNow;
                     command.ExecutionSucceeded = false;
@@ -472,7 +493,7 @@ namespace forte.devices.services
 
         private void ExecuteCommand(StreamingDeviceCommandModel command)
         {
-            var result = true;
+            bool result;
             var resultMessage = string.Empty;
 
             switch (command.Command)

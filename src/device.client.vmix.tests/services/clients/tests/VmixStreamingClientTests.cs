@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using forte.devices.models;
 using forte.devices.models.presets;
@@ -122,6 +125,32 @@ namespace forte.devices.services.clients.tests
                     buffer.AppendLine($"{property.Key}={property.Value},");
             }
             var code = buffer.ToString();
+        }
+
+        [DllImport("user32")]
+        private static extern int IsWindowEnabled(int hWnd);
+
+        [DllImport("user32", CharSet = CharSet.Auto, SetLastError = true, ExactSpelling = true)]
+        public static extern IntPtr GetWindow(IntPtr hwnd, int wFlag);
+
+        [TestMethod, Ignore]
+        public void TestDialogs()
+        {
+            var vmixPath = @"C:\Program Files (x86)\vMix\vMix64.exe";
+            var vmixProcessName = "vMix64";
+            var existingProcess = Process.GetProcessesByName(vmixProcessName).FirstOrDefault();
+
+            var vMixProcess = existingProcess ?? Process.Start(new ProcessStartInfo
+            {
+                FileName = vmixPath,
+                WindowStyle = ProcessWindowStyle.Hidden
+            });
+
+            var handle = vMixProcess.MainWindowHandle;
+            var ptr = handle.ToInt32();
+            var enabled = IsWindowEnabled(ptr);
+            var owner = GetWindow(handle, /*GW_OWNER*/ 4);
+            var ownerEnabled = IsWindowEnabled(owner.ToInt32());
         }
     }
 }
