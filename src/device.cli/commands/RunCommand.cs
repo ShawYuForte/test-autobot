@@ -115,7 +115,11 @@ namespace forte.devices.commands
                     Console.WriteLine("Device identifier is not a valid Guid.");
                     Environment.Exit(Parser.DefaultExitCodeFail);
                 }
-                daemon.ini
+                daemon.Init(deviceId);
+            }
+            else
+            {
+                daemon.Init();
             }
 
             logger.Information("Running device local UI web server.");

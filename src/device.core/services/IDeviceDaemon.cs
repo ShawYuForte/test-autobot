@@ -1,5 +1,6 @@
 ﻿#region
 
+using System;
 using forte.devices.models;
 
 #endregion
@@ -8,6 +9,9 @@ namespace forte.devices.services
 {
     public interface IDeviceDaemon
     {
+        void Init();
+        void Init(Guid deviceId);
+
         /// <summary>
         ///     Force resets the device to idle, closing the streaming client in the process
         /// </summary>

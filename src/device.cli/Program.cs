@@ -41,20 +41,28 @@ namespace forte.devices
                 Environment.Exit(Parser.DefaultExitCodeFail);
             }
 
-            switch (verb)
+            try
             {
-                case RunOptions.VerbName:
-                    new RunCommand((RunOptions)options).Run();
-                    break;
-                case SimulatorOptions.VerbName:
-                    new SimulatorCommand((SimulatorOptions)options).Run();
-                    break;
-                case UpgradeOptions.VerbName:
-                    new UpgradeCommand((UpgradeOptions)options).Run();
-                    break;
-                default:
-                    // Never happens
-                    break;
+                switch (verb)
+                {
+                    case RunOptions.VerbName:
+                        new RunCommand((RunOptions)options).Run();
+                        break;
+                    case SimulatorOptions.VerbName:
+                        new SimulatorCommand((SimulatorOptions)options).Run();
+                        break;
+                    case UpgradeOptions.VerbName:
+                        new UpgradeCommand((UpgradeOptions)options).Run();
+                        break;
+                    default:
+                        // Never happens
+                        break;
+                }
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine($"Error: {exception.Message}");
+                Environment.Exit(Parser.DefaultExitCodeFail);
             }
         }
     }
