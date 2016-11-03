@@ -65,10 +65,17 @@ namespace forte.devices.services
             var config = _configurationManager.GetDeviceConfig();
             if (deviceId != Guid.Empty)
             {
-                if (config.DeviceId != Guid.Empty && config.DeviceId != deviceId)
+                if (config.DeviceId != deviceId)
                 {
-                    _logger.Warning("New device identifier specified, changing from {@oldId} to {@newId}",
-                        config.DeviceId, deviceId);
+                    if (config.DeviceId != Guid.Empty)
+                    {
+                        _logger.Warning("New device identifier specified, changing from {@oldId} to {@newId}",
+                            config.DeviceId, deviceId);
+                    }
+                    else
+                    {
+                        _logger.Information("Setting new device identifier {@newId}", deviceId);
+                    }
                     _configurationManager.UpdateSetting(nameof(models.StreamingDeviceConfig.DeviceId), deviceId);
                     var storedState = GetState();
                     if (storedState.DeviceId != deviceId)

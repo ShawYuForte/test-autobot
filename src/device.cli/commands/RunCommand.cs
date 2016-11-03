@@ -3,7 +3,6 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Runtime.InteropServices;
 using CommandLine;
 using device.logging;
 using device.web;
@@ -22,10 +21,6 @@ namespace forte.devices.commands
     public class RunCommand
     {
         private readonly RunOptions _options;
-
-        [DllImport("kernel32.dll")]
-        static extern bool FreeConsole();
-
 
         public RunCommand(RunOptions options)
         {
@@ -98,13 +93,11 @@ namespace forte.devices.commands
             if (_options.Background)
             {
                 Console.WriteLine("Running silent...");
-                //FreeConsole();
             }
 
             logger.Information("Initializing...");
             if (!string.IsNullOrWhiteSpace(_options.DeviceId))
             {
-                logger.Debug("New device id specified {@deviceId}", _options.DeviceId);
                 Guid deviceId;
 
                 if (_options.DeviceId.ToLower() == "new")
@@ -116,7 +109,6 @@ namespace forte.devices.commands
                     Console.WriteLine("Device identifier is not a valid Guid.");
                     Environment.Exit(Parser.DefaultExitCodeFail);
                 }
-                logger.Debug("New device id {@deviceId}", deviceId);
                 daemon.Init(deviceId);
             }
             else
