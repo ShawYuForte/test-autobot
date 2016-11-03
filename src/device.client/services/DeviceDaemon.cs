@@ -81,7 +81,7 @@ namespace forte.devices.services
             _client = new RestClient($"{config.Get<string>(SettingParams.ServerApiPath)}/devices/");
             _streamClient = new RestClient($"{config.Get<string>(SettingParams.ServerApiPath)}/streams/");
             _deviceId = config.DeviceId;
-            _logger.Information("Devide unique identifier {@deviceId}", _deviceId);
+            _logger.Information("Device unique identifier {@deviceId}", _deviceId);
         }
 
         private bool FetchRequested { get; set; }

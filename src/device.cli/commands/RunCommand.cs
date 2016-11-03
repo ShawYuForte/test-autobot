@@ -104,6 +104,7 @@ namespace forte.devices.commands
             logger.Information("Initializing...");
             if (!string.IsNullOrWhiteSpace(_options.DeviceId))
             {
+                logger.Debug("New device id specified {@deviceId}", _options.DeviceId);
                 Guid deviceId;
 
                 if (_options.DeviceId.ToLower() == "new")
@@ -115,6 +116,7 @@ namespace forte.devices.commands
                     Console.WriteLine("Device identifier is not a valid Guid.");
                     Environment.Exit(Parser.DefaultExitCodeFail);
                 }
+                logger.Debug("New device id {@deviceId}", deviceId);
                 daemon.Init(deviceId);
             }
             else
