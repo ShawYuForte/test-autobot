@@ -46,11 +46,6 @@ $scheduledtaskscript = "$($env:chocolateyPackageFolder)\tools\schedulelockworkst
 Invoke-Expression $scheduledtaskscript
 Write-Host "Scheduled run task created!"
 
-# Create scheduled task to restart machine on lost of WAN connection
-$scheduledtaskscript = "$($env:chocolateyPackageFolder)\tools\schedulelostconnectionrestart.ps1"
-Invoke-Expression $scheduledtaskscript
-Write-Host "Scheduled run task created!"
-
 Update-SessionEnvironment
 
 try 
