@@ -1,6 +1,4 @@
-﻿# WORK-IN-PROGRESS
-
-$TASK_TRIGGER_DAILY = 2
+﻿$TASK_TRIGGER_DAILY = 2
 # The name of the scheduled task
 $TaskName = "Forte device-cli run on system startup"
 # The description of the task
@@ -24,7 +22,7 @@ $TaskDefinition.Settings.AllowDemandStart = $true
 
 $triggers = $TaskDefinition.Triggers
 #http://msdn.microsoft.com/en-us/library/windows/desktop/aa383915(v=vs.85).aspx
-$trigger = $triggers.Create(9) # Creates a trigger on boot
+$trigger = $triggers.Create(9) # Creates a trigger on logon
 $trigger.UserId = "Forte\Forte"
 $trigger.Enabled = $true
 
