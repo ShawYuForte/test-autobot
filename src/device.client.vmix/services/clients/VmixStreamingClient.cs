@@ -104,14 +104,16 @@ namespace forte.devices.services.clients
 
         void IStreamingClient.StartStreaming()
         {
-            _logger.Debug("Loading static image intro...");
-
             var vmixState = GetVmixState();
-            var openingVideo = vmixState.Inputs.Single(input => input.Role == InputRole.OpeninStaticImage);
-            SetActive(openingVideo);
+
+            _logger.Debug("Loading static image intro...");
+            var openingImage = vmixState.Inputs.Single(input => input.Role == InputRole.OpeninStaticImage);
+            SetActive(openingImage);
+
+            _logger.Debug("Ensuring audio is off...");
+            TurnAudioOff(vmixState);
 
             _logger.Debug("Starting streaming...");
-
             StartStreaming();
 
             _logger.Debug("Starting started.");
