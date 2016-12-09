@@ -28,6 +28,8 @@ namespace forte.devices.models.presets
                 ShortcutMappings = "",
                 Loop = "False",
                 VolumeF = "1",
+                VolumeF1 = "1",
+                VolumeF2 = "1",
                 BalanceF = "0",
                 AspectRatio = "100",
                 Category = "0",
@@ -99,6 +101,10 @@ namespace forte.devices.models.presets
         public string Loop { get; set; }
         [XmlAttribute(AttributeName = "VolumeF")]
         public string VolumeF { get; set; }
+        [XmlAttribute(AttributeName = "VolumeF1")]
+        public string VolumeF1 { get; set; }
+        [XmlAttribute(AttributeName = "VolumeF2")]
+        public string VolumeF2 { get; set; }
         [XmlAttribute(AttributeName = "Muted")]
         public string Muted { get; set; }
         [XmlAttribute(AttributeName = "BalanceF")]
@@ -217,6 +223,10 @@ namespace forte.devices.models.presets
         public string AudioChannel { get; set; }
         [XmlAttribute(AttributeName = "AudioGain")]
         public string AudioGain { get; set; }
+        [XmlAttribute(AttributeName = "AudioGain1")]
+        public string AudioGain1 { get; set; }
+        [XmlAttribute(AttributeName = "AudioGain2")]
+        public string AudioGain2 { get; set; }
         [XmlAttribute(AttributeName = "AudioCompressorEnabled")]
         public string AudioCompressorEnabled { get; set; }
         [XmlAttribute(AttributeName = "AudioCompressorRatio")]
