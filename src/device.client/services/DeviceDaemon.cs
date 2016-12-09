@@ -1,7 +1,9 @@
 ﻿#region
 
 using System;
+using System.Diagnostics;
 using System.Net;
+using System.Text;
 using System.Threading;
 using AutoMapper;
 using forte.devices.data;
@@ -283,6 +285,7 @@ namespace forte.devices.services
             {
                 case StreamingDeviceStatuses.Idle:
                     state.StreamingPresetLoadHash = _streamingClient.LoadVideoStreamPreset(videoStream);
+                    FlushDns();
                     _streamingClient.StartStreaming();
                     break;
                 case StreamingDeviceStatuses.Streaming:
@@ -614,6 +617,33 @@ namespace forte.devices.services
             if (string.IsNullOrWhiteSpace(config.Get<string>(SettingParams.ServerApiPath)))
                 _configurationManager.UpdateSetting(SettingParams.ServerApiPath,
                     "http://forte-devapi.azurewebsites.net/api");
+        }
+
+        private void FlushDns()
+        {
+            var buffer = new StringBuilder();
+            var process = new Process
+            {
+                StartInfo =
+                {
+                    FileName = "ipconfig",
+                    Arguments = "/flushdns",
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false
+                }
+            };
+            process.OutputDataReceived +=
+                delegate(object o, DataReceivedEventArgs args) { buffer.AppendLine(args.Data); };
+
+            process.Start();
+
+            // Start the asynchronous read of the sort output stream.
+            process.BeginOutputReadLine();
+
+            process.WaitForExit();
+            var output = buffer.ToString();
+            if (string.IsNullOrWhiteSpace(output) || !output.Contains("Successfully flushed"))
+                _logger.Warning("Could not flush DNS Resolver Cache, process output: {@output}", output);
         }
     }
 }
