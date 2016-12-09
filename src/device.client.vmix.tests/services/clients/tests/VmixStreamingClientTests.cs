@@ -152,33 +152,5 @@ namespace forte.devices.services.clients.tests
             var owner = GetWindow(handle, /*GW_OWNER*/ 4);
             var ownerEnabled = IsWindowEnabled(owner.ToInt32());
         }
-
-        [TestMethod]
-        public void Test()
-        {
-            var buffer = new StringBuilder();
-            var process = new Process
-            {
-                StartInfo =
-            {
-                FileName = "ipconfig",
-                Arguments = "/flushdns",
-                RedirectStandardOutput = true,
-                UseShellExecute = false
-            }
-            };
-            process.OutputDataReceived +=
-                delegate(object o, DataReceivedEventArgs args) { buffer.AppendLine(args.Data); }; 
-
-            process.Start();
-
-            // Start the asynchronous read of the sort output stream.
-            process.BeginOutputReadLine();
-
-            process.WaitForExit();
-            var output = buffer.ToString();
-            "Successfully flushed"
-            Assert.IsNotNull(output);
-        }
     }
 }
