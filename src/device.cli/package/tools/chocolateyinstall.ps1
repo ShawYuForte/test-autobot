@@ -36,6 +36,11 @@ $scheduledtaskscript = "$($env:chocolateyPackageFolder)\tools\scheduleupgrade.ps
 Invoke-Expression $scheduledtaskscript
 Write-Host "Scheduled upgrade task created!"
 
+# Create scheduled upgrade task
+$scheduledtaskscript = "$($env:chocolateyPackageFolder)\tools\schedulerestartdevicecli.ps1"
+Invoke-Expression $scheduledtaskscript
+Write-Host "Scheduled device-cli restart task created!"
+
 # Create scheduled run task
 $scheduledtaskscript = "$($env:chocolateyPackageFolder)\tools\schedulerun.ps1"
 Invoke-Expression $scheduledtaskscript
@@ -44,7 +49,7 @@ Write-Host "Scheduled run task created!"
 # Create scheduled task to lock workstation on automatic logon
 $scheduledtaskscript = "$($env:chocolateyPackageFolder)\tools\schedulelockworkstation.ps1"
 Invoke-Expression $scheduledtaskscript
-Write-Host "Scheduled run task created!"
+Write-Host "Scheduled lock workstation task created!"
 
 Update-SessionEnvironment
 

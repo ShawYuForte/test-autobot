@@ -220,6 +220,7 @@
     <None Include="package\tools\schedulelockworkstation.ps1" />
     <None Include="package\tools\schedulelostconnectionrestart.ps1" />
     <None Include="package\tools\schedulerun.ps1" />
+    <None Include="package\tools\schedulerestartdevicecli.ps1" />
     <None Include="package\tools\scheduleupgrade.ps1" />
     <None Include="package\tools\chocolateyinstall.ps1" />
     <None Include="package\tools\chocolateyuninstall.ps1" />
