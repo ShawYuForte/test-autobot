@@ -14,6 +14,7 @@ using AutoMapper;
 using forte.devices.models;
 using forte.devices.models.presets;
 using forte.services;
+using Polly;
 using RestSharp;
 
 #endregion
@@ -22,9 +23,7 @@ namespace forte.devices.services.clients
 {
     public class VmixStreamingClient : IStreamingClient
     {
-        [DllImport("user32")]
-        private static extern int IsWindowEnabled(int hWnd);
-
+        const uint WM_CLOSE = 0x0010;
 
         private readonly Regex _cameraRegex = new Regex(@"RTSPTCP rtsp:\/\/root:pass@[0-9.]*\/axis-media\/media\.amp");
         private readonly RestClient _client;
@@ -105,6 +104,7 @@ namespace forte.devices.services.clients
         void IStreamingClient.StartStreaming()
         {
             var vmixState = GetVmixState();
+            var config = _configurationManager.GetDeviceConfig();
 
             _logger.Debug("Loading static image intro...");
             var openingImage = vmixState.Inputs.Single(input => input.Role == InputRole.OpeninStaticImage);
@@ -114,7 +114,11 @@ namespace forte.devices.services.clients
             TurnAudioOff(vmixState);
 
             _logger.Debug("Starting streaming...");
-            StartStreaming();
+
+            var retryCountForStreamException = config.Get(VmixSettingParams.RetryCountForStreamException, 0);
+            Policy.Handle<Exception>()
+                .WaitAndRetry(retryCountForStreamException, attempt => TimeSpan.FromSeconds(5))
+                .Execute(StartStreaming);
 
             _logger.Debug("Starting started.");
         }
@@ -165,12 +169,85 @@ namespace forte.devices.services.clients
             if (shutdownClient) StopVmix();
         }
 
+        private VmixState CallAndFetchState(string operation, string description)
+        {
+            try
+            {
+                var config = _configurationManager.GetDeviceConfig();
+                var webRequest =
+                    WebRequest.CreateHttp($"{config.Get<string>(VmixSettingParams.VmixApiPath)}{operation}");
+                var response = (HttpWebResponse)webRequest.GetResponse();
+                _logger.Debug("VMIX command HTTP response {@response}", response);
+                if (response.StatusCode == HttpStatusCode.OK) return GetVmixState();
+
+                var error = $"Could not {description} ({response.StatusDescription}";
+                _logger.Error(error);
+                throw new Exception(error);
+            }
+            catch (Exception exception)
+            {
+                _logger.Error(exception, "Calling vMix API failed for operation {@operation}", operation);
+                throw;
+            }
+        }
+
+        public bool CloseModalErrorWindowIfOpen()
+        {
+            var windowPtr = FindWindowByCaption(IntPtr.Zero, "vMix Error");
+            if (windowPtr == IntPtr.Zero)
+                return false;
+            SendMessage(windowPtr, WM_CLOSE, IntPtr.Zero, IntPtr.Zero);
+            return true;
+        }
+
+        private string EnsureVmixIsRunning(bool startFresh)
+        {
+            var existingProcess = GetVmixProcess();
+            if (existingProcess != null)
+            {
+                if (!startFresh) return existingProcess.Handle.ToString();
+                StopVmix();
+            }
+
+            var config = _configurationManager.GetDeviceConfig();
+            var presetTemplateFilePath = config.Get<string>(VmixSettingParams.VmixExePath);
+
+            if (!File.Exists(presetTemplateFilePath))
+                throw new Exception($"Cannot run vMix, file doesn't exist at '{presetTemplateFilePath}'");
+
+            var vMixProcess = Process.Start(new ProcessStartInfo
+            {
+                FileName = presetTemplateFilePath,
+                WindowStyle = ProcessWindowStyle.Hidden
+            });
+
+            if (vMixProcess == null)
+                throw new Exception("Could not run vMix");
+
+            while (string.IsNullOrWhiteSpace(vMixProcess.MainWindowTitle))
+            {
+                Thread.Sleep(100);
+                vMixProcess.Refresh();
+            }
+
+            return vMixProcess.Handle.ToString();
+        }
+
         public VmixState FadeToPreview()
         {
             var result = CallAndFetchState("/?Function=Transition1", "fade to preview");
             Thread.Sleep(2000);
             return result;
         }
+
+        [DllImport("user32.dll", SetLastError = true)]
+        static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+
+        /// <summary>
+        ///     Find window by Caption only. Note you must pass IntPtr.Zero as the first parameter.
+        /// </summary>
+        [DllImport("user32.dll", EntryPoint = "FindWindow", SetLastError = true)]
+        static extern IntPtr FindWindowByCaption(IntPtr ZeroOnly, string lpWindowName);
 
         public Process GetVmixProcess()
         {
@@ -182,6 +259,70 @@ namespace forte.devices.services.clients
             var existingProcess = Process.GetProcessesByName(sExeName).FirstOrDefault();
 
             return existingProcess;
+        }
+
+        private string GetVmixProcessHash()
+        {
+            var vmixProcess = GetVmixProcess();
+            return vmixProcess?.Handle.ToString();
+        }
+
+        private VmixState GetVmixState()
+        {
+            var request = new RestRequest("", Method.GET);
+            var response = _client.Execute<VmixState>(request);
+            _logger.Debug("VMIX state {@state}", response);
+            return response.StatusCode != HttpStatusCode.OK ? null : MatchPresetStateRoles(response.Data);
+        }
+
+        private bool IsPresetLoaded(VmixPreset preset)
+        {
+            var state = GetVmixState();
+            if (state == null || state.Inputs.Count != preset.Inputs.Count) return false;
+            foreach (var input in preset.Inputs)
+                if (state.Inputs.All(i =>
+                    !input.OriginalTitle.Contains(i.Title) &&
+                    (input.Title == null || !input.Title.Contains(i.Title)) &&
+                    !i.Title.Contains(input.OriginalTitle)))
+                    return false;
+            return true;
+        }
+
+        [DllImport("user32")]
+        private static extern int IsWindowEnabled(int hWnd);
+
+        private void LoadDefaultSettings()
+        {
+            var config = _configurationManager.GetDeviceConfig();
+            if (string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.VmixApiPath)))
+                config = _configurationManager.UpdateSetting(VmixSettingParams.VmixApiPath, "http://localhost:8088/api");
+            if (string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.VmixExePath)))
+                config = _configurationManager.UpdateSetting(VmixSettingParams.VmixExePath,
+                    @"C:\Program Files (x86)\vMix\vMix64.exe");
+            if (string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.VmixPlaylistName)))
+                config = _configurationManager.UpdateSetting(VmixSettingParams.VmixPlaylistName,
+                    "CameraSwitchingProgram");
+            if (string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.VmixPresetTemplateFilePath)))
+                config = _configurationManager.UpdateSetting(VmixSettingParams.VmixPresetTemplateFilePath,
+                    @"C:\forte\preset\Forte Preset.vmix");
+            if (string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.BroadcastStartupImage)))
+                config = _configurationManager.UpdateSetting(VmixSettingParams.BroadcastStartupImage,
+                    "logo_dark_background.jpg");
+            if (string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.BroadcastStartupVideo)))
+                config = _configurationManager.UpdateSetting(VmixSettingParams.BroadcastStartupVideo,
+                    "logo_dark_background_mantis.mp4");
+            if (string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.BroadcastClosingImage)))
+                config = _configurationManager.UpdateSetting(VmixSettingParams.BroadcastClosingImage,
+                    "logo_girl_warrior_stance.jpg");
+            if (string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.BroadcastClosingVideo)))
+                config = _configurationManager.UpdateSetting(VmixSettingParams.BroadcastClosingVideo,
+                    "logo_reveal_house.mp4");
+            if (string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.BroadcastOverlayImage)))
+                _configurationManager.UpdateSetting(VmixSettingParams.BroadcastOverlayImage, "overlay_1280_720.png");
+            if (!config.Contains(VmixSettingParams.AutoCloseVmixErrorDialog))
+                _configurationManager.UpdateSetting(VmixSettingParams.AutoCloseVmixErrorDialog, false);
+            if (!config.Contains(VmixSettingParams.RetryCountForStreamException))
+                _configurationManager.UpdateSetting(VmixSettingParams.RetryCountForStreamException, 0);
         }
 
         /// <summary>
@@ -235,6 +376,50 @@ namespace forte.devices.services.clients
         }
 
         /// <summary>
+        ///     Match predefined roles from the preset state
+        /// </summary>
+        /// <param name="state"></param>
+        /// <returns></returns>
+        private VmixState MatchPresetStateRoles(VmixState state)
+        {
+            if (state == null) return null;
+
+            var config = _configurationManager.GetDeviceConfig();
+
+            var input = state.Inputs.FirstOrDefault(i => i.Title == config.Get<string>(VmixSettingParams.BroadcastStartupImage));
+            if (input != null) input.Role = InputRole.OpeninStaticImage;
+
+            input = state.Inputs.FirstOrDefault(i => i.Title == config.Get<string>(VmixSettingParams.BroadcastStartupVideo));
+            if (input != null) input.Role = InputRole.OpeningVideo;
+
+            input = state.Inputs.FirstOrDefault(i => i.Title == config.Get<string>(VmixSettingParams.BroadcastClosingImage));
+            if (input != null) input.Role = InputRole.ClosingStaticImage;
+
+            input = state.Inputs.FirstOrDefault(i => i.Title == config.Get<string>(VmixSettingParams.BroadcastClosingVideo));
+            if (input != null) input.Role = InputRole.ClosingVideo;
+
+            input = state.Inputs.FirstOrDefault(i => i.Title == config.Get<string>(VmixSettingParams.BroadcastOverlayImage));
+            if (input != null) input.Role = InputRole.LogoOverlay;
+
+            var audioInputs = state.Inputs.Where(
+                    i => i.Title.ToLower().Contains("audio") || i.Title.ToLower().Contains("microphone") ||
+                         i.Title.ToLower() == "microphone" || i.Title.ToLower() == "music");
+
+            foreach (var audioInput in audioInputs)
+                audioInput.Role = InputRole.Audio;
+
+            state.Inputs.Where(i => _cameraRegex.IsMatch(i.Title)).ToList().ForEach(i => i.Role = InputRole.Camera);
+
+            state.Active = state.Inputs.FirstOrDefault(i => i.Number == state.ActiveNumber);
+            state.Preview = state.Inputs.FirstOrDefault(i => i.Number == state.PreviewNumber);
+
+            return state;
+        }
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+
+        /// <summary>
         ///     Set the preview window to the specified input
         /// </summary>
         /// <param name="input"></param>
@@ -285,28 +470,25 @@ namespace forte.devices.services.clients
             return state;
         }
 
-
         /// <summary>
         ///     Start streaming to the already selected channel
         /// </summary>
         /// <returns></returns>
         public VmixState StartStreaming()
         {
+            var config = _configurationManager.GetDeviceConfig();
+
             CallAndFetchState("/?Function=StartStreaming", "start streaming");
             Thread.Sleep(5000);
             var state = GetVmixState();
-            // When streaming fails, API returns true, but an error dialog is displayed, so make sure no dialogs open
+            if (config.Get(VmixSettingParams.AutoCloseVmixErrorDialog, false))
+            {
+                // When streaming fails, API returns true, but an error dialog is displayed, so make sure no dialogs open
+                CloseModalErrorWindowIfOpen();
+                Thread.Sleep(1000);
+            }
             if (state.Streaming && !VmixDialogsOpen()) return state;
             throw new Exception("Could not start streaming");
-        }
-
-        private bool VmixDialogsOpen()
-        {
-            var vmixProcess = GetVmixProcess();
-            if (vmixProcess == null) throw new Exception("VMix process is not running");
-            var vmixWindowEnabled = IsWindowEnabled(vmixProcess.MainWindowHandle.ToInt32()) != 0;
-            // VMix Window will be disabled, if there are dialogs showing
-            return !vmixWindowEnabled;
         }
 
         public VmixState StopPlaylist()
@@ -335,9 +517,7 @@ namespace forte.devices.services.clients
             state = state ?? GetVmixState();
             var audioInputs = state.Inputs.Where(input => input.Role == InputRole.Audio).ToList();
             foreach (var audioInput in audioInputs)
-            {
                 state = CallAndFetchState($"/?Function=AudioOff&Input={audioInput.Key}", "audio off");
-            }
             return state;
         }
 
@@ -346,9 +526,7 @@ namespace forte.devices.services.clients
             state = state ?? GetVmixState();
             var audioInputs = state.Inputs.Where(input => input.Role == InputRole.Audio).ToList();
             foreach (var audioInput in audioInputs)
-            {
                 state = CallAndFetchState($"/?Function=AudioOn&Input={audioInput.Key}", "audio on");
-            }
             return state;
         }
 
@@ -366,170 +544,13 @@ namespace forte.devices.services.clients
             return CallAndFetchState($"/?Function=OverlayInput1In&Input={overlayInput.Key}", "turn overlay on");
         }
 
-        private VmixState CallAndFetchState(string operation, string description)
-        {
-            try
-            {
-                var config = _configurationManager.GetDeviceConfig();
-                var webRequest =
-                    WebRequest.CreateHttp($"{config.Get<string>(VmixSettingParams.VmixApiPath)}{operation}");
-                var response = (HttpWebResponse)webRequest.GetResponse();
-                _logger.Debug("VMIX command HTTP response {@response}", response);
-                if (response.StatusCode == HttpStatusCode.OK) return GetVmixState();
-
-                var error = $"Could not {description} ({response.StatusDescription}";
-                _logger.Error(error);
-                throw new Exception(error);
-            }
-            catch (Exception exception)
-            {
-                _logger.Error(exception, "Calling vMix API failed for operation {@operation}", operation);
-                throw;
-            }
-        }
-
-        private string EnsureVmixIsRunning(bool startFresh)
-        {
-            var existingProcess = GetVmixProcess();
-            if (existingProcess != null)
-            {
-                if (!startFresh) return existingProcess.Handle.ToString();
-                StopVmix();
-            }
-
-            var config = _configurationManager.GetDeviceConfig();
-            var presetTemplateFilePath = config.Get<string>(VmixSettingParams.VmixExePath);
-
-            if (!File.Exists(presetTemplateFilePath))
-            {
-                throw new Exception($"Cannot run vMix, file doesn't exist at '{presetTemplateFilePath}'");
-            }
-
-            var vMixProcess = Process.Start(new ProcessStartInfo
-            {
-                FileName = presetTemplateFilePath,
-                WindowStyle = ProcessWindowStyle.Hidden
-            });
-
-            if (vMixProcess == null)
-            {
-                throw new Exception("Could not run vMix");
-            }
-
-            while (string.IsNullOrWhiteSpace(vMixProcess.MainWindowTitle))
-            {
-                Thread.Sleep(100);
-                vMixProcess.Refresh();
-            }
-
-            return vMixProcess.Handle.ToString();
-        }
-
-        private string GetVmixProcessHash()
+        private bool VmixDialogsOpen()
         {
             var vmixProcess = GetVmixProcess();
-            return vmixProcess?.Handle.ToString();
-        }
-
-        private VmixState GetVmixState()
-        {
-            var request = new RestRequest("", Method.GET);
-            var response = _client.Execute<VmixState>(request);
-            _logger.Debug("VMIX state {@state}", response);
-            return response.StatusCode != HttpStatusCode.OK ? null : MatchPresetStateRoles(response.Data);
-        }
-
-        private bool IsPresetLoaded(VmixPreset preset)
-        {
-            var state = GetVmixState();
-            if ((state == null) || (state.Inputs.Count != preset.Inputs.Count)) return false;
-            foreach (var input in preset.Inputs)
-            {
-                if (state.Inputs.All(i =>
-                    !input.OriginalTitle.Contains(i.Title) &&
-                    ((input.Title == null) || !input.Title.Contains(i.Title)) &&
-                    !i.Title.Contains(input.OriginalTitle)))
-                    return false;
-            }
-            return true;
-        }
-
-        private void LoadDefaultSettings()
-        {
-            var config = _configurationManager.GetDeviceConfig();
-            if (string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.VmixApiPath)))
-                config = _configurationManager.UpdateSetting(VmixSettingParams.VmixApiPath, "http://localhost:8088/api");
-            if (string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.VmixExePath)))
-                config = _configurationManager.UpdateSetting(VmixSettingParams.VmixExePath,
-                    @"C:\Program Files (x86)\vMix\vMix64.exe");
-            if (string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.VmixPlaylistName)))
-                config = _configurationManager.UpdateSetting(VmixSettingParams.VmixPlaylistName,
-                    "CameraSwitchingProgram");
-            if (string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.VmixPresetTemplateFilePath)))
-                config = _configurationManager.UpdateSetting(VmixSettingParams.VmixPresetTemplateFilePath,
-                    @"C:\forte\preset\Forte Preset.vmix");
-            if (string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.BroadcastStartupImage)))
-                config = _configurationManager.UpdateSetting(VmixSettingParams.BroadcastStartupImage,
-                    "logo_dark_background.jpg");
-            if (string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.BroadcastStartupVideo)))
-                config = _configurationManager.UpdateSetting(VmixSettingParams.BroadcastStartupVideo,
-                    "logo_dark_background_mantis.mp4");
-            if (string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.BroadcastClosingImage)))
-                config = _configurationManager.UpdateSetting(VmixSettingParams.BroadcastClosingImage,
-                    "logo_girl_warrior_stance.jpg");
-            if (string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.BroadcastClosingVideo)))
-                config = _configurationManager.UpdateSetting(VmixSettingParams.BroadcastClosingVideo,
-                    "logo_reveal_house.mp4");
-            if (string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.BroadcastOverlayImage)))
-                _configurationManager.UpdateSetting(VmixSettingParams.BroadcastOverlayImage, "overlay_1280_720.png");
-        }
-
-        /// <summary>
-        ///     Match predefined roles from the preset state
-        /// </summary>
-        /// <param name="state"></param>
-        /// <returns></returns>
-        private VmixState MatchPresetStateRoles(VmixState state)
-        {
-            if (state == null) return null;
-
-            var config = _configurationManager.GetDeviceConfig();
-
-            var input =
-                state.Inputs.FirstOrDefault(i => i.Title == config.Get<string>(VmixSettingParams.BroadcastStartupImage));
-            if (input != null) input.Role = InputRole.OpeninStaticImage;
-
-            input =
-                state.Inputs.FirstOrDefault(i => i.Title == config.Get<string>(VmixSettingParams.BroadcastStartupVideo));
-            if (input != null) input.Role = InputRole.OpeningVideo;
-
-            input =
-                state.Inputs.FirstOrDefault(i => i.Title == config.Get<string>(VmixSettingParams.BroadcastClosingImage));
-            if (input != null) input.Role = InputRole.ClosingStaticImage;
-
-            input =
-                state.Inputs.FirstOrDefault(i => i.Title == config.Get<string>(VmixSettingParams.BroadcastClosingVideo));
-            if (input != null) input.Role = InputRole.ClosingVideo;
-
-            input =
-                state.Inputs.FirstOrDefault(i => i.Title == config.Get<string>(VmixSettingParams.BroadcastOverlayImage));
-            if (input != null) input.Role = InputRole.LogoOverlay;
-
-            var audioInputs =
-                state.Inputs.Where(
-                    i => (i.Title.ToLower().Contains("audio") && i.Title.ToLower().Contains("microphone")) ||
-                         (i.Title.ToLower() == "microphone") || (i.Title.ToLower() == "music"));
-            foreach (var audioInput in audioInputs)
-            {
-                audioInput.Role = InputRole.Audio;
-            }
-
-            state.Inputs.Where(i => _cameraRegex.IsMatch(i.Title)).ToList().ForEach(i => i.Role = InputRole.Camera);
-
-            state.Active = state.Inputs.FirstOrDefault(i => i.Number == state.ActiveNumber);
-            state.Preview = state.Inputs.FirstOrDefault(i => i.Number == state.PreviewNumber);
-
-            return state;
+            if (vmixProcess == null) throw new Exception("VMix process is not running");
+            var vmixWindowEnabled = IsWindowEnabled(vmixProcess.MainWindowHandle.ToInt32()) != 0;
+            // VMix Window will be disabled, if there are dialogs showing
+            return !vmixWindowEnabled;
         }
     }
 }

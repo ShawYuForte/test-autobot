@@ -8,7 +8,9 @@
             <label class="col-md-4 control-label" ng-bind="setting"></label>
 
             <div class="col-md-6">
-                <input type="text" class="form-control" ng-model="value.stringValue" name="setting_{{$index}}"/>
+                <input ng-if="value.stringValue" type="text" class="form-control" ng-model="value.stringValue" name="setting_{{$index}}"/>
+                <input ng-if="value.intValue !== undefined" type="number" class="form-control" ng-model="value.intValue" name="setting_{{$index}}"/>
+                <input ng-if="value.boolValue !== undefined" type="checkbox" ng-model="value.boolValue" name="setting_{{$index}}"/>
             </div>
 
             <div class="col-md-2" ng-if="model.settingsForm['setting_' + $index].$dirty">

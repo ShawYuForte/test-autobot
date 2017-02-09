@@ -13,7 +13,7 @@
     //Declare moment.js globals as an angular constant for DI
     forte.app.constant('moment', window.moment);
 
-    forte.app.config(['$routeProvider', function ($routeProvider) {
+    forte.app.config(['$routeProvider', '$locationProvider', function ($routeProvider, $locationProvider) {
         $routeProvider
             .when('/dashboard',
             {
@@ -27,9 +27,11 @@
                 controller: 'SettingsCtrl',
                 controllerAs: 'model'
             })
-            .otherwise({
-                redirectTo: '/dashboard'
-            });
+            //.otherwise({
+            //    redirectTo: '/dashboard'
+            //});
+
+        $locationProvider.html5Mode(false);
     }]);
 
 })();
