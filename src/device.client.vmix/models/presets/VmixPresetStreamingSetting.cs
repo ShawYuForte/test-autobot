@@ -75,5 +75,7 @@ namespace forte.devices.models.presets
         public string ExternalLink { get; set; }
         [XmlElement(ElementName = "KeyframeAligned")]
         public string KeyframeAligned { get; set; }
+        [XmlElement(ElementName = "AudioChannel")]
+        public string AudioChannel { get; set; }
     }
 }

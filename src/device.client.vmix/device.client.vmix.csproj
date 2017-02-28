@@ -121,6 +121,10 @@
     <Compile Include="models\presets\playlists\PlayListCollection.cs" />
     <Compile Include="models\presets\playlists\PlaylistItem.cs" />
     <Compile Include="models\presets\playlists\PlayLists.cs" />
+    <Compile Include="models\presets\VmixPresetActivators.cs" />
+    <Compile Include="models\presets\VmixPresetDataSources.cs" />
+    <Compile Include="models\presets\VmixPresetShortcut.cs" />
+    <Compile Include="models\presets\VmixPresetShortcutInput.cs" />
     <Compile Include="models\presets\VmixStreamDestination.cs" />
     <Compile Include="models\VmixSettingParams.cs" />
     <Compile Include="models\VMixAudio.cs" />
@@ -133,7 +137,7 @@
     <Compile Include="models\presets\VmixPresetOutputsExternal.cs" />
     <Compile Include="models\presets\VmixPresetOutputsFullscreen.cs" />
     <Compile Include="models\presets\VmixPresetRecordingSettings.cs" />
-    <Compile Include="models\presets\VmixPresetShortcut.cs" />
+    <Compile Include="models\presets\VmixPresetArrayOfShortcut.cs" />
     <Compile Include="models\presets\VmixPresetShortcuts.cs" />
     <Compile Include="models\presets\VmixPresetState.cs" />
     <Compile Include="models\presets\VmixPresetStreamingSetting.cs" />

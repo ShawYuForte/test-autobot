@@ -170,5 +170,10 @@ namespace forte.devices.models.presets
         public VmixPresetStreamingSettings StreamingSettings { get; set; }
         [XmlElement(ElementName = "OutputFormat")]
         public VmixPresetOutputFormat OutputFormat { get; set; }
+
+        [XmlElement(ElementName = "DataSources")]
+        public VmixPresetDataSources DataSources { get; set; }
+        [XmlElement(ElementName = "Activators")]
+        public VmixPresetActivators Activators { get; set; }
     }
 }

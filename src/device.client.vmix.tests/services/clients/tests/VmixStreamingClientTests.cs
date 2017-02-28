@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Xml;
@@ -90,6 +91,11 @@ namespace forte.devices.services.clients.tests
 
         private void TestPresetGeneration(string presetFile)
         {
+            // TODO
+            // 1. remove the Destination encoded Xml
+            // 2. compare rest of the xml
+            // 3. decode destination xml from #1 and compare 
+
             var preset = VmixPreset.FromFile(presetFile);
             Assert.IsNotNull(preset, "Could not load preset from file {0}", presetFile);
             var tempFile = Path.GetTempFileName();
@@ -108,6 +114,25 @@ namespace forte.devices.services.clients.tests
                     identical = xmldiff.Compare(presetFile, tempFile, false, xmlWriter);
                 }
                 message = sw.ToString();
+            }
+
+            if (!identical)
+            {
+                var presetDoc = new XmlDocument();
+                presetDoc.Load(presetFile);
+                var xmlPatch = new XmlPatch();
+                var xmlReader = new XmlTextReader(new StringReader(message));
+                xmlPatch.Patch(presetDoc, xmlReader);
+                var tempOutputFile = Path.GetTempFileName();
+                using (var xmlTextWriter = XmlWriter.Create(tempOutputFile))
+                {
+                    presetDoc.WriteTo(xmlTextWriter);
+                    xmlTextWriter.Flush();
+                    //patched = stringWriter.GetStringBuilder().ToString();
+                }
+                Debug.WriteLine("ERROR: Files not identical");
+                Debug.WriteLine($"ERROR: Original: {presetFile}");
+                Debug.WriteLine($"ERROR: Patched: {tempOutputFile}");
             }
 
             Assert.IsTrue(identical, "Did not regenerate identical Xml for '{0}', message: {1}", presetFile, message);

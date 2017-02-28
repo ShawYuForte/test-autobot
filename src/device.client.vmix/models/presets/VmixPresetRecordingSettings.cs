@@ -1,6 +1,6 @@
 ﻿using System.Xml.Serialization;
 
-namespace forte.devices.models
+namespace forte.devices.models.presets
 {
     [XmlRoot(ElementName = "RecordingSettings")]
     public class VmixPresetRecordingSettings
@@ -47,5 +47,7 @@ namespace forte.devices.models
         public string FFMPEGFormatXML { get; set; }
         [XmlElement(ElementName = "MP4Format")]
         public string MP4Format { get; set; }
+        [XmlElement(ElementName = "AudioChannel")]
+        public string AudioChannel { get; set; }
     }
 }
