@@ -1,39 +1,28 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
+using System.Xml;
+using System.Xml.Linq;
 using forte.devices.models;
 using forte.devices.models.presets;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.XmlDiffPatch;
 using Moq;
 using Ploeh.AutoFixture;
 using Ploeh.AutoFixture.AutoMoq;
+
+#endregion
 
 namespace forte.devices.services.clients.tests
 {
     [TestClass]
     public class VmixStreamingClientTests
     {
-        [TestMethod, Ignore]
-        public void TestPresetGeneration()
-        {
-            var presetFile = @"C:\dev\forte\iot\src\device.client.vmix.tests\services\clients\tests\data\preset1.vmix";
-            var preset = VmixPreset.FromFile(presetFile);
-            Assert.IsNotNull(preset);
-            var tempFile = Path.GetTempFileName();
-            preset.ToFile(tempFile);
-
-            //var expected = File.OpenText(presetFile).ReadToEnd();
-            //var actual = File.OpenText(tempFile).ReadToEnd();
-
-            //Assert.IsTrue(same);
-            //Assert.AreEqual(expected, actual);
-        }
-
-        [TestMethod, Ignore]
+        [TestMethod]
+        [Ignore]
         public void TestLoadingPresetFromVideoStream()
         {
             var config = new TestStreamingDeviceConfig();
@@ -55,7 +44,8 @@ namespace forte.devices.services.clients.tests
             sut.StopVmix();
         }
 
-        [TestMethod, Ignore]
+        [TestMethod]
+        [Ignore]
         public void TestLoadingPresetWithShortTimeout()
         {
             var config = new TestStreamingDeviceConfig();
@@ -86,7 +76,46 @@ namespace forte.devices.services.clients.tests
             sut.StopVmix();
         }
 
-        [TestMethod, Ignore]
+        [TestMethod]
+        [DeploymentItem("data", "data")]
+        //[Ignore]
+        public void TestPresetGeneration()
+        {
+            //foreach (var file in Directory.GetFiles("data\\presets"))
+            //{
+            //    TestPresetGeneration(file);
+            //}
+            TestPresetGeneration(@"D:\dev\active\forte\iot\src\device.client.vmix.tests\data\presets\Forte Preset AHPC.vmix");
+        }
+
+        private void TestPresetGeneration(string presetFile)
+        {
+            var preset = VmixPreset.FromFile(presetFile);
+            Assert.IsNotNull(preset, "Could not load preset from file {0}", presetFile);
+            var tempFile = Path.GetTempFileName();
+            preset.ToFile(tempFile);
+
+            var xmldiff = new XmlDiff(options: XmlDiffOptions.IgnoreNamespaces | XmlDiffOptions.IgnoreDtd |
+                XmlDiffOptions.IgnoreChildOrder | XmlDiffOptions.IgnorePrefixes | XmlDiffOptions.IgnoreWhitespace);
+
+            string message;
+            bool identical;
+
+            using (var sw = new StringWriter())
+            {
+                using (var xmlWriter = XmlWriter.Create(sw))
+                {
+                    identical = xmldiff.Compare(presetFile, tempFile, false, xmlWriter);
+                }
+                message = sw.ToString();
+            }
+
+            Assert.IsTrue(identical, "Did not regenerate identical Xml for '{0}', message: {1}", presetFile, message);
+            File.Delete(tempFile);
+        }
+
+        [TestMethod]
+        [Ignore]
         public void UtilityTest()
         {
             var presetFile = @"C:\dev\forte\iot\src\device.client.vmix.tests\services\clients\tests\data\preset1.vmix";
@@ -104,10 +133,8 @@ namespace forte.devices.services.clients.tests
                 foreach (var input in preset.Inputs)
                 {
                     var currentValue = propertyInfo.GetValue(input);
-                    if (!beginning && !Object.Equals(currentValue, previousValue))
-                    {
+                    if (!beginning && !Equals(currentValue, previousValue))
                         same = false;
-                    }
                     beginning = false;
                     previousValue = currentValue;
                     if (!same) break;
@@ -118,39 +145,11 @@ namespace forte.devices.services.clients.tests
 
             var buffer = new StringBuilder();
             foreach (var property in sameProperties)
-            {
-                if ((property.Value as string) != null)
-                    buffer.AppendLine($"{property.Key}=\"{property.Value}\",");
-                else
-                    buffer.AppendLine($"{property.Key}={property.Value},");
-            }
+                buffer.AppendLine(property.Value is string
+                    ? $"{property.Key}=\"{property.Value}\","
+                    : $"{property.Key}={property.Value},");
             var code = buffer.ToString();
-        }
-
-        [DllImport("user32")]
-        private static extern int IsWindowEnabled(int hWnd);
-
-        [DllImport("user32", CharSet = CharSet.Auto, SetLastError = true, ExactSpelling = true)]
-        public static extern IntPtr GetWindow(IntPtr hwnd, int wFlag);
-
-        [TestMethod, Ignore]
-        public void TestDialogs()
-        {
-            var vmixPath = @"C:\Program Files (x86)\vMix\vMix64.exe";
-            var vmixProcessName = "vMix64";
-            var existingProcess = Process.GetProcessesByName(vmixProcessName).FirstOrDefault();
-
-            var vMixProcess = existingProcess ?? Process.Start(new ProcessStartInfo
-            {
-                FileName = vmixPath,
-                WindowStyle = ProcessWindowStyle.Hidden
-            });
-
-            var handle = vMixProcess.MainWindowHandle;
-            var ptr = handle.ToInt32();
-            var enabled = IsWindowEnabled(ptr);
-            var owner = GetWindow(handle, /*GW_OWNER*/ 4);
-            var ownerEnabled = IsWindowEnabled(owner.ToInt32());
+            Console.WriteLine(code);
         }
     }
 }

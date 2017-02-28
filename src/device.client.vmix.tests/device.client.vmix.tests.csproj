@@ -76,6 +76,20 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="XmlDiffPatch, Version=1.0.8.28, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <HintPath>..\packages\XMLDiffPatch.1.0.8.28\lib\net\XmlDiffPatch.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="XmlDiffPatch.View, Version=1.0.1493.40755, Culture=neutral">
+      <HintPath>..\packages\XMLDiffPatch.1.0.8.28\lib\net\XmlDiffPatch.View.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="xmlunit-core, Version=2.3.0.96, Culture=neutral, PublicKeyToken=e7d7e3088fd452f6, processorArchitecture=MSIL">
+      <HintPath>..\packages\XMLUnit.Core.2.3.0\lib\net35\xmlunit-core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <Choose>
     <When Condition="('$(VisualStudioVersion)' == '10.0' or '$(VisualStudioVersion)' == '') and '$(TargetFrameworkVersion)' == 'v3.5'">
@@ -107,12 +121,52 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
-    <None Include="services\clients\tests\data\preset1.vmix" />
+    <None Include="services\clients\tests\data\preset1.vmix">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="data\presets\Forte Preset AHPC.vmix">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="data\presets\Forte Preset BBT.vmix">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="data\presets\Forte Preset BSF-Custom.vmix">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="data\presets\Forte Preset BSF.vmix">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="data\presets\Forte Preset CCY.vmix">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="data\presets\Forte Preset ECPS.vmix">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="data\presets\Forte Preset EGP.vmix">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="data\presets\Forte Preset FSN.vmix">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="data\presets\Forte Preset LAB240.vmix">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="data\presets\Forte Preset RF.vmix">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="data\presets\Forte Preset RPF.vmix">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="data\presets\Forte Preset S26.vmix">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="data\presets\Forte Preset TFS.vmix">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
-    <Folder Include="data\" />
-  </ItemGroup>
-  <ItemGroup>
+    <Content Include="services\clients\tests\data\test.xml" />
     <Content Include="services\clients\tests\data\vmix-state1.xml" />
   </ItemGroup>
   <Choose>

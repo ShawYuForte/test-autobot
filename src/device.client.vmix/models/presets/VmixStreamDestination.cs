@@ -52,84 +52,85 @@ namespace forte.devices.models.presets
         public string UserAgent { get; set; }
 
         [XmlElement(ElementName = "CloudMediaGroup.username")]
-        //public string CloudMediaGroup.username { get; set; }
-        //[XmlElement(ElementName = "CloudMediaGroup.xml")]
-        //public string CloudMediaGroup.xml { get; set; }
-        //[XmlElement(ElementName = "CloudMediaGroup.channel")]
-        //public string CloudMediaGroup.channel { get; set; }
-        //[XmlElement(ElementName = "DaCast.username")]
-        //public string DaCast.username { get; set; }
-        //[XmlElement(ElementName = "DaCast.xml")]
-        //public string DaCast.xml { get; set; }
-        //[XmlElement(ElementName = "DaCast.channel")]
-        //public string DaCast.channel { get; set; }
-        //[XmlElement(ElementName = "Meridix.username")]
-        //public string Meridix.username { get; set; }
-        //[XmlElement(ElementName = "Meridix.xml")]
-        //public string Meridix.xml { get; set; }
-        //[XmlElement(ElementName = "Meridix.channel")]
-        //public string Meridix.channel { get; set; }
-        //[XmlElement(ElementName = "ScaleEngine.username")]
-        //public string ScaleEngine.username { get; set; }
-        //[XmlElement(ElementName = "ScaleEngine.xml")]
-        //public string ScaleEngine.xml { get; set; }
-        //[XmlElement(ElementName = "ScaleEngine.channel")]
-        //public string ScaleEngine.channel { get; set; }
-        //[XmlElement(ElementName = "StreamingChurch.tv.username")]
-        //public string StreamingChurch.tv.username { get; set; }
-        //[XmlElement(ElementName = "StreamingChurch.tv.xml")]
-        //public string StreamingChurch.tv.xml { get; set; }
-        //[XmlElement(ElementName = "StreamingChurch.tv.channel")]
-        //public string StreamingChurch.tv.channel { get; set; }
-        //[XmlElement(ElementName = "StreamShark.io.username")]
-        //public string StreamShark.io.username { get; set; }
-        //[XmlElement(ElementName = "StreamShark.io.xml")]
-        //public string StreamShark.io.xml { get; set; }
-        //[XmlElement(ElementName = "StreamShark.io.channel")]
-        //public string StreamShark.io.channel { get; set; }
-        //[XmlElement(ElementName = "StreamSpot.username")]
-        //public string StreamSpot.username { get; set; }
-        //[XmlElement(ElementName = "StreamSpot.xml")]
-        //public string StreamSpot.xml { get; set; }
-        //[XmlElement(ElementName = "StreamSpot.channel")]
-        //public string StreamSpot.channel { get; set; }
-        //[XmlElement(ElementName = "Sunday_Streams.username")]
-        //public string Sunday_Streams.username { get; set; }
-        //[XmlElement(ElementName = "Sunday_Streams.xml")]
-        //public string Sunday_Streams.xml { get; set; }
-        //[XmlElement(ElementName = "Sunday_Streams.channel")]
-        //public string Sunday_Streams.channel { get; set; }
-        //[XmlElement(ElementName = "TikiLIVE.username")]
-        //public string TikiLIVE.username { get; set; }
-        //[XmlElement(ElementName = "TikiLIVE.xml")]
-        //public string TikiLIVE.xml { get; set; }
-        //[XmlElement(ElementName = "TikiLIVE.channel")]
-        //public string TikiLIVE.channel { get; set; }
-        //[XmlElement(ElementName = "Twitch.username")]
-        //public string Twitch.username { get; set; }
-        //[XmlElement(ElementName = "Twitch.xml")]
-        //public string Twitch.xml { get; set; }
-        //[XmlElement(ElementName = "Twitch.channel")]
-        //public string Twitch.channel { get; set; }
-        //[XmlElement(ElementName = "Ustream.username")]
-        //public string Ustream.username { get; set; }
-        //[XmlElement(ElementName = "Ustream.xml")]
-        //public string Ustream.xml { get; set; }
-        //[XmlElement(ElementName = "Ustream.channel")]
-        //public string Ustream.channel { get; set; }
-        //[XmlElement(ElementName = "YouTube_Live.username")]
-        //public string YouTube_Live.username { get; set; }
-        //[XmlElement(ElementName = "YouTube_Live.xml")]
-        //public string YouTube_Live.xml { get; set; }
-        //[XmlElement(ElementName = "YouTube_Live.channel")]
-        //public string YouTube_Live.channel { get; set; }
-        //[XmlElement(ElementName = "Wowza_Cloud.username")]
-        //public string Wowza_Cloud.username { get; set; }
-        //[XmlElement(ElementName = "Wowza_Cloud.xml")]
-        //public string Wowza_Cloud.xml { get; set; }
-        //[XmlElement(ElementName = "Wowza_Cloud.channel")]
-        //public string Wowza_Cloud.channel { get; set; }
-        //[XmlElement(ElementName = "Provider")]
+        public string CloudMediaGroupUsername { get; set; }
+
+        [XmlElement(ElementName = "CloudMediaGroup.xml")]
+        public string CloudMediaGroupXml { get; set; }
+        [XmlElement(ElementName = "CloudMediaGroup.channel")]
+        public string CloudMediaGroupChannel { get; set; }
+        [XmlElement(ElementName = "DaCast.username")]
+        public string DaCastUsername { get; set; }
+        [XmlElement(ElementName = "DaCast.xml")]
+        public string DaCastXml { get; set; }
+        [XmlElement(ElementName = "DaCast.channel")]
+        public string DaCastChannel { get; set; }
+        [XmlElement(ElementName = "Meridix.username")]
+        public string MeridixUsername { get; set; }
+        [XmlElement(ElementName = "Meridix.xml")]
+        public string MeridixXml { get; set; }
+        [XmlElement(ElementName = "Meridix.channel")]
+        public string MeridixChannel { get; set; }
+        [XmlElement(ElementName = "ScaleEngine.username")]
+        public string ScaleEngineUsername { get; set; }
+        [XmlElement(ElementName = "ScaleEngine.xml")]
+        public string ScaleEngineXml { get; set; }
+        [XmlElement(ElementName = "ScaleEngine.channel")]
+        public string ScaleEngineChannel { get; set; }
+        [XmlElement(ElementName = "StreamingChurch.tv.username")]
+        public string StreamingChurchTvUsername { get; set; }
+        [XmlElement(ElementName = "StreamingChurch.tv.xml")]
+        public string StreamingChurchTvXml { get; set; }
+        [XmlElement(ElementName = "StreamingChurch.tv.channel")]
+        public string StreamingChurchTvChannel { get; set; }
+        [XmlElement(ElementName = "StreamShark.io.username")]
+        public string StreamSharkIoUsername { get; set; }
+        [XmlElement(ElementName = "StreamShark.io.xml")]
+        public string StreamSharkIoXml { get; set; }
+        [XmlElement(ElementName = "StreamShark.io.channel")]
+        public string StreamSharkIoChannel { get; set; }
+        [XmlElement(ElementName = "StreamSpot.username")]
+        public string StreamSpotUsername { get; set; }
+        [XmlElement(ElementName = "StreamSpot.xml")]
+        public string StreamSpotXml { get; set; }
+        [XmlElement(ElementName = "StreamSpot.channel")]
+        public string StreamSpotChannel { get; set; }
+        [XmlElement(ElementName = "Sunday_Streams.username")]
+        public string Sunday_StreamsUsername { get; set; }
+        [XmlElement(ElementName = "Sunday_Streams.xml")]
+        public string Sunday_StreamsXml { get; set; }
+        [XmlElement(ElementName = "Sunday_Streams.channel")]
+        public string Sunday_StreamsChannel { get; set; }
+        [XmlElement(ElementName = "TikiLIVE.username")]
+        public string TikiLIVEUsername { get; set; }
+        [XmlElement(ElementName = "TikiLIVE.xml")]
+        public string TikiLIVEXml { get; set; }
+        [XmlElement(ElementName = "TikiLIVE.channel")]
+        public string TikiLIVEChannel { get; set; }
+        [XmlElement(ElementName = "Twitch.username")]
+        public string TwitchUsername { get; set; }
+        [XmlElement(ElementName = "Twitch.xml")]
+        public string TwitchXml { get; set; }
+        [XmlElement(ElementName = "Twitch.channel")]
+        public string TwitchChannel { get; set; }
+        [XmlElement(ElementName = "Ustream.username")]
+        public string UstreamUsername { get; set; }
+        [XmlElement(ElementName = "Ustream.xml")]
+        public string UstreamXml { get; set; }
+        [XmlElement(ElementName = "Ustream.channel")]
+        public string UstreamChannel { get; set; }
+        [XmlElement(ElementName = "YouTube_Live.username")]
+        public string YouTube_LiveUsername { get; set; }
+        [XmlElement(ElementName = "YouTube_Live.xml")]
+        public string YouTube_LiveXml { get; set; }
+        [XmlElement(ElementName = "YouTube_Live.channel")]
+        public string YouTube_LiveChannel { get; set; }
+        [XmlElement(ElementName = "Wowza_Cloud.username")]
+        public string Wowza_CloudUsername { get; set; }
+        [XmlElement(ElementName = "Wowza_Cloud.xml")]
+        public string Wowza_CloudXml { get; set; }
+        [XmlElement(ElementName = "Wowza_Cloud.channel")]
+        public string Wowza_CloudChannel { get; set; }
+        [XmlElement(ElementName = "Provider")]
         public string Provider { get; set; }
     }
 }

@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Serialization;
+using forte.devices.infrastructure;
 using RestSharp.Extensions.MonoHttp;
 
 namespace forte.devices.models.presets
@@ -120,7 +121,7 @@ namespace forte.devices.models.presets
 
             using (TextWriter writer = new StringWriter(stringBuilder))
             {
-                using (XmlWriter xmlWriter = XmlWriter.Create(writer, _xmlWriterSettings))
+                using (var xmlWriter = new VmixXmlWriter(XmlWriter.Create(writer, _xmlWriterSettings)))
                 {
                     serializer.Serialize(xmlWriter, vmixStreamDestination);
                 }

@@ -115,8 +115,16 @@ namespace forte.devices.models.presets
         public string Category { get; set; }
         [XmlAttribute(AttributeName = "MouseClickAction")]
         public string MouseClickAction { get; set; }
+
         [XmlAttribute(AttributeName = "Collapsed")]
         public string Collapsed { get; set; }
+
+        [XmlAttribute(AttributeName = "MixChannel1")]
+        public string MixChannel1 { get; set; }
+
+        [XmlAttribute(AttributeName = "MixChannel2")]
+        public string MixChannel2 { get; set; }
+
         [XmlAttribute(AttributeName = "Solo")]
         public string Solo { get; set; }
         [XmlAttribute(AttributeName = "HeadphonesVolumeF")]
@@ -163,6 +171,10 @@ namespace forte.devices.models.presets
         public string PTZDefaultPanTiltSpeed { get; set; }
         [XmlAttribute(AttributeName = "PTZDefaultZoomSpeed")]
         public string PTZDefaultZoomSpeed { get; set; }
+
+        [XmlAttribute(AttributeName = "PTZDefaultPositionSpeed")]
+        public string PTZDefaultPositionSpeed { get; set; }
+
         [XmlAttribute(AttributeName = "VideoShader_ColorCorrectionSourceEnabled")]
         public string VideoShader_ColorCorrectionSourceEnabled { get; set; }
         [XmlAttribute(AttributeName = "VideoShader_White")]
