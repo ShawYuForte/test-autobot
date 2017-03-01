@@ -157,6 +157,8 @@ namespace forte.devices.models.presets
         public string SelectedIndex { get; set; }
         [XmlAttribute(AttributeName = "Rate")]
         public string Rate { get; set; }
+        [XmlAttribute(AttributeName = "MasterOverlay0")]
+        public string MasterOverlay0 { get; set; }
         [XmlAttribute(AttributeName = "XML")]
         public string XML { get; set; }
         [XmlAttribute(AttributeName = "ShaderSource")]
