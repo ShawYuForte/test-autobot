@@ -109,23 +109,23 @@ namespace forte.devices.services.clients.tests
 
         [TestMethod]
         [DeploymentItem("data", "data")]
-        //[Ignore]
         public void TestPresetGeneration()
         {
             foreach (var file in Directory.GetFiles("data\\presets"))
             {
-                TestPresetGeneration(file);
+                try
+                {
+                    TestPresetGeneration(file);
+                }
+                catch (Exception e)
+                {
+                    Assert.Fail("Exception with file {0}: {1}; {2}", file, e.Message, e.StackTrace);
+                }
             }
-            //TestPresetGeneration(@"D:\dev\active\forte\iot\src\device.client.vmix.tests\data\presets\Forte Preset AHPC.vmix");
         }
 
         private void TestPresetGeneration(string presetFile)
         {
-            // TODO
-            // 1. remove the Destination encoded Xml
-            // 2. compare rest of the xml
-            // 3. decode destination xml from #1 and compare 
-
             var input = Path.GetTempFileName();
             var output = Path.GetTempFileName();
 
@@ -142,6 +142,9 @@ namespace forte.devices.services.clients.tests
 
             var inputDestinations = ExtractDestinations(input);
             var outputDestinations = ExtractDestinations(output);
+
+            var identical = AreXmlFilesIdentical(input, output, out message, out patchOutputFile);
+            Assert.IsTrue(identical, "Did not regenerate identical Xml for '{0}', message: {1}. Compare {2} to {3}", presetFile, message, input, output);
 
             if (inputDestinations == null || inputDestinations.Count != outputDestinations?.Count)
                 Assert.Fail("Destinations for file {0} do not match, input has {1}, output has {2}", presetFile, inputDestinations?.Count,  outputDestinations?.Count);
@@ -164,9 +167,6 @@ namespace forte.devices.services.clients.tests
             inputBuffer.AppendLine("</Destinations>");
             outputBuffer.AppendLine("</Destinations>");
 
-            var identical = AreXmlFilesIdentical(input, output, out message, out patchOutputFile);
-            Assert.IsTrue(identical, "Did not regenerate identical Xml for '{0}', message: {1}", presetFile, message);
-
             var inputDestinationFile = Path.GetTempFileName();
             File.WriteAllText(inputDestinationFile, inputBuffer.ToString());
             _tempFiles.Add(inputDestinationFile);
@@ -183,12 +183,13 @@ namespace forte.devices.services.clients.tests
         {
             var result = new List<string>();
             const string fullTagRegEx = @"<Destination(0|1|2)[\sa-zA-Z:=\-""\/\.0-9]*>[\s\S]*?<\/?Destination(0|1|2)[\sa-zA-Z:=\-""\/\.0-9]*>";
-            var fileContent = File.ReadAllText(file);
+            var fileContent = File.ReadAllText(file).RemoveXmlAttribute("Destination(0|1|2)");
+
             var match = Regex.Match(fileContent, fullTagRegEx);
 
             while (match.Success)
             {
-                result.Add(match.Value.RemoveXmlAttribute("StreamDestination"));
+                result.Add(match.Value.RemoveXmlAttributeTags("StreamDestination"));
                 fileContent = fileContent.Replace(match.Value, string.Empty);
                 match = match.NextMatch();
             }

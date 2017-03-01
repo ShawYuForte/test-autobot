@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Serialization;
+using forte.devices.extensions;
 using forte.devices.infrastructure;
 using RestSharp.Extensions.MonoHttp;
 
@@ -127,20 +128,9 @@ namespace forte.devices.models.presets
                 }
             }
 
-            const string tagRegEx = @"<\/?StreamDestination[\sa-zA-Z:=\-""\/\.0-9]*>";
             var serialized = stringBuilder.ToString();
 
-            var match = Regex.Match(serialized, tagRegEx);
-
-            while (match.Success)
-            {
-                serialized = serialized.Replace(match.Value, string.Empty);
-                match = match.NextMatch();
-            }
-
-            //serialized = serialized.Replace("<StreamDestination>", string.Empty)
-            //    .Replace("</StreamDestination>", string.Empty);
-            destination = serialized; // HttpUtility.HtmlEncode(serialized);
+            destination = serialized.RemoveXmlAttributeTags("StreamDestination"); 
         }
 
         [XmlElement(ElementName = "Version")]
