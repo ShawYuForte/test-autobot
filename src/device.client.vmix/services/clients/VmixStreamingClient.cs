@@ -345,7 +345,7 @@ namespace forte.devices.services.clients
             vmixPreset.Outputs = new List<VmixStreamDestination>
             {
                 new VmixStreamDestination("Primary", videoStream.PrimaryIngestUrl),
-                new VmixStreamDestination("Secondary", videoStream.SecondaryIngestUrl)
+                //new VmixStreamDestination("Secondary", videoStream.SecondaryIngestUrl)
             };
             _logger.Debug("Saving preset file {@vmixPresetOutputFile} for {@vmixPreset}", vmixPresetOutputFile,
                 vmixPreset);

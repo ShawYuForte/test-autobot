@@ -30,13 +30,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="forte.specs, Version=1.1.2.3178, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\forte.specs.1.1.2\lib\net45\forte.specs.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="RestSharp, Version=105.2.3.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\RestSharp.105.2.3\lib\net452\RestSharp.dll</HintPath>
@@ -61,6 +56,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\forte.specs\forte.specs.csproj">
+      <Project>{5E1C27C1-9D29-4DBC-970C-F8766A18CB7B}</Project>
+      <Name>forte.specs</Name>
+    </ProjectReference>
     <ProjectReference Include="..\device.client\device.client.csproj">
       <Project>{EE82A4F2-712F-4E3D-B1AA-DAC254E33AA6}</Project>
       <Name>device.client</Name>
