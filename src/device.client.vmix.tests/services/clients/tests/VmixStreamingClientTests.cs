@@ -69,7 +69,7 @@ namespace forte.devices.services.clients.tests
             {
                 PrimaryIngestUrl = "primary",
                 SecondaryIngestUrl = "secondary"
-            });
+            }, null);
 
             Assert.IsFalse(string.IsNullOrWhiteSpace(result));
             sut.StopVmix();
@@ -96,7 +96,7 @@ namespace forte.devices.services.clients.tests
                 {
                     PrimaryIngestUrl = "primary",
                     SecondaryIngestUrl = "secondary"
-                });
+                }, null);
                 Assert.Fail("Expected timeout exception");
             }
             catch (Exception exception)

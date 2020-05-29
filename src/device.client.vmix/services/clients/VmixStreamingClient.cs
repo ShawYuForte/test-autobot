@@ -25,6 +25,7 @@ namespace forte.devices.services.clients
     {
         const uint WM_CLOSE = 0x0010;
 
+        //private readonly Regex _cameraRegex = new Regex(@"Webcam");
         private readonly Regex _cameraRegex = new Regex(@"RTSPTCP rtsp:\/\/root:pass@[0-9.]*\/axis-media\/media\.amp");
         private readonly RestClient _client;
         private readonly IConfigurationManager _configurationManager;
@@ -48,9 +49,9 @@ namespace forte.devices.services.clients
             return clientState;
         }
 
-        public string LoadVideoStreamPreset(VideoStreamModel videoStream)
+        public string LoadVideoStreamPreset(VideoStreamModel videoStream, string preset)
         {
-            var presetIdentifier = LoadPreset(videoStream);
+            var presetIdentifier = LoadPreset(videoStream, preset);
             if (presetIdentifier == null)
                 throw new Exception("Could not load preset");
             return presetIdentifier;
@@ -66,20 +67,30 @@ namespace forte.devices.services.clients
             StopVmix();
         }
 
-        public void StartProgram()
+        public void StartProgram(DateTime? time = null)
         {
             _logger.Debug("Starting intro video...");
 
             var vmixState = GetVmixState();
+			var openingVideo = vmixState.Inputs.Single(input => input.Role == InputRole.OpeningVideo);
 
-            var openingVideo = vmixState.Inputs.Single(input => input.Role == InputRole.OpeningVideo);
+			var mils = 0;
+			var now = DateTime.UtcNow;
+			if(time != null && time > now)
+			{
+				mils = (int) (time.Value - now).TotalMilliseconds;
+
+				_logger.Debug($"Wait for class start {time.Value}, miliseconds to start: {mils}.");
+				Thread.Sleep(mils);
+			}
+
             SetPreview(openingVideo);
 
             // Fade to intro video
             FadeToPreview();
 
-            // Set camera 1 at preview
-            var cameraInput = vmixState.Inputs.First(input => input.Role == InputRole.Camera);
+			// Set camera 1 at preview
+			var cameraInput = vmixState.Inputs.First(input => input.Role == InputRole.Camera);
             SetPreview(cameraInput);
             _logger.Debug("Set camera 1 as preview.");
 
@@ -123,7 +134,7 @@ namespace forte.devices.services.clients
             _logger.Debug("Starting started.");
         }
 
-        public void StopProgram()
+        public void StopProgram(DateTime? time = null)
         {
             _logger.Debug("Stopping program...");
 
@@ -328,12 +339,23 @@ namespace forte.devices.services.clients
         /// <summary>
         ///     Load presets based on a preset file defined in the app config
         /// </summary>
-        public string LoadPreset(VideoStreamModel videoStream)
+        public string LoadPreset(VideoStreamModel videoStream, string preset)
         {
             var vmixProcessHandle = EnsureVmixIsRunning(startFresh: true);
 
             var config = _configurationManager.GetDeviceConfig();
-            var presetTemplateFilePath = config.Get<string>(VmixSettingParams.VmixPresetTemplateFilePath);
+
+			var presetTemplateFilePath = config.Get<string>(VmixSettingParams.VmixPresetTemplateFilePath);
+			_logger.Debug($"Custom preset? {preset}");
+			if(!string.IsNullOrEmpty(preset))
+			{
+				_logger.Debug($"Using preset {preset} instead of {presetTemplateFilePath}");
+				if(preset != "Test")
+				{
+					presetTemplateFilePath = preset;
+				}
+			}
+
             var vmixPresetOutputFolder = config.Get<string>(VmixSettingParams.VmixPresetFolderPath);
             if (string.IsNullOrWhiteSpace(vmixPresetOutputFolder)) vmixPresetOutputFolder = Path.GetTempPath();
             _logger.Debug("Using preset output path {@vmixPresetOutputFolder}", vmixPresetOutputFolder);
@@ -347,8 +369,8 @@ namespace forte.devices.services.clients
                 new VmixStreamDestination("Primary", videoStream.PrimaryIngestUrl),
                 //new VmixStreamDestination("Secondary", videoStream.SecondaryIngestUrl)
             };
-            _logger.Debug("Saving preset file {@vmixPresetOutputFile} for {@vmixPreset}", vmixPresetOutputFile,
-                vmixPreset);
+            //_logger.Debug("Saving preset file {@vmixPresetOutputFile} for {@vmixPreset}", vmixPresetOutputFile, vmixPreset);
+            _logger.Debug("Saving preset file {@vmixPresetOutputFile}", vmixPresetOutputFile);
             vmixPreset.ToFile(vmixPresetOutputFile);
 
             var requestUrl = $"/?Function=OpenPreset&Value={vmixPresetOutputFile}";

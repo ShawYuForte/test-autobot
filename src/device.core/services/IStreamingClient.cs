@@ -1,5 +1,6 @@
 ﻿#region
 
+using System;
 using forte.devices.models;
 
 #endregion
@@ -22,7 +23,7 @@ namespace forte.devices.services
         /// </summary>
         /// <returns>Unique identifier for loaded preset</returns>
         /// <param name="videoStream"></param>
-        string LoadVideoStreamPreset(VideoStreamModel videoStream);
+        string LoadVideoStreamPreset(VideoStreamModel videoStream, string preset);
 
         /// <summary>
         ///     Shut the client down
@@ -32,7 +33,7 @@ namespace forte.devices.services
         /// <summary>
         ///     Starts the program, video and image intros, and playlist
         /// </summary>
-        void StartProgram();
+        void StartProgram(DateTime? time = null);
 
         /// <summary>
         ///     Starts streaming to the streaming service
@@ -42,7 +43,7 @@ namespace forte.devices.services
         /// <summary>
         ///     Stops program by playing outro and stopping the playlist
         /// </summary>
-        void StopProgram();
+        void StopProgram(DateTime? time = null);
 
         /// <summary>
         ///     Ends a broadcast, and optionally shuts down the streaming client software

@@ -12,6 +12,7 @@ using forte.devices.extensions;
 using forte.devices.models;
 using forte.models.devices;
 using forte.services;
+using Newtonsoft.Json;
 using RestSharp;
 using StreamingDeviceState = forte.devices.models.StreamingDeviceState;
 using StreamingDeviceStatuses = forte.devices.models.StreamingDeviceStatuses;
@@ -245,7 +246,7 @@ namespace forte.devices.services
                 case StreamingDeviceStatuses.Streaming:
                 case StreamingDeviceStatuses.Recording:
                 case StreamingDeviceStatuses.StreamingAndRecording:
-                    _streamingClient.StartProgram();
+                    _streamingClient.StartProgram(command.GetTime());
                     break;
                 case StreamingDeviceStatuses.StreamingProgram:
                 case StreamingDeviceStatuses.StreamingAndRecordingProgram:
@@ -284,7 +285,7 @@ namespace forte.devices.services
             switch (state.Status)
             {
                 case StreamingDeviceStatuses.Idle:
-                    state.StreamingPresetLoadHash = _streamingClient.LoadVideoStreamPreset(videoStream);
+                    state.StreamingPresetLoadHash = _streamingClient.LoadVideoStreamPreset(videoStream, command.GetPreset());
                     FlushDns();
                     _streamingClient.StartStreaming();
                     break;
@@ -399,11 +400,8 @@ namespace forte.devices.services
         {
             _logger.Debug("Fetching command...");
 
-            var request = new RestRequest($"{_deviceId}/commands/next", Method.GET)
-            {
-                JsonSerializer = NewtonsoftJsonSerializer.Default
-            };
-            var response = _client.Execute<StreamingDeviceCommandModel>(request);
+			var request = new RestRequest($"{_deviceId}/commands/next", Method.GET);
+            var response = _client.Execute(request);
             // Not found if no command
             if (response.StatusCode == HttpStatusCode.NotFound)
             {
@@ -417,10 +415,10 @@ namespace forte.devices.services
                 throw new Exception(response.ErrorMessage ?? response.StatusDescription);
             }
 
-            _logger.Debug("Command retrieved {@command}", response.Data);
-            var command = response.Data;
+			_logger.Debug("Command retrieved {@command}", response.Content);
+            var command = JsonConvert.DeserializeObject<StreamingDeviceCommandModel>(response.Content);
 
-            SaveCommandLocally(command);
+			SaveCommandLocally(command);
 
             try
             {
