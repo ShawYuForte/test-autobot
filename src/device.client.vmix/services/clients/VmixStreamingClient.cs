@@ -71,7 +71,12 @@ namespace forte.devices.services.clients
         {
             _logger.Debug("Starting intro video...");
 
-            var vmixState = GetVmixState();
+            var config = _configurationManager.GetDeviceConfig();
+
+			var enableIntro = config.Get<bool>(VmixSettingParams.EnableIntro);
+			_logger.Debug($"Starting intro video... Enable: {enableIntro}");
+
+			var vmixState = GetVmixState();
 			var openingVideo = vmixState.Inputs.Single(input => input.Role == InputRole.OpeningVideo);
 
 			var mils = 0;
@@ -80,21 +85,27 @@ namespace forte.devices.services.clients
 			{
 				mils = (int) (time.Value - now).TotalMilliseconds;
 
-				_logger.Debug($"Wait for class start {time.Value}, miliseconds to start: {mils}.");
+				_logger.Debug($"Start program: Wait for class start {time.Value}, miliseconds to start: {mils}.");
 				Thread.Sleep(mils);
 			}
 
-            SetPreview(openingVideo);
+			if(enableIntro)
+			{
+				SetPreview(openingVideo);
 
-            // Fade to intro video
-            FadeToPreview();
+				// Fade to intro video
+				FadeToPreview();
+			}
 
 			// Set camera 1 at preview
 			var cameraInput = vmixState.Inputs.First(input => input.Role == InputRole.Camera);
             SetPreview(cameraInput);
             _logger.Debug("Set camera 1 as preview.");
 
-            Thread.Sleep(openingVideo.Duration);
+			if(enableIntro)
+			{
+				Thread.Sleep(openingVideo.Duration);
+			}
 
             FadeToPreview();
             _logger.Debug("Switched to camera 1 video.");
@@ -112,17 +123,35 @@ namespace forte.devices.services.clients
             _logger.Debug("Started the playlist");
         }
 
-        void IStreamingClient.StartStreaming()
+        void IStreamingClient.StartStreaming(DateTime? time = null)
         {
             var vmixState = GetVmixState();
             var config = _configurationManager.GetDeviceConfig();
 
             _logger.Debug("Loading static image intro...");
             var openingImage = vmixState.Inputs.Single(input => input.Role == InputRole.OpeninStaticImage);
-            SetActive(openingImage);
 
-            _logger.Debug("Ensuring audio is off...");
-            TurnAudioOff(vmixState);
+			if(time != null)
+			{
+				var timeSecondsConfig = config.Get(VmixSettingParams.StaticImageTime, 30);
+				_logger.Debug($"Seconds for static image: {timeSecondsConfig}");
+
+				var mils = 0;
+				var startTime = time.Value.AddSeconds(-timeSecondsConfig);
+				var now = DateTime.UtcNow;
+				if(startTime > now)
+				{
+					mils = (int) (startTime - now).TotalMilliseconds;
+
+					_logger.Debug($"Start stream: Wait for class start {time.Value}, static image start: {startTime}, miliseconds to start: {mils}.");
+					Thread.Sleep(mils);
+				}
+			}
+
+			_logger.Debug("Ensuring audio is off...");
+			TurnAudioOff(vmixState);
+
+			SetActive(openingImage);
 
             _logger.Debug("Starting streaming...");
 
@@ -139,10 +168,19 @@ namespace forte.devices.services.clients
             _logger.Debug("Stopping program...");
 
             var vmixState = GetVmixState();
+			var config = _configurationManager.GetDeviceConfig();
 
-            var closingVideo = vmixState.Inputs.Single(input => input.Role == InputRole.ClosingVideo);
-            SetPreview(closingVideo);
-            _logger.Debug("Placed closing video in preview.");
+			var enableOutro = config.Get<bool>(VmixSettingParams.EnableOutro);
+			_logger.Debug($"Outro video... Enable: {enableOutro}");
+			var enableOutroStatic = config.Get<bool>(VmixSettingParams.EnableOutroStatic);
+			_logger.Debug($"Outro video static image... Enable: {enableOutroStatic}");
+
+			var closingVideo = vmixState.Inputs.Single(input => input.Role == InputRole.ClosingVideo);
+			if(enableOutro)
+			{
+				SetPreview(closingVideo);
+				_logger.Debug("Placed closing video in preview.");
+			}
 
             // Turn off audio (possibly fade)
             TurnAudioOff(vmixState);
@@ -160,20 +198,39 @@ namespace forte.devices.services.clients
             FadeToPreview();
             _logger.Debug("Switched to closing video.");
 
-            // Set ending background image as preview
-            var closingImageInput = vmixState.Inputs.First(input => input.Role == InputRole.ClosingStaticImage);
-            SetPreview(closingImageInput);
-            _logger.Debug("Set closing image as preview.");
+			// Set ending background image as preview
+			if(enableOutroStatic)
+			{
+				var closingImageInput = vmixState.Inputs.First(input => input.Role == InputRole.ClosingStaticImage);
+				SetPreview(closingImageInput);
+				_logger.Debug("Set closing image as preview.");
+			}
 
-            Thread.Sleep(closingVideo.Duration);
+			if(enableOutro)
+			{
+				Thread.Sleep(closingVideo.Duration);
+			}
 
-            FadeToPreview();
-            _logger.Debug("Switched to closing image.");
+			if(enableOutroStatic)
+			{
+				FadeToPreview();
+				_logger.Debug("Switched to closing image.");
+			}
+
+			if(!enableOutroStatic)
+			{
+				_logger.Debug("No outro closing image.");
+				StopStreaming(true);
+			}
         }
 
         public void StopStreaming(bool shutdownClient)
         {
-            _logger.Debug("Stopping streaming...");
+			var state = GetVmixState();
+			if(state == null) return;
+			if(!state.Streaming) return;
+
+			_logger.Debug("Stopping streaming...");
             StopStreaming();
             _logger.Debug("Stopped streaming.");
 
@@ -282,7 +339,7 @@ namespace forte.devices.services.clients
         {
             var request = new RestRequest("", Method.GET);
             var response = _client.Execute<VmixState>(request);
-            _logger.Debug("VMIX state {@state}", response);
+            //_logger.Debug("VMIX state {@state}", response);
             return response.StatusCode != HttpStatusCode.OK ? null : MatchPresetStateRoles(response.Data);
         }
 
@@ -302,39 +359,41 @@ namespace forte.devices.services.clients
         [DllImport("user32")]
         private static extern int IsWindowEnabled(int hWnd);
 
-        private void LoadDefaultSettings()
-        {
-            var config = _configurationManager.GetDeviceConfig();
-            if (string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.VmixApiPath)))
-                config = _configurationManager.UpdateSetting(VmixSettingParams.VmixApiPath, "http://localhost:8088/api");
-            if (string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.VmixExePath)))
-                config = _configurationManager.UpdateSetting(VmixSettingParams.VmixExePath,
-                    @"C:\Program Files (x86)\vMix\vMix64.exe");
-            if (string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.VmixPlaylistName)))
-                config = _configurationManager.UpdateSetting(VmixSettingParams.VmixPlaylistName,
-                    "CameraSwitchingProgram");
-            if (string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.VmixPresetTemplateFilePath)))
-                config = _configurationManager.UpdateSetting(VmixSettingParams.VmixPresetTemplateFilePath,
-                    @"C:\forte\preset\Forte Preset.vmix");
-            if (string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.BroadcastStartupImage)))
-                config = _configurationManager.UpdateSetting(VmixSettingParams.BroadcastStartupImage,
-                    "logo_dark_background.jpg");
-            if (string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.BroadcastStartupVideo)))
-                config = _configurationManager.UpdateSetting(VmixSettingParams.BroadcastStartupVideo,
-                    "logo_dark_background_mantis.mp4");
-            if (string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.BroadcastClosingImage)))
-                config = _configurationManager.UpdateSetting(VmixSettingParams.BroadcastClosingImage,
-                    "logo_girl_warrior_stance.jpg");
-            if (string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.BroadcastClosingVideo)))
-                config = _configurationManager.UpdateSetting(VmixSettingParams.BroadcastClosingVideo,
-                    "logo_reveal_house.mp4");
-            if (string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.BroadcastOverlayImage)))
-                _configurationManager.UpdateSetting(VmixSettingParams.BroadcastOverlayImage, "overlay_1280_720.png");
-            if (!config.Contains(VmixSettingParams.AutoCloseVmixErrorDialog))
-                _configurationManager.UpdateSetting(VmixSettingParams.AutoCloseVmixErrorDialog, false);
-            if (!config.Contains(VmixSettingParams.RetryCountForStreamException))
-                _configurationManager.UpdateSetting(VmixSettingParams.RetryCountForStreamException, 0);
-        }
+		private void LoadDefaultSettings()
+		{
+			var config = _configurationManager.GetDeviceConfig();
+			if(string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.VmixApiPath)))
+				config = _configurationManager.UpdateSetting(VmixSettingParams.VmixApiPath, "http://localhost:8088/api");
+			if(string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.VmixExePath)))
+				config = _configurationManager.UpdateSetting(VmixSettingParams.VmixExePath, @"C:\Program Files (x86)\vMix\vMix64.exe");
+			if(string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.VmixPlaylistName)))
+				config = _configurationManager.UpdateSetting(VmixSettingParams.VmixPlaylistName, "CameraSwitchingProgram");
+			if(string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.VmixPresetTemplateFilePath)))
+				config = _configurationManager.UpdateSetting(VmixSettingParams.VmixPresetTemplateFilePath, @"C:\forte\preset\Forte Preset.vmix");
+			if(string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.BroadcastStartupImage)))
+				config = _configurationManager.UpdateSetting(VmixSettingParams.BroadcastStartupImage, "logo_dark_background.jpg");
+			if(string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.BroadcastStartupVideo)))
+				config = _configurationManager.UpdateSetting(VmixSettingParams.BroadcastStartupVideo, "logo_dark_background_mantis.mp4");
+			if(string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.BroadcastClosingImage)))
+				config = _configurationManager.UpdateSetting(VmixSettingParams.BroadcastClosingImage, "logo_girl_warrior_stance.jpg");
+			if(string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.BroadcastClosingVideo)))
+				config = _configurationManager.UpdateSetting(VmixSettingParams.BroadcastClosingVideo, "logo_reveal_house.mp4");
+			if(string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.BroadcastOverlayImage)))
+				_configurationManager.UpdateSetting(VmixSettingParams.BroadcastOverlayImage, "overlay_1280_720.png");
+			if(!config.Contains(VmixSettingParams.AutoCloseVmixErrorDialog))
+				_configurationManager.UpdateSetting(VmixSettingParams.AutoCloseVmixErrorDialog, false);
+			if(!config.Contains(VmixSettingParams.RetryCountForStreamException))
+				_configurationManager.UpdateSetting(VmixSettingParams.RetryCountForStreamException, 0);
+
+			if(!config.Contains(VmixSettingParams.EnableIntro))
+				_configurationManager.UpdateSetting(VmixSettingParams.EnableIntro, true);
+			if(!config.Contains(VmixSettingParams.EnableOutro))
+				_configurationManager.UpdateSetting(VmixSettingParams.EnableOutro, true);
+			if(!config.Contains(VmixSettingParams.EnableOutroStatic))
+				_configurationManager.UpdateSetting(VmixSettingParams.EnableOutroStatic, true);
+			if(!config.Contains(VmixSettingParams.StaticImageTime))
+				_configurationManager.UpdateSetting(VmixSettingParams.StaticImageTime, 30);
+		}
 
         /// <summary>
         ///     Load presets based on a preset file defined in the app config
@@ -350,7 +409,7 @@ namespace forte.devices.services.clients
 			if(!string.IsNullOrEmpty(preset))
 			{
 				_logger.Debug($"Using preset {preset} instead of {presetTemplateFilePath}");
-				if(preset != "Test")
+				if(!preset.StartsWith("Test"))
 				{
 					presetTemplateFilePath = preset;
 				}
@@ -499,7 +558,6 @@ namespace forte.devices.services.clients
         public VmixState StartStreaming()
         {
             var config = _configurationManager.GetDeviceConfig();
-
             CallAndFetchState("/?Function=StartStreaming", "start streaming");
             Thread.Sleep(5000);
             var state = GetVmixState();

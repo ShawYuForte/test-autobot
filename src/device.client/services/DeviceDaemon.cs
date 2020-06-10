@@ -287,7 +287,7 @@ namespace forte.devices.services
                 case StreamingDeviceStatuses.Idle:
                     state.StreamingPresetLoadHash = _streamingClient.LoadVideoStreamPreset(videoStream, command.GetPreset());
                     FlushDns();
-                    _streamingClient.StartStreaming();
+                    _streamingClient.StartStreaming(command.GetTime());
                     break;
                 case StreamingDeviceStatuses.Streaming:
                 case StreamingDeviceStatuses.StreamingProgram:

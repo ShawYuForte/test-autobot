@@ -148,8 +148,8 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\forte.specs\forte.specs.csproj">
-      <Project>{5e1c27c1-9d29-4dbc-970c-f8766a18cb7b}</Project>
+    <ProjectReference Include="..\..\..\web\src\forte.specs\forte.specs.csproj">
+      <Project>{5E1C27C1-9D29-4DBC-970C-F8766A18CB7B}</Project>
       <Name>forte.specs</Name>
     </ProjectReference>
     <ProjectReference Include="..\device.core\device.core.csproj">

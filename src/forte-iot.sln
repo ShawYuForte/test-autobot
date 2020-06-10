@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.168
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "device.client", "device.client\device.client.csproj", "{EE82A4F2-712F-4E3D-B1AA-DAC254E33AA6}"
 EndProject
@@ -39,6 +39,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "device.web", "device.web\device.web.csproj", "{FBAB6E6A-2A8E-4FA9-B975-2755A14110AF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "device.client.simulator", "device.client.simulator\device.client.simulator.csproj", "{CE1CE7DC-1E7A-4354-8CA5-FF7B3834B69F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "forte.specs", "..\..\web\src\forte.specs\forte.specs.csproj", "{5E1C27C1-9D29-4DBC-970C-F8766A18CB7B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "forte.modules.serilog", "..\..\web\src\forte.modules.serilog\forte.modules.serilog.csproj", "{045A37A3-0CBC-4E61-A39D-58355AACD983}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -82,11 +86,20 @@ Global
 		{CE1CE7DC-1E7A-4354-8CA5-FF7B3834B69F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CE1CE7DC-1E7A-4354-8CA5-FF7B3834B69F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CE1CE7DC-1E7A-4354-8CA5-FF7B3834B69F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5E1C27C1-9D29-4DBC-970C-F8766A18CB7B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5E1C27C1-9D29-4DBC-970C-F8766A18CB7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5E1C27C1-9D29-4DBC-970C-F8766A18CB7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5E1C27C1-9D29-4DBC-970C-F8766A18CB7B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{045A37A3-0CBC-4E61-A39D-58355AACD983}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{045A37A3-0CBC-4E61-A39D-58355AACD983}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{045A37A3-0CBC-4E61-A39D-58355AACD983}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{045A37A3-0CBC-4E61-A39D-58355AACD983}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		EnterpriseLibraryConfigurationToolBinariesPath = packages\TransientFaultHandling.Core.5.1.1209.1\lib\NET4
+		SolutionGuid = {D4D5E4E5-1EA4-45CB-842C-3B7FEBAD5053}
 	EndGlobalSection
 EndGlobal

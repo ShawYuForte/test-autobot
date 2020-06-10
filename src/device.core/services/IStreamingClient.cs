@@ -38,7 +38,7 @@ namespace forte.devices.services
         /// <summary>
         ///     Starts streaming to the streaming service
         /// </summary>
-        void StartStreaming();
+        void StartStreaming(DateTime? time = null);
 
         /// <summary>
         ///     Stops program by playing outro and stopping the playlist

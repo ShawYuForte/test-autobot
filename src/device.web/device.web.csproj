@@ -821,17 +821,13 @@
     <TypeScriptCompile Include="client\bower_components\moment\moment.d.ts" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\forte.specs\forte.specs.csproj">
-      <Project>{5e1c27c1-9d29-4dbc-970c-f8766a18cb7b}</Project>
+    <ProjectReference Include="..\..\..\web\src\forte.specs\forte.specs.csproj">
+      <Project>{5E1C27C1-9D29-4DBC-970C-F8766A18CB7B}</Project>
       <Name>forte.specs</Name>
     </ProjectReference>
     <ProjectReference Include="..\device.core\device.core.csproj">
       <Project>{4fc451ca-14c1-46da-95ff-5c177463cfd4}</Project>
       <Name>device.core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\device.logging\device.logging.csproj">
-      <Project>{9db2f28e-0f35-4270-94b5-509e821faacf}</Project>
-      <Name>device.logging</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

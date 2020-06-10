@@ -222,12 +222,12 @@
     <None Include="package\tools\ReadMe.md" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\forte.modules.serilog\forte.modules.serilog.csproj">
+    <ProjectReference Include="..\..\..\web\src\forte.modules.serilog\forte.modules.serilog.csproj">
       <Project>{045a37a3-0cbc-4e61-a39d-58355aacd983}</Project>
       <Name>forte.modules.serilog</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\forte.specs\forte.specs.csproj">
-      <Project>{5e1c27c1-9d29-4dbc-970c-f8766a18cb7b}</Project>
+    <ProjectReference Include="..\..\..\web\src\forte.specs\forte.specs.csproj">
+      <Project>{5E1C27C1-9D29-4DBC-970C-F8766A18CB7B}</Project>
       <Name>forte.specs</Name>
     </ProjectReference>
     <ProjectReference Include="..\device.client.simulator\device.client.simulator.csproj">
@@ -255,6 +255,7 @@
       <Name>device.web</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>
