@@ -1,33 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using forte.models;
 
 namespace forte.devices.models
 {
-    public class StreamingDeviceConfig
+	public class StreamingDeviceConfig
     {
-        /// <summary>
-        ///     Device unique identifier
-        /// </summary>
-        public Guid DeviceId => Get<Guid>(nameof(DeviceId));
-
-        /// <summary>
-        /// Information on the operating system this device is running with
-        /// </summary>
-        public string OperatingSystem => Get<string>(nameof(OperatingSystem));
-
-        /// <summary>
-        /// Information on the processor the device is running with
-        /// </summary>
-        public string Processor => Get<string>(nameof(Processor));
-
-        /// <summary>
-        /// Information on the configured machine memory for the device
-        /// </summary>
-        public int Memory => Get<int>(nameof(Memory));
-
         private readonly Dictionary<string, DataValue> _settings = new Dictionary<string, DataValue>();
 
         //TODO
@@ -36,15 +14,22 @@ namespace forte.devices.models
         {
             get
             {
-                if (!_settings.ContainsKey(setting)) _settings.Add(setting, new DataValue(string.Empty));
+				if(!_settings.ContainsKey(setting))
+				{
+					_settings.Add(setting, new DataValue(string.Empty));
+				}
                 return _settings[setting];
             }
-            set
-            {
-                if (!_settings.ContainsKey(setting))
-                    _settings.Add(setting, value);
-                else
-                    _settings[setting] = value;
+			set
+			{
+				if(!_settings.ContainsKey(setting))
+				{
+					_settings.Add(setting, value);
+				}
+				else
+				{
+					_settings[setting] = value;
+				}
             }
         }
 
@@ -64,21 +49,9 @@ namespace forte.devices.models
             return _settings.ContainsKey(setting);
         }
 
-        public IDictionary<string, DataValue> ToDictionary(bool includeRestricted = false)
+        public IDictionary<string, DataValue> ToDictionary()
         {
-            var settings = _settings;
-
-            if (!includeRestricted)
-            {
-                settings = settings.Where(setting => 
-                        setting.Key != nameof(DeviceId) && 
-                        setting.Key != nameof(OperatingSystem) &&
-                        setting.Key != nameof(Processor) &&
-                        setting.Key != nameof(Memory))
-                    .ToDictionary(x => x.Key, x => x.Value);
-            }
-
-            return new ReadOnlyDictionary<string, DataValue>(settings);
+            return new ReadOnlyDictionary<string, DataValue>(_settings);
         }
     }
 }

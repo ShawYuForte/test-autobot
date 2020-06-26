@@ -22,8 +22,7 @@ namespace forte.devices
 
         public static void SetDefaultSerializerSettings(JsonSerializerSettings existingSerializerSettings = null)
         {
-            var settings = existingSerializerSettings ??
-                           (JsonConvert.DefaultSettings != null ? JsonConvert.DefaultSettings() : null);
+            var settings = existingSerializerSettings ?? (JsonConvert.DefaultSettings != null ? JsonConvert.DefaultSettings() : null);
             settings = GetSerializerSettings(settings);
             JsonConvert.DefaultSettings = () => settings;
         }

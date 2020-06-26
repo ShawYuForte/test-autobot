@@ -2,6 +2,7 @@
 
 using device.logging.services;
 using forte;
+using forte.devices.services;
 using forte.services;
 using Microsoft.Practices.Unity;
 
@@ -13,18 +14,13 @@ namespace device.logging
     {
         public static class Registrar
         {
-            /// <summary>
-            /// Register logger dependencies. Depends on IRuntimeConfig
-            /// </summary>
-            /// <param name="unityContainer"></param>
             public static void RegisterDependencies(IUnityContainer unityContainer)
             {
                 unityContainer.RegisterType<SeriLoggerEx, SeriLoggerEx>(new ContainerControlledLifetimeManager());
-                var seriLogger = unityContainer.Resolve<SeriLoggerEx>();
-                seriLogger.Configure();
-
-                unityContainer.RegisterInstance<ILogger>(seriLogger);
-            }
+				var seriLogger = unityContainer.Resolve<SeriLoggerEx>();
+				seriLogger.Configure();
+				unityContainer.RegisterInstance<ILogger>(seriLogger);
+			}
         }
     }
 }

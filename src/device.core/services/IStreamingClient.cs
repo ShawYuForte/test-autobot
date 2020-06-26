@@ -12,43 +12,10 @@ namespace forte.devices.services
     /// </summary>
     public interface IStreamingClient
     {
-        /// <summary>
-        ///     Get current state of the client
-        /// </summary>
-        /// <returns></returns>
-        StreamingClientState GetState();
-
-        /// <summary>
-        ///     Loads the streaming software with presets based on the video stream provided
-        /// </summary>
-        /// <returns>Unique identifier for loaded preset</returns>
-        /// <param name="videoStream"></param>
-        string LoadVideoStreamPreset(VideoStreamModel videoStream, string preset);
-
-        /// <summary>
-        ///     Shut the client down
-        /// </summary>
-        void ShutDown();
-
-        /// <summary>
-        ///     Starts the program, video and image intros, and playlist
-        /// </summary>
-        void StartProgram(DateTime? time = null);
-
-        /// <summary>
-        ///     Starts streaming to the streaming service
-        /// </summary>
-        void StartStreaming(DateTime? time = null);
-
-        /// <summary>
-        ///     Stops program by playing outro and stopping the playlist
-        /// </summary>
-        void StopProgram(DateTime? time = null);
-
-        /// <summary>
-        ///     Ends a broadcast, and optionally shuts down the streaming client software
-        /// </summary>
-        /// <param name="shutdownClient"></param>
-        void StopStreaming(bool shutdownClient);
+        string LoadVideoStreamPreset(string preset, string primaryUrl);
+		void StartStreaming();
+		void StopStreaming(bool shutdownClient);
+		void StartProgram();
+		void StopProgram();
     }
 }

@@ -32,14 +32,14 @@ Install-ChocolateyPath c:\forte\device-cli
 Write-Host "Scheduling automatic upgrade and run tasks..."
 
 # Create scheduled upgrade task
-$scheduledtaskscript = "$($env:chocolateyPackageFolder)\tools\scheduleupgrade.ps1"
-Invoke-Expression $scheduledtaskscript
-Write-Host "Scheduled upgrade task created!"
+#$scheduledtaskscript = "$($env:chocolateyPackageFolder)\tools\scheduleupgrade.ps1"
+#Invoke-Expression $scheduledtaskscript
+#Write-Host "Scheduled upgrade task created!"
 
-# Create scheduled upgrade task
-$scheduledtaskscript = "$($env:chocolateyPackageFolder)\tools\schedulerestartdevicecli.ps1"
-Invoke-Expression $scheduledtaskscript
-Write-Host "Scheduled device-cli restart task created!"
+# Create scheduled restart task
+#$scheduledtaskscript = "$($env:chocolateyPackageFolder)\tools\schedulerestartdevicecli.ps1"
+#Invoke-Expression $scheduledtaskscript
+#Write-Host "Scheduled device-cli restart task created!"
 
 # Create scheduled run task
 $scheduledtaskscript = "$($env:chocolateyPackageFolder)\tools\schedulerun.ps1"

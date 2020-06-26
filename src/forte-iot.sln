@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.168
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "device.client", "device.client\device.client.csproj", "{EE82A4F2-712F-4E3D-B1AA-DAC254E33AA6}"
-EndProject
 Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "docs", "..\docs\", "{19413059-8740-4BDF-9E9F-D8B9AFF56602}"
 	ProjectSection(WebsiteProperties) = preProject
 		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.0"
@@ -28,8 +26,6 @@ Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "docs", "..\docs\", "{194130
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "device.client.vmix", "device.client.vmix\device.client.vmix.csproj", "{BD82769B-E2B9-47D8-9962-AB7844548496}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "device.client.vmix.tests", "device.client.vmix.tests\device.client.vmix.tests.csproj", "{8E08DF21-FE03-421C-AC7F-BBED56B5EE10}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "device.core", "device.core\device.core.csproj", "{4FC451CA-14C1-46DA-95FF-5C177463CFD4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "device.logging", "device.logging\device.logging.csproj", "{9DB2F28E-0F35-4270-94B5-509E821FAACF}"
@@ -37,8 +33,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "device.cli", "device.cli\device.cli.csproj", "{9EBCDF44-1594-4688-86D7-243FFDE8D884}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "device.web", "device.web\device.web.csproj", "{FBAB6E6A-2A8E-4FA9-B975-2755A14110AF}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "device.client.simulator", "device.client.simulator\device.client.simulator.csproj", "{CE1CE7DC-1E7A-4354-8CA5-FF7B3834B69F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "forte.specs", "..\..\web\src\forte.specs\forte.specs.csproj", "{5E1C27C1-9D29-4DBC-970C-F8766A18CB7B}"
 EndProject
@@ -50,10 +44,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{EE82A4F2-712F-4E3D-B1AA-DAC254E33AA6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EE82A4F2-712F-4E3D-B1AA-DAC254E33AA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EE82A4F2-712F-4E3D-B1AA-DAC254E33AA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EE82A4F2-712F-4E3D-B1AA-DAC254E33AA6}.Release|Any CPU.Build.0 = Release|Any CPU
 		{19413059-8740-4BDF-9E9F-D8B9AFF56602}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{19413059-8740-4BDF-9E9F-D8B9AFF56602}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{19413059-8740-4BDF-9E9F-D8B9AFF56602}.Release|Any CPU.ActiveCfg = Debug|Any CPU
@@ -62,10 +52,6 @@ Global
 		{BD82769B-E2B9-47D8-9962-AB7844548496}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BD82769B-E2B9-47D8-9962-AB7844548496}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BD82769B-E2B9-47D8-9962-AB7844548496}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8E08DF21-FE03-421C-AC7F-BBED56B5EE10}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8E08DF21-FE03-421C-AC7F-BBED56B5EE10}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8E08DF21-FE03-421C-AC7F-BBED56B5EE10}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8E08DF21-FE03-421C-AC7F-BBED56B5EE10}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4FC451CA-14C1-46DA-95FF-5C177463CFD4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4FC451CA-14C1-46DA-95FF-5C177463CFD4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4FC451CA-14C1-46DA-95FF-5C177463CFD4}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -82,10 +68,6 @@ Global
 		{FBAB6E6A-2A8E-4FA9-B975-2755A14110AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FBAB6E6A-2A8E-4FA9-B975-2755A14110AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FBAB6E6A-2A8E-4FA9-B975-2755A14110AF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CE1CE7DC-1E7A-4354-8CA5-FF7B3834B69F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CE1CE7DC-1E7A-4354-8CA5-FF7B3834B69F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CE1CE7DC-1E7A-4354-8CA5-FF7B3834B69F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CE1CE7DC-1E7A-4354-8CA5-FF7B3834B69F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5E1C27C1-9D29-4DBC-970C-F8766A18CB7B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5E1C27C1-9D29-4DBC-970C-F8766A18CB7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5E1C27C1-9D29-4DBC-970C-F8766A18CB7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -99,7 +81,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		EnterpriseLibraryConfigurationToolBinariesPath = packages\TransientFaultHandling.Core.5.1.1209.1\lib\NET4
 		SolutionGuid = {D4D5E4E5-1EA4-45CB-842C-3B7FEBAD5053}
+		EnterpriseLibraryConfigurationToolBinariesPath = packages\TransientFaultHandling.Core.5.1.1209.1\lib\NET4
 	EndGlobalSection
 EndGlobal

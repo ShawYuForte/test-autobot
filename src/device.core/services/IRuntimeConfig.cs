@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace forte.devices.services
+﻿namespace forte.devices.services
 {
-    public interface IRuntimeConfig
-    {
-        string LogPath { get; set; }
-        string DataPath { get; set; }
-    }
+	public interface IRuntimeConfig
+	{
+		string DataPath { get; set; }
+		string LogPath { get; set; }
+	}
 }

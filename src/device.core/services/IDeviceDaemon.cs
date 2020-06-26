@@ -1,46 +1,11 @@
-﻿#region
-
-using System;
-using forte.devices.models;
-
-#endregion
+using System.Threading.Tasks;
 
 namespace forte.devices.services
 {
-    public interface IDeviceDaemon
+	public interface IDeviceDaemon
     {
-        void Init();
-        void Init(Guid deviceId);
-
-        /// <summary>
-        ///     Force resets the device to idle, closing the streaming client in the process
-        /// </summary>
-        void ForceResetToIdle();
-
-        /// <summary>
-        ///     Retrieve current device state
-        /// </summary>
-        /// <returns></returns>
-        StreamingDeviceState GetState();
-
-        /// <summary>
-        ///     Publish device state to the server
-        /// </summary>
-        bool PublishState();
-
-        /// <summary>
-        ///     Fetches the next command, if available, from the server
-        /// </summary>
-        void QueryServer();
-
-        /// <summary>
-        ///     Run and block
-        /// </summary>
-        void Run();
-
-        /// <summary>
-        ///     Stop the blocking daemon
-        /// </summary>
-        void Stop();
+		void Await(int port);
+		Task Start();
+		void Shutdown();
     }
 }

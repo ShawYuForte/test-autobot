@@ -20,9 +20,7 @@ namespace forte.devices
             public static void RegisterMappings()
             {
                 Mapper.CreateMap<Audio, VmixAudio>();
-
-                Mapper.CreateMap<VmixState, StreamingClientState>()
-                    .ForMember(m => m.Software, expression => { expression.UseValue("vMix"); });
+                Mapper.CreateMap<VmixState, StreamingClientState>().ForMember(m => m.Software, expression => { expression.UseValue("vMix"); });
             }
         }
     }

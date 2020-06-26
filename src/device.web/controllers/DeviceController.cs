@@ -11,71 +11,74 @@ using forte.services;
 
 namespace device.web.controllers
 {
-    [RoutePrefix("api/device")]
-    public class DeviceController : ApiController
-    {
-        private readonly IConfigurationManager _configManager;
-        private readonly IDeviceDaemon _deviceDaemon;
-        private readonly ILogger _logger;
+	[RoutePrefix("api/device")]
+	public class DeviceController : ApiController
+	{
+		private readonly IConfigurationManager _configManager;
+		private readonly IDeviceDaemon _deviceDaemon;
+		private readonly ILogger _logger;
 
-        public DeviceController(IConfigurationManager configManager, IDeviceDaemon deviceDaemon, ILogger logger)
-        {
-            _configManager = configManager;
-            _deviceDaemon = deviceDaemon;
-            _logger = logger;
-        }
+		public DeviceController(IConfigurationManager configManager, IDeviceDaemon deviceDaemon, ILogger logger)
+		{
+			_configManager = configManager;
+			_deviceDaemon = deviceDaemon;
+			_logger = logger;
+		}
 
-        [Route, HttpGet]
-        public IHttpActionResult GetState()
-        {
-            return Ok(_deviceDaemon.GetState());
-        }
+		[Route, HttpGet]
+		public IHttpActionResult GetState()
+		{
+			return Ok("");
+			//return Ok(_deviceDaemon.GetState());
+		}
 
-        [Route("shutdown"), HttpPost]
-        public IHttpActionResult Shutdown()
-        {
-            _deviceDaemon.Stop();
-            return Ok();
-        }
+		[Route("shutdown"), HttpPost]
+		public IHttpActionResult Shutdown()
+		{
+			_deviceDaemon.Shutdown();
+			return Ok();
+		}
 
-        [Route("fetch"), HttpPost]
-        public IHttpActionResult FetchCommand()
-        {
-            _deviceDaemon.QueryServer();
-            return Ok();
-        }
+		[Route("fetch"), HttpPost]
+		public IHttpActionResult FetchCommand()
+		{
+			//_deviceDaemon.QueryServer();
+			return Ok();
+		}
 
-        [Route("publish"), HttpPost]
-        public IHttpActionResult PublishState()
-        {
-            _deviceDaemon.PublishState();
-            return Ok();
-        }
+		[Route("publish"), HttpPost]
+		public IHttpActionResult PublishState()
+		{
+			//_deviceDaemon.PublishState();
+			return Ok();
+		}
 
-        [Route("reset"), HttpPost]
-        public IHttpActionResult Reset()
-        {
-            _deviceDaemon.ForceResetToIdle();
-            return Ok();
-        }
+		[Route("reset"), HttpPost]
+		public IHttpActionResult Reset()
+		{
+			//_deviceDaemon.ForceResetToIdle();
+			return Ok();
+		}
 
-        [Route("settings"), HttpGet]
-        public IHttpActionResult GetSettings()
-        {
-            _logger.Debug("Fetching settings");
-            var config = _configManager.GetDeviceConfig();
-            return Ok(Mapper.Map<SettingsModel>(config));
-        }
+		[Route("settings"), HttpGet]
+		public IHttpActionResult GetSettings()
+		{
+			_logger.Debug("Fetching settings");
+			var config = _configManager.GetDeviceConfig();
+			return Ok(Mapper.Map<SettingsModel>(config));
+		}
 
-        [Route("settings/{setting}"), HttpPost]
-        public IHttpActionResult UpdateSetting([FromUri]string setting, [FromBody]DataValue dataValue)
-        {
-            var config = _configManager.GetDeviceConfig();
-            if (!config.Contains(setting))
-                return BadRequest("Setting does not exist");
+		[Route("settings/{setting}"), HttpPost]
+		public IHttpActionResult UpdateSetting([FromUri]string setting, [FromBody]DataValue dataValue)
+		{
+			var config = _configManager.GetDeviceConfig();
+			if(!config.Contains(setting))
+			{
+				return BadRequest("Setting does not exist");
+			}
 
-            config = _configManager.UpdateSetting(setting, dataValue.Get());
-            return Ok(Mapper.Map<SettingsModel>(config));
-        }
-    }
+			config = _configManager.UpdateSetting(setting, dataValue.Get());
+			return Ok(Mapper.Map<SettingsModel>(config));
+		}
+	}
 }
