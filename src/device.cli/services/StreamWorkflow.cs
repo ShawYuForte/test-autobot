@@ -288,7 +288,7 @@ namespace forte.devices.workflow
 		{
 			try
 			{
-				var request = new RestRequest($"streamLink/{s.SessioId}?requestRef={s.Permalink}&programStart={s.StartTime}&programEnd={s.EndTime}", Method.GET);
+				var request = new RestRequest($"streamLink/{s.SessioId}?deviceId={_deviceId}&requestRef={s.Permalink}&programStart={s.StartTime}&programEnd={s.EndTime}", Method.GET);
 				_client.ExecuteAsync<VideoStreamModel>(request, async (m) =>
 				{
 					try
@@ -326,7 +326,7 @@ namespace forte.devices.workflow
 		{
 			try
 			{
-				var request = new RestRequest($"streamStart/{s.SessioId}?requestRef={s.Permalink}&programStart={s.StartTime}&programEnd={s.EndTime}", Method.GET);
+				var request = new RestRequest($"streamStart/{s.SessioId}?deviceId={_deviceId}&requestRef={s.Permalink}&programStart={s.StartTime}&programEnd={s.EndTime}", Method.GET);
 				_client.ExecuteAsync<VideoStreamModel>(request, async (m) =>
 				{
 					try
@@ -370,7 +370,7 @@ namespace forte.devices.workflow
 					_streamingClient.StopProgram();
 				}
 
-				var request = new RestRequest($"streamStop/{s.SessioId}?requestRef={s.Permalink}", Method.GET);
+				var request = new RestRequest($"streamStop/{s.SessioId}?deviceId={_deviceId}&requestRef={s.Permalink}", Method.GET);
 				_client.ExecuteAsync<bool>(request, async (m) =>
 				{
 					try
