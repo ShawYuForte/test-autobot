@@ -233,7 +233,7 @@ namespace forte.devices.workflow
 						_logger.Warning($"{s.Permalink}");
 						if(!fakeRun)
 						{
-							var r = LoadPreset(s);
+							var r = await LoadPreset(s);
 							if(!r) continue; //something went wrong with loading preset
 						}
 						SetSessionStatus(s, WorkflowState.VmixLoaded);
@@ -429,11 +429,11 @@ namespace forte.devices.workflow
 
 		#region vmix steps
 
-		private bool LoadPreset(SessionState s)
+		private async Task<bool> LoadPreset(SessionState s)
 		{
 			try
 			{
-				_streamingClient.LoadVideoStreamPreset(s.VmixPreset, s.PrimaryIngestUrl);
+				await _streamingClient.LoadVideoStreamPreset(s.VmixPreset, s.PrimaryIngestUrl);
 				return true;
 			}
 			catch(Exception ex)

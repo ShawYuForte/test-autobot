@@ -2,16 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using System.Text.RegularExpressions;
+using System.Web;
 using System.Xml;
 using System.Xml.Serialization;
 using forte.devices.extensions;
 using forte.devices.infrastructure;
-using RestSharp.Extensions.MonoHttp;
 
 namespace forte.devices.models.presets
 {
-    [XmlRoot(ElementName = "XML")]
+	[XmlRoot(ElementName = "XML")]
     public class VmixPreset
     {
         public const string PositionsMagicString =

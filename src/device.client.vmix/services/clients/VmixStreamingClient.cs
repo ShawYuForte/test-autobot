@@ -10,6 +10,7 @@ using System.Net;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using forte.devices.models;
 using forte.devices.models.presets;
 using forte.services;
@@ -23,13 +24,17 @@ namespace forte.devices.services.clients
     {
         const uint WM_CLOSE = 0x0010;
 
-        private readonly Regex _cameraRegex = new Regex(@"Webcam");
-        //private readonly Regex _cameraRegex = new Regex(@"RTSPTCP rtsp:\/\/root:pass@[0-9.]*\/axis-media\/media\.amp");
+		#if DEBUG
+		private readonly Regex _cameraRegex = new Regex(@"Webcam");
+		#else
+        private readonly Regex _cameraRegex = new Regex(@"RTSPTCP rtsp:\/\/root:pass@[0-9.]*\/axis-media\/media\.amp");
+		#endif
+
         private readonly RestClient _client;
         private readonly IConfigurationManager _configurationManager;
         private readonly ILogger _logger;
 
-		#region init
+#region init
 
 		public VmixStreamingClient(IConfigurationManager configurationManager, ILogger logger)
         {
@@ -71,13 +76,13 @@ namespace forte.devices.services.clients
             _client = new RestClient(config.Get<string>(VmixSettingParams.VmixApiPath));
         }
 
-		#endregion
+#endregion
 
-		#region preset
+#region preset
 
-		public string LoadVideoStreamPreset(string preset, string primaryUrl)
+		public async Task<string> LoadVideoStreamPreset(string preset, string primaryUrl)
 		{
-			var presetIdentifier = LoadPreset(preset, primaryUrl);
+			var presetIdentifier = await LoadPreset(preset, primaryUrl);
 			if(presetIdentifier == null)
 			{
 				throw new Exception("Could not load preset");
@@ -85,7 +90,7 @@ namespace forte.devices.services.clients
 			return presetIdentifier;
 		}
 
-		private string LoadPreset(string preset, string primaryUrl)
+		private async Task<string> LoadPreset(string preset, string primaryUrl)
 		{
 			var vmixProcessHandle = EnsureVmixIsRunning(startFresh: true);
 			var config = _configurationManager.GetDeviceConfig();
@@ -129,17 +134,17 @@ namespace forte.devices.services.clients
 			var response = _client.Execute<VmixState>(request);
 
 			const int fiveSeconds = 5000;
-			var stopwatch = new Stopwatch();
-			stopwatch.Start();
-
-			while(!IsPresetLoaded(vmixPreset))
+			var timeLeft = timeout * 60 * 1000;
+			while(true)
 			{
-				if(stopwatch.Elapsed.TotalSeconds > timeout)
+				if(IsPresetLoaded(vmixPreset)) break;
+				if(timeLeft <= 0)
 				{
 					throw new Exception($"Preset load timed out, could not load within {timeout} seconds.");
 				}
 
-				Thread.Sleep(fiveSeconds);
+				await Task.Delay(fiveSeconds);
+				timeLeft -= fiveSeconds;
 			}
 
 			return vmixProcessHandle;
@@ -162,9 +167,9 @@ namespace forte.devices.services.clients
 			return true;
 		}
 
-		#endregion
+#endregion
 
-		#region stream
+#region stream
 
 		public void StartStreaming()
 		{
@@ -232,9 +237,9 @@ namespace forte.devices.services.clients
 			}
 		}
 
-		#endregion
+#endregion
 
-		#region program
+#region program
 
 		public void StartProgram()
 		{
@@ -285,7 +290,8 @@ namespace forte.devices.services.clients
 			var config = _configurationManager.GetDeviceConfig();
 			var enableOutro = config.Get<bool>(VmixSettingParams.EnableOutro);
 			var enableOutroStatic = config.Get<bool>(VmixSettingParams.EnableOutroStatic);
-			var closingVideo = vmixState.Inputs.Single(input => input.Role == InputRole.ClosingVideo);
+			var closingVideo = vmixState.Inputs.SingleOrDefault(input => input.Role == InputRole.ClosingVideo);
+			if(closingVideo == null) return;
 			_logger.Debug($"Stopping program... Outro video enabled: {enableOutro}, Outro static image enabled: {enableOutroStatic}");
 
 			if(enableOutro)
@@ -336,9 +342,9 @@ namespace forte.devices.services.clients
 			}
 		}
 
-		#endregion
+#endregion
 
-		#region vmix
+#region vmix
 
 		private VmixState GetVmixState()
 		{
@@ -548,9 +554,9 @@ namespace forte.devices.services.clients
 			process?.Kill();
 		}
 
-		#endregion
+#endregion
 
-		#region internal
+#region internal
 
 		/// <summary>
 		///     Find window by Caption only. Note you must pass IntPtr.Zero as the first parameter.
@@ -564,6 +570,6 @@ namespace forte.devices.services.clients
 		[DllImport("user32")]
 		private static extern int IsWindowEnabled(int hWnd);
 
-		#endregion
+#endregion
     }
 }

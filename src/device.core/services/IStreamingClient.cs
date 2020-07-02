@@ -1,6 +1,7 @@
 ﻿#region
 
 using System;
+using System.Threading.Tasks;
 using forte.devices.models;
 
 #endregion
@@ -12,7 +13,7 @@ namespace forte.devices.services
     /// </summary>
     public interface IStreamingClient
     {
-        string LoadVideoStreamPreset(string preset, string primaryUrl);
+		Task<string> LoadVideoStreamPreset(string preset, string primaryUrl);
 		void StartStreaming();
 		void StopStreaming(bool shutdownClient);
 		void StartProgram();

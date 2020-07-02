@@ -121,6 +121,13 @@ namespace forte.devices
 		{
 			var config = configManager.GetDeviceConfig();
 
+			//for upgrade reasons
+			var guid = config.Get<Guid>(SettingParams.DeviceId);
+			if(guid != Guid.Empty)
+			{
+				config = configManager.UpdateSetting(SettingParams.DeviceId, guid.ToString());
+			}
+
 			if(string.IsNullOrWhiteSpace(config.Get<string>(SettingParams.DeviceId)))
 			{
 				config = configManager.UpdateSetting(SettingParams.DeviceId, Guid.NewGuid().ToString());
