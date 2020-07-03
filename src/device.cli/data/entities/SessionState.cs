@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using forte.devices.data.enums;
+using forte.models;
 
 namespace forte.devices.entities
 {
@@ -24,5 +25,9 @@ namespace forte.devices.entities
         public string PrimaryIngestUrl { get; set; }
 
 		public bool VmixUsed { get; set; }
+
+		public int RetryCount { get; set; }
+
+		public SessionType SessionType { get; set; }
 	}
 }

@@ -7,6 +7,7 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 using device.web.server;
 using forte.devices.config;
 using forte.devices.data;
@@ -15,6 +16,7 @@ using forte.devices.entities;
 using forte.devices.extensions;
 using forte.devices.models;
 using forte.devices.services;
+using forte.models;
 using forte.models.devices;
 using forte.services;
 using Newtonsoft.Json;
@@ -258,14 +260,14 @@ namespace forte.devices.workflow
 						_logger.Warning($"{s.Permalink}: {overdue} seconds before start, start static image stream");
 						if(!fakeRun)
 						{
-							var r1 = StartClientStream();
+							var r1 = StartClientStream(s);
 							if(!r1) continue; //something went wrong
 						}
 						SetSessionStatus(s, WorkflowState.StreamingClient);
 						continue;
 					}
 
-						//start session
+					//start session
 					if(s.Status == WorkflowState.StreamingClient)
 					{
 						if(!isVmixSession) continue;
@@ -274,7 +276,7 @@ namespace forte.devices.workflow
 						_logger.Warning($"{s.Permalink}: {overdue} seconds before start, start program");
 						if(!fakeRun)
 						{
-							var r2 = StartProgram();
+							var r2 = StartProgram(s);
 							if(!r2) continue; //something went wrong
 						}
 						SetSessionStatus(s, WorkflowState.Program);
@@ -288,7 +290,8 @@ namespace forte.devices.workflow
 		{
 			try
 			{
-				var request = new RestRequest($"streamLink/{s.SessioId}?deviceId={_deviceId}&requestRef={s.Permalink}&programStart={s.StartTime}&programEnd={s.EndTime}", Method.GET);
+				AddSessionRetry(s);
+				var request = new RestRequest($"streamLink/{s.SessioId}?retryNum={s.RetryCount}&deviceId={_deviceId}&requestRef={s.Permalink}&programStart={s.StartTime}&programEnd={s.EndTime}", Method.GET);
 				_client.ExecuteAsync<VideoStreamModel>(request, async (m) =>
 				{
 					try
@@ -304,6 +307,7 @@ namespace forte.devices.workflow
 
 						SetSessionUrl(s, m.Data.PrimaryIngestUrl);
 						SetSessionStatus(s, WorkflowState.Linked);
+						ClearSessionRetry(s);
 					}
 					catch(Exception ex)
 					{
@@ -326,7 +330,8 @@ namespace forte.devices.workflow
 		{
 			try
 			{
-				var request = new RestRequest($"streamStart/{s.SessioId}?deviceId={_deviceId}&requestRef={s.Permalink}&programStart={s.StartTime}&programEnd={s.EndTime}", Method.GET);
+				AddSessionRetry(s);
+				var request = new RestRequest($"streamStart/{s.SessioId}?retryNum={s.RetryCount}&deviceId={_deviceId}&requestRef={s.Permalink}&programStart={s.StartTime}&programEnd={s.EndTime}", Method.GET);
 				_client.ExecuteAsync<VideoStreamModel>(request, async (m) =>
 				{
 					try
@@ -342,6 +347,7 @@ namespace forte.devices.workflow
 
 						SetSessionUrl(s, m.Data.PrimaryIngestUrl);
 						SetSessionStatus(s, WorkflowState.StreamingServer);
+						ClearSessionRetry(s);
 					}
 					catch(Exception ex)
 					{
@@ -364,13 +370,15 @@ namespace forte.devices.workflow
 		{
 			try
 			{
-				if(s.VmixUsed)
+				AddSessionRetry(s);
+
+				if(s.VmixUsed && s.SessionType != SessionType.Manual)
 				{
 					_logger.Warning($"{s.Permalink}");
 					_streamingClient.StopProgram();
 				}
 
-				var request = new RestRequest($"streamStop/{s.SessioId}?deviceId={_deviceId}&requestRef={s.Permalink}", Method.GET);
+				var request = new RestRequest($"streamStop/{s.SessioId}?retryNum={s.RetryCount}&deviceId={_deviceId}&requestRef={s.Permalink}", Method.GET);
 				_client.ExecuteAsync<bool>(request, async (m) =>
 				{
 					try
@@ -384,13 +392,14 @@ namespace forte.devices.workflow
 
 						_logger.Debug($"{s.Permalink}: StopStream success");
 
-						if(s.VmixUsed)
+						if(s.VmixUsed && s.SessionType != SessionType.Manual)
 						{
 							_logger.Warning($"{s.Permalink}");
 							_streamingClient.StopStreaming(true);
 						}
 
 						SetSessionStatus(s, WorkflowState.Processed);
+						ClearSessionRetry(s);
 					}
 					catch(Exception ex)
 					{
@@ -427,48 +436,78 @@ namespace forte.devices.workflow
 			_dbRepository.UpdateSession(s);
 		}
 
+		private void AddSessionRetry(SessionState s)
+		{
+			s.RetryCount++;
+			_dbRepository.UpdateSession(s);
+		}
+
+		private void ClearSessionRetry(SessionState s)
+		{
+			s.RetryCount = 0;
+			_dbRepository.UpdateSession(s);
+		}
+
 		#region vmix steps
 
 		private async Task<bool> LoadPreset(SessionState s)
 		{
 			try
 			{
-				await _streamingClient.LoadVideoStreamPreset(s.VmixPreset, s.PrimaryIngestUrl);
+				AddSessionRetry(s);
+				if(s.SessionType != SessionType.Manual)
+				{
+					await _streamingClient.LoadVideoStreamPreset(s.VmixPreset, s.PrimaryIngestUrl);
+				}
+				ClearSessionRetry(s);
 				return true;
 			}
 			catch(Exception ex)
 			{
+				ReportError(s, ex, "Load Preset");
 				_logger.Debug(ex, "");
 			}
 
 			return false;
 		}
 
-		private bool StartClientStream()
+		private bool StartClientStream(SessionState s)
 		{
 			try
 			{
-				FlushDns();
-				_streamingClient.StartStreaming();
+				AddSessionRetry(s);
+				if(s.SessionType != SessionType.Manual)
+				{
+					FlushDns();
+					_streamingClient.StartStreaming();
+				}
+				ClearSessionRetry(s);
 				return true;
 			}
 			catch(Exception ex)
 			{
+				ReportError(s, ex, "Load Preset");
 				_logger.Debug(ex, "");
 			}
 
 			return false;
 		}
 
-		private bool StartProgram()
+		private bool StartProgram(SessionState s)
 		{
 			try
 			{
-				_streamingClient.StartProgram();
+				AddSessionRetry(s);
+				if(s.SessionType != SessionType.Manual)
+				{
+					_streamingClient.StartProgram();
+				}
+				ClearSessionRetry(s);
 				return true;
 			}
 			catch(Exception ex)
 			{
+				ReportError(s, ex, "Load Preset");
 				_logger.Debug(ex, "");
 			}
 
@@ -534,7 +573,8 @@ namespace forte.devices.workflow
 					SessioId = command.SessionId.Value,
 					Permalink = command.Permalink,
 					VmixPreset = command.Preset,
-					Status = WorkflowState.Idle
+					Status = WorkflowState.Idle,
+					SessionType = (SessionType) command.Type
 				};
 			}
 
@@ -587,6 +627,12 @@ namespace forte.devices.workflow
 			{
 				_logger.Warning("Could not flush DNS Resolver Cache, process output: {@output}", output);
 			}
+		}
+
+		private void ReportError(SessionState s, Exception ex, string message)
+		{
+			if(s.RetryCount != 5) return;
+			_logger.Fatal(ex, $"{s.Permalink}: Streaming action {message} have failed 5 times. The system might be trying to retry further, but it is recommended to check the cause of this error.");
 		}
 
 		#endregion
