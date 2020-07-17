@@ -208,6 +208,10 @@
     <Compile Include="Migrations\202007031129386_refactor3.Designer.cs">
       <DependentUpon>202007031129386_refactor3.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202007151214290_refactor4.cs" />
+    <Compile Include="Migrations\202007151214290_refactor4.Designer.cs">
+      <DependentUpon>202007151214290_refactor4.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="options\UpgradeOptions.cs" />
     <Compile Include="Program.cs" />
@@ -269,6 +273,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202007031129386_refactor3.resx">
       <DependentUpon>202007031129386_refactor3.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202007151214290_refactor4.resx">
+      <DependentUpon>202007151214290_refactor4.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

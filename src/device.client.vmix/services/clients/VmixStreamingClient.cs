@@ -103,13 +103,26 @@ namespace forte.devices.services.clients
 			_logger.Debug($"Custom preset? {preset}");
 			if(!string.IsNullOrEmpty(preset))
 			{
-				_logger.Debug($"Using preset {preset} instead of {presetTemplateFilePath}");
 				if(!preset.StartsWith("Test"))
 				{
-					presetTemplateFilePath = preset;
+					var info = new FileInfo(presetTemplateFilePath);
+					if(info.Exists)
+					{
+						preset = preset.Replace(".vmix", "");
+						var newPath = $"{info.DirectoryName}/{preset}.vmix";
+
+						if(File.Exists(newPath))
+						{
+							_logger.Debug($"Using preset {newPath} instead of {presetTemplateFilePath}");
+							presetTemplateFilePath = newPath;
+						}
+						else
+						{
+							_logger.Error($"Cannot find preset: {newPath}");
+						}
+					}
 				}
 			}
-
 
 			if(string.IsNullOrWhiteSpace(vmixPresetOutputFolder))
 			{

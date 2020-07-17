@@ -7,8 +7,6 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web;
-using device.web.server;
 using forte.devices.config;
 using forte.devices.data;
 using forte.devices.data.enums;
@@ -26,7 +24,7 @@ namespace forte.devices.workflow
 {
 	public class StreamWorkflow: IDeviceDaemon
 	{
-        private readonly IApiServer _server;
+		private readonly IApiServer _server;
         private readonly ILogger _logger;
 		private readonly IConfigurationManager _configurationManager;
 		private readonly DbRepository _dbRepository;
@@ -36,7 +34,6 @@ namespace forte.devices.workflow
 
 		private bool _running = true;
 		private string _deviceId;
-		private ConcurrentQueue<StreamingDeviceCommandModel> _commands = new ConcurrentQueue<StreamingDeviceCommandModel>();
 		private Dictionary<Guid, SessionState> _lockedSessions = new Dictionary<Guid, SessionState>();
 
 		public StreamWorkflow(
@@ -71,58 +68,15 @@ namespace forte.devices.workflow
 		{
 			var config = _configurationManager.GetDeviceConfig();
 			var apiPath = config.Get<string>(SettingParams.ServerApiPath);
-			var seconds = 0;
 			_deviceId = config.Get<string>(SettingParams.DeviceId);
 			_client = _client ?? new RestClient($"{apiPath}/streams/");
 			_clientDevice = _clientDevice ?? new RestClient($"{apiPath}/devices/");
 
-			//async loop for processing commands
 			Run();
-			//async loop for checking new commands
-			while(true)
-			{
-				if(seconds != 0)
-				{
-					await Task.Delay(1000);
-					seconds--;
-					continue;
-				}
-
-				seconds = 10;
-
-				try
-				{
-					ThreadSafeFetchCommand();
-				}
-				catch(Exception exception)
-				{
-					_logger.Error(exception, exception.Message);
-				}
-			}
-
-			//$"0-{DateTime.Now}", "405E2FBA-C7C1-4C8A-B10B-9A63D2375D60"
 		}
 
 		private async void Run()
 		{
-			var fakeRun = true;
-			var now = DateTime.UtcNow;
-			fakeRun = false;
-			//now = new DateTime(2020, 6, 19, 17, 30, 00).ToUniversalTime();
-			//var sessions = new List<SessionState>
-			//{
-			//	new SessionState
-			//	{
-			//		//StartTime = DateTime.UtcNow,
-			//		StartTime = now,
-			//		EndTime = now.AddMinutes(4),
-			//		SessioId = new Guid(sessionId),
-			//		Status = WorkflowState.Idle,
-			//		Permalink = sessionName,
-			//		VmixPreset = "Test"
-			//	}
-			//};
-
 			var config = _configurationManager.GetDeviceConfig();
 			var linkRetrySeconds = 15;
 			var streamRetrySeconds = 15;
@@ -131,71 +85,92 @@ namespace forte.devices.workflow
 			var staticImageSeconds = config.Get(VmixSettingParams.StaticImageTime, 30);
 			var serverStreamSeconds = staticImageSeconds + 10;
 			var sessions = _dbRepository.GetSessions();
-
+			var seconds = 0;
 			double overdue = 0;
+
 			while(true)
 			{
 				await Task.Delay(1000);
 
-				//executer pending commands before processing further
-				StreamingDeviceCommandModel command;
-				if(_commands.TryDequeue(out command))
+				if(seconds != 0)
 				{
+					seconds--;
+				}
+				else if(seconds == 0)
+				{
+					StreamingDeviceCommandModel command = null;
 					try
 					{
-						command.ExecutionAttempts++;
-
-						var session = sessions.FirstOrDefault(s => s.SessioId == command.SessionId.Value);
-						var isNew = session == null;
-						switch(command.Command)
-						{
-							case StreamingDeviceCommands.UpdateSession:
-								session = UpdateSession(session, command);
-								if(isNew)
-								{
-									sessions.Add(session);
-								}
-								break;
-							case StreamingDeviceCommands.CancelSession:
-								session = CancelSession(session, command);
-								break;
-							default:
-								throw new ArgumentOutOfRangeException();
-						}
-
-						command.ExecutionSucceeded = true;
-						command.ExecutedOn = DateTime.UtcNow;
+						command = ThreadSafeFetchCommand();
 					}
 					catch(Exception exception)
 					{
-						if(string.IsNullOrWhiteSpace(command.ExecutionMessages))
-						{
-							command.ExecutionMessages = exception.Message;
-						}
-						else
-						{
-							command.ExecutionMessages += $"{exception.Message};\n\r";
-						}
+						_logger.Error(exception, exception.Message);
+					}
 
-						if(command.ExecutionAttempts >= command.MaxAttemptsAllowed)
+					//executer pending commands before processing further
+					if(command != null)
+					{
+						try
 						{
+							command.ExecutionAttempts++;
+
+							var session = sessions.FirstOrDefault(s => s.SessioId == command.SessionId.Value);
+							var isNew = session == null;
+							switch(command.Command)
+							{
+								case StreamingDeviceCommands.UpdateSession:
+									session = UpdateSession(session, command);
+									if(isNew)
+									{
+										sessions.Add(session);
+									}
+									break;
+								case StreamingDeviceCommands.CancelSession:
+									session = CancelSession(session, command);
+									break;
+								default:
+									throw new ArgumentOutOfRangeException();
+							}
+
+							command.ExecutionSucceeded = true;
 							command.ExecutedOn = DateTime.UtcNow;
-							command.ExecutionSucceeded = false;
-							_logger.Fatal(exception, "Could not execute command {@command}", command);
 						}
-						else
+						catch(Exception exception)
 						{
-							_logger.Error(exception, "Could not execute command {@command}", command);
+							if(string.IsNullOrWhiteSpace(command.ExecutionMessages))
+							{
+								command.ExecutionMessages = exception.Message;
+							}
+							else
+							{
+								command.ExecutionMessages += $"{exception.Message};\n\r";
+							}
+
+							if(command.ExecutionAttempts >= command.MaxAttemptsAllowed)
+							{
+								command.ExecutedOn = DateTime.UtcNow;
+								command.ExecutionSucceeded = false;
+								_logger.Fatal(exception, "Could not execute command {@command}", command);
+							}
+							else
+							{
+								_logger.Error(exception, "Could not execute command {@command}", command);
+							}
+						}
+
+						try
+						{
+							SaveCommandOnServer(command);
+						}
+						catch(Exception exception)
+						{
+							_logger.Fatal(exception, "Could not save command on the server {@command}", command);
 						}
 					}
-
-					try
+					else
 					{
-						SaveCommandOnServer(command);
-					}
-					catch(Exception exception)
-					{
-						_logger.Fatal(exception, "Could not save command on the server {@command}", command);
+						seconds = 10;
 					}
 				}
 
@@ -206,12 +181,16 @@ namespace forte.devices.workflow
 				foreach(var s in sessions)
 				{
 					if(_lockedSessions.ContainsKey(s.SessioId)) continue;
-					//check if vmix is free to use for this session
+					//check if vmix is free to use for this session and it's time
 					var isVmixSession = (vmixSession == null || vmixSession.Id == s.Id);
-					if(isVmixSession) { SetSessionVmix(s, true); }
+					var needsLinking = s.StartTime.AddSeconds(-linkTimeSeconds) <= DateTime.UtcNow;
+					if(isVmixSession)
+					{
+						SetSessionVmix(s, needsLinking);
+					}
 
 					//terminate outdated session
-					if(s.EndTime <= DateTime.UtcNow)
+					if(s.EndTime <= DateTime.UtcNow || s.Status == WorkflowState.CancelPending)
 					{
 						_logger.Warning($"{s.Permalink}: {(DateTime.UtcNow - s.EndTime).TotalSeconds} seconds after end, terminate");
 						_lockedSessions[s.SessioId] = s;
@@ -220,7 +199,7 @@ namespace forte.devices.workflow
 					}
 
 					//start new session
-					if(s.Status == WorkflowState.Idle && s.StartTime.AddSeconds(-linkTimeSeconds) <= DateTime.UtcNow)
+					if(s.Status == WorkflowState.Idle && needsLinking)
 					{
 						_logger.Warning($"{s.Permalink}: {(s.StartTime - DateTime.UtcNow).TotalSeconds} seconds before start, link resources");
 						_lockedSessions[s.SessioId] = s;
@@ -233,7 +212,7 @@ namespace forte.devices.workflow
 					{
 						if(!isVmixSession) continue;
 						_logger.Warning($"{s.Permalink}");
-						if(!fakeRun)
+						//if(!fakeRun)
 						{
 							var r = await LoadPreset(s);
 							if(!r) continue; //something went wrong with loading preset
@@ -258,7 +237,7 @@ namespace forte.devices.workflow
 						overdue = (s.StartTime - DateTime.UtcNow).TotalSeconds;
 						if(overdue > staticImageSeconds) continue; //wait
 						_logger.Warning($"{s.Permalink}: {overdue} seconds before start, start static image stream");
-						if(!fakeRun)
+						//if(!fakeRun)
 						{
 							var r1 = StartClientStream(s);
 							if(!r1) continue; //something went wrong
@@ -274,7 +253,7 @@ namespace forte.devices.workflow
 						overdue = (s.StartTime - DateTime.UtcNow).TotalSeconds;
 						if(overdue > 0) continue; //wait
 						_logger.Warning($"{s.Permalink}: {overdue} seconds before start, start program");
-						if(!fakeRun)
+						//if(!fakeRun)
 						{
 							var r2 = StartProgram(s);
 							if(!r2) continue; //something went wrong
@@ -323,6 +302,7 @@ namespace forte.devices.workflow
 			{
 				_lockedSessions.Remove(s.SessioId);
 				_logger.Debug(ex, "");
+				ReportError(s, ex, "Link Stream");
 			}
 		}
 
@@ -363,6 +343,7 @@ namespace forte.devices.workflow
 			{
 				_lockedSessions.Remove(s.SessioId);
 				_logger.Debug(ex, "");
+				ReportError(s, ex, "Start Stream");
 			}
 		}
 
@@ -378,7 +359,8 @@ namespace forte.devices.workflow
 					_streamingClient.StopProgram();
 				}
 
-				var request = new RestRequest($"streamStop/{s.SessioId}?retryNum={s.RetryCount}&deviceId={_deviceId}&requestRef={s.Permalink}", Method.GET);
+				var url = $"streamStop/{s.SessioId}?retryNum={s.RetryCount}&deviceId={_deviceId}&requestRef={s.Permalink}&deleteAsset={s.IsCancelled == true}";
+				var request = new RestRequest(url, Method.GET);
 				_client.ExecuteAsync<bool>(request, async (m) =>
 				{
 					try
@@ -415,6 +397,7 @@ namespace forte.devices.workflow
 			{
 				_lockedSessions.Remove(s.SessioId);
 				_logger.Debug(ex, "");
+				ReportError(s, ex, "Stop Stream");
 			}
 		}
 
@@ -527,7 +510,7 @@ namespace forte.devices.workflow
 
 		#region internal
 
-		private void ThreadSafeFetchCommand()
+		private StreamingDeviceCommandModel ThreadSafeFetchCommand()
 		{
 			var request = new RestRequest($"{_deviceId}/commands/next", Method.GET);
 			var response = _clientDevice.Execute(request);
@@ -537,18 +520,17 @@ namespace forte.devices.workflow
 			{
 				//_logger.Debug("No command available, exiting");
 				// ... so just exit
-				return;
+				return null;
 			}
 
 			if(response.StatusCode != HttpStatusCode.OK)
 			{
 				_logger.Error("Failed fetching command, response {@response}", response);
-				return;
+				return null;
 			}
 
 			_logger.Debug("Command retrieved {@command}", response.Content);
-			var command = JsonConvert.DeserializeObject<StreamingDeviceCommandModel>(response.Content);
-			_commands.Enqueue(command);
+			return JsonConvert.DeserializeObject<StreamingDeviceCommandModel>(response.Content);
 		}
 
 		private void SaveCommandOnServer(StreamingDeviceCommandModel commandModel)
@@ -572,7 +554,6 @@ namespace forte.devices.workflow
 				{
 					SessioId = command.SessionId.Value,
 					Permalink = command.Permalink,
-					VmixPreset = command.Preset,
 					Status = WorkflowState.Idle,
 					SessionType = (SessionType) command.Type
 				};
@@ -580,6 +561,7 @@ namespace forte.devices.workflow
 
 			state.StartTime = command.TimeStart.Value;
 			state.EndTime = command.TimeEnd.Value;
+			state.VmixPreset = command.Preset;
 
 			if(isNew)
 			{
@@ -595,9 +577,10 @@ namespace forte.devices.workflow
 
 		private SessionState CancelSession(SessionState state, StreamingDeviceCommandModel command)
 		{
-			if(state != null && state.Status != WorkflowState.Processed)
+			if(state != null)
 			{
-				state.EndTime = new DateTime(1900, 1, 1); //trigger session ending by setting end time in the past
+				state.IsCancelled = true; 
+				state.Status = WorkflowState.CancelPending;
 				_dbRepository.UpdateSession(state);
 			}
 
@@ -638,327 +621,3 @@ namespace forte.devices.workflow
 		#endregion
 	}
 }
-
-
-//#region
-
-//using System;
-//using System.Net;
-//using System.Threading;
-//using AutoMapper;
-//using forte.devices.extensions;
-//using forte.models.devices;
-//using forte.services;
-//using Newtonsoft.Json;
-//using RestSharp;
-//using StreamingDeviceState = forte.devices.models.StreamingDeviceState;
-//using StreamingDeviceStatuses = forte.devices.models.StreamingDeviceStatuses;
-
-//#endregion
-
-//namespace forte.devices.services
-//{
-//	/// <summary>
-//	///     Streaming device manager, responds to WebSocket messages when there are new commands, and then for each command:
-//	///     - Fetches command
-//	///     - Saves locally
-//	///     - Executes the command
-//	///     - Saves state locally
-//	///     - Saves command state on the server
-//	///     - Publishes new client state
-//	/// </summary>
-//	public class DeviceDaemon
-//    {
-//        public delegate void MessageReceivedDelegate(string message);
-
-//        private static readonly object Key = new object();
-
-//        private RestClient _client;
-//        private readonly IConfigurationManager _configurationManager;
-//        private Guid _deviceId;
-//        private readonly IDeviceRepository _deviceRepository;
-//        private readonly ILogger _logger;
-//        private readonly IServerListener _serverListener;
-//        private RestClient _streamClient;
-//        private DateTime _lastPublishTime = DateTime.MinValue;
-
-//        private readonly IStreamingClient _streamingClient;
-
-//        public DeviceDaemon(IDeviceRepository deviceRepository, IStreamingClient streamingClient, ILogger logger,
-//            IConfigurationManager configurationManager, IServerListener serverListener)
-//        {
-//            _deviceRepository = deviceRepository;
-//            _streamingClient = streamingClient;
-//            _logger = logger;
-//            _configurationManager = configurationManager;
-//            _serverListener = serverListener;
-//            serverListener.MessageReceived += OnServerMessageReceived;
-//        }
-
-//        public void Init()
-//        {
-//            Init(Guid.Empty);
-//        }
-//        //public void Init(Guid deviceId)
-//        //{
-//        //    SetDefaultSettings();
-//        //    var config = _configurationManager.GetDeviceConfig();
-//        //    if (deviceId != Guid.Empty)
-//        //    {
-//        //        if (config.DeviceId != deviceId)
-//        //        {
-//        //            if (config.DeviceId != Guid.Empty)
-//        //            {
-//        //                _logger.Warning("New device identifier specified, changing from {@oldId} to {@newId}",
-//        //                    config.DeviceId, deviceId);
-//        //            }
-//        //            else
-//        //            {
-//        //                _logger.Information("Setting new device identifier {@newId}", deviceId);
-//        //            }
-//        //            _configurationManager.UpdateSetting(nameof(models.StreamingDeviceConfig.DeviceId), deviceId);
-//        //            var storedState = GetState();
-//        //            if (storedState.DeviceId != deviceId)
-//        //            {
-//        //                storedState.DeviceId = deviceId;
-//        //                _deviceRepository.Save(storedState);
-//        //            }
-//        //        }
-//        //    }
-//        //    _client = new RestClient($"{config.Get<string>(SettingParams.ServerApiPath)}/devices/");
-//        //    _streamClient = new RestClient($"{config.Get<string>(SettingParams.ServerApiPath)}/streams/");
-//        //    _deviceId = config.DeviceId;
-//        //    _logger.Information("Device unique identifier {@deviceId}", _deviceId);
-//        //}
-
-//        private bool FetchRequested { get; set; }
-
-//        private bool Stopped { get; set; }
-
-//        public void ForceResetToIdle()
-//        {
-//            _logger.Warning("Force resetting device to idle");
-
-//            var state = GetState();
-//            //_streamingClient.ShutDown();
-//            state.Status = StreamingDeviceStatuses.Idle;
-//            _deviceRepository.Save(state);
-
-//            _logger.Debug("Device reset to idle!");
-//        }
-
-//        public StreamingDeviceState GetState()
-//        {
-//            var state = _deviceRepository.GetDeviceState();
-//            if (state != null) return state;
-
-//            var config = _configurationManager.GetDeviceConfig();
-
-//            state = new StreamingDeviceState
-//            {
-//                //DeviceId = config.DeviceId,
-//                StateCapturedOn = DateTime.UtcNow,
-//                Status = StreamingDeviceStatuses.Idle
-//            };
-//            _deviceRepository.Save(state);
-//            return state;
-//        }
-
-//        private void TryPublishState()
-//        {
-//            try
-//            {
-//                PublishState();
-//            }
-//            catch (Exception exception)
-//            {
-//                _logger.Error(exception, "Could not publish state");
-//            }
-//        }
-
-//        /// <summary>
-//        ///     Publish device state to the server
-//        /// </summary>
-//        public bool PublishState()
-//        {
-//            _logger.Debug("Publishing state");
-
-//            var deviceState = GetState();
-//            var request = new RestRequest($"{deviceState.DeviceId}/state", Method.POST)
-//            {
-//                JsonSerializer = NewtonsoftJsonSerializer.Default
-//            };
-//            request.AddHeader("Content-Type", "application/json; charset=utf-8");
-//            request.AddJsonBody(deviceState);
-//            var response = _client.Execute(request);
-
-//            if (response.StatusCode != HttpStatusCode.OK)
-//            {
-//                // Log error
-//                throw new Exception(response.ErrorMessage ?? $"Publishing state, response was {response.StatusCode}");
-//            }
-
-//            _lastPublishTime = DateTime.Now;
-//            _logger.Debug("State published");
-
-//            return true;
-//        }
-
-//        public void QueryServer()
-//        {
-//            FetchRequested = true;
-//        }
-
-//        public void Stop()
-//        {
-//            _serverListener.Disconnect();
-//            Stopped = true;
-//        }
-
-
-//        /// <summary>
-//        ///     Stop streaming for the specified video stream identifier. The video stream identifier is there to ensure that the
-//        ///     request is coming for the right stream
-//        /// </summary>
-//        /// <param name="command"></param>
-//        public bool StopProgram(StreamingDeviceCommandModel command)
-//        {
-//            _logger.Debug("Stopping program for command {@command}", command);
-
-//            var state = GetState();
-
-//            switch (state.Status)
-//            {
-//                case StreamingDeviceStatuses.Idle:
-//                    _logger.Error("Request to stop program against idle device (expected streaming program)");
-//                    return false;
-//                case StreamingDeviceStatuses.Streaming:
-//                case StreamingDeviceStatuses.StreamingAndRecording:
-//                case StreamingDeviceStatuses.Recording:
-//                    _logger.Warning("Request to stop program against device without a running program. {@state}", state);
-//                    return false;
-//                case StreamingDeviceStatuses.StreamingProgram:
-//                case StreamingDeviceStatuses.StreamingAndRecordingProgram:
-//                case StreamingDeviceStatuses.RecordingProgram:
-//                    state.Status = StreamingDeviceStatuses.Streaming;
-//                    break;
-//                case StreamingDeviceStatuses.Offline:
-//                case StreamingDeviceStatuses.Error:
-//                    throw new Exception($"Device with status {state.Status} cannot accept commands");
-//                default:
-//                    throw new ArgumentOutOfRangeException();
-//            }
-
-//            _deviceRepository.Save(state);
-
-//            _logger.Debug("Program stopped.");
-
-//            return true;
-//        }
-
-//        /// <summary>
-//        ///     Stop streaming for the specified video stream identifier. The video stream identifier is there to ensure that the
-//        ///     request is coming for the right stream
-//        /// </summary>
-//        /// <param name="command"></param>
-//        public bool StopStreaming(StreamingDeviceCommandModel command)
-//        {
-//            _logger.Debug("Stopping streaming for command {@command}", command);
-
-//            var state = GetState();
-
-//            switch (state.Status)
-//            {
-//                case StreamingDeviceStatuses.Idle:
-//                    _logger.Error("Request to stop streaming against idle device (expected streaming)");
-//                    return false;
-//                case StreamingDeviceStatuses.Streaming:
-//                case StreamingDeviceStatuses.StreamingAndRecording:
-//                case StreamingDeviceStatuses.Recording:
-//                    //
-//                    state.Status = StreamingDeviceStatuses.Idle;
-//                    break;
-//                case StreamingDeviceStatuses.StreamingProgram:
-//                case StreamingDeviceStatuses.StreamingAndRecordingProgram:
-//                case StreamingDeviceStatuses.RecordingProgram:
-//                    _logger.Error("Request to stop stream against device running program");
-//                    return false;
-//                case StreamingDeviceStatuses.Offline:
-//                case StreamingDeviceStatuses.Error:
-//                    throw new Exception($"Device with status {state.Status} cannot accept commands");
-//                default:
-//                    throw new ArgumentOutOfRangeException();
-//            }
-
-//            state.ActiveVideoStreamId = null;
-//            _deviceRepository.Save(state);
-
-//            _logger.Debug("Streaming stopped.");
-
-//            return true;
-//        }
-
-
-
-//        private void PublishTemporaryFailedState()
-//        {
-//            var state = GetState();
-//            var status = state.Status;
-//            if (status != StreamingDeviceStatuses.Error)
-//            {
-//                state.Status = StreamingDeviceStatuses.Error;
-//                _deviceRepository.Save(state);
-//            }
-//            PublishState();
-//            if (status != state.Status)
-//            {
-//                state.Status = status;
-//                _deviceRepository.Save(state);
-//            }
-//        }
-
-
-
-//        private void OnServerMessageReceived(string message)
-//        {
-//            if (message != "CommandAvailable") return;
-//            FetchRequested = true;
-//        }
-
-//        private bool ResetToIdle(StreamingDeviceCommandModel command)
-//        {
-//            _logger.Debug("Resetting device to idle for command {@command}", command);
-
-//            var state = GetState();
-
-//            switch (state.Status)
-//            {
-//                case StreamingDeviceStatuses.Idle:
-//                    // already idle, asssume it worked
-//                    return true;
-//                case StreamingDeviceStatuses.Streaming:
-//                case StreamingDeviceStatuses.StreamingAndRecording:
-//                case StreamingDeviceStatuses.Recording:
-//                case StreamingDeviceStatuses.StreamingProgram:
-//                case StreamingDeviceStatuses.StreamingAndRecordingProgram:
-//                case StreamingDeviceStatuses.RecordingProgram:
-//                    if (state.ActiveVideoStreamId != command.VideoStreamId)
-//                        return false;
-//                    //_streamingClient.ShutDown();
-//                    state.Status = StreamingDeviceStatuses.Idle;
-//                    break;
-//                case StreamingDeviceStatuses.Offline:
-//                case StreamingDeviceStatuses.Error:
-//                    throw new Exception($"Device with status {state.Status} cannot accept commands");
-//                default:
-//                    throw new ArgumentOutOfRangeException();
-//            }
-
-//            _deviceRepository.Save(state);
-
-//            _logger.Debug("Device reset to idle.");
-
-//            return true;
-//        }
-//    }
-//}

@@ -29,5 +29,7 @@ namespace forte.devices.entities
 		public int RetryCount { get; set; }
 
 		public SessionType SessionType { get; set; }
+
+		public bool? IsCancelled { get; set; }
 	}
 }

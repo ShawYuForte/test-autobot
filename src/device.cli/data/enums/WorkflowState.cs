@@ -8,6 +8,7 @@
 		StreamingServer = 20,
 		StreamingClient = 25,
 		Program = 30,
-		Processed = 40
+		Processed = 40,
+		CancelPending = 100
 	}
 }
