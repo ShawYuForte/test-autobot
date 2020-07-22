@@ -34,7 +34,7 @@ namespace forte.devices.workflow
 
 		private bool _running = true;
 		private string _deviceId;
-		private Dictionary<Guid, SessionState> _lockedSessions = new Dictionary<Guid, SessionState>();
+		private ConcurrentDictionary<Guid, SessionState> _lockedSessions = new ConcurrentDictionary<Guid, SessionState>();
 
 		public StreamWorkflow(
 			IApiServer server,
@@ -294,15 +294,13 @@ namespace forte.devices.workflow
 					}
 					finally
 					{
-						_lockedSessions.Remove(s.SessioId);
+						_lockedSessions.TryRemove(s.SessioId, out var t);
 					}
 				});
 			}
 			catch(Exception ex)
 			{
-				_lockedSessions.Remove(s.SessioId);
-				_logger.Debug(ex, "");
-				ReportError(s, ex, "Link Stream");
+				ReportError(ex, s, "Link Stream");
 			}
 		}
 
@@ -335,15 +333,13 @@ namespace forte.devices.workflow
 					}
 					finally
 					{
-						_lockedSessions.Remove(s.SessioId);
+						_lockedSessions.TryRemove(s.SessioId, out var t);
 					}
 				});
 			}
 			catch(Exception ex)
 			{
-				_lockedSessions.Remove(s.SessioId);
-				_logger.Debug(ex, "");
-				ReportError(s, ex, "Start Stream");
+				ReportError(ex, s, "Start Stream");
 			}
 		}
 
@@ -389,15 +385,27 @@ namespace forte.devices.workflow
 					}
 					finally
 					{
-						_lockedSessions.Remove(s.SessioId);
+						_lockedSessions.TryRemove(s.SessioId, out var t);
 					}
 				});
 			}
 			catch(Exception ex)
 			{
-				_lockedSessions.Remove(s.SessioId);
-				_logger.Debug(ex, "");
-				ReportError(s, ex, "Stop Stream");
+				ReportError(ex, s, "Stop Stream");
+			}
+		}
+
+		private void ReportError(Exception ex, SessionState s, string name)
+		{
+			_logger.Debug(ex, "");
+			try
+			{
+				_lockedSessions.TryRemove(s.SessioId, out var t);
+				ReportError(s, ex, name);
+			}
+			catch(Exception ex1)
+			{
+				_logger.Debug(ex1, "");
 			}
 		}
 
