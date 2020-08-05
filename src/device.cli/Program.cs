@@ -172,6 +172,11 @@ namespace forte.devices
 			{
 				config = configManager.UpdateSetting(SettingParams.VerboseDebug, true);
 			}
+
+			if(string.IsNullOrWhiteSpace(config.Get<string>(SettingParams.DeviceName)))
+			{
+				config = configManager.UpdateSetting(SettingParams.DeviceName, "Forte-device");
+			}
 		}
     }
 }

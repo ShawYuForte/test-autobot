@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net.Mail;
+using forte.devices.config;
 using forte.services;
 
 namespace forte.devices.services
@@ -7,14 +8,19 @@ namespace forte.devices.services
 	public class MailService
 	{
 		public ILogger _logger { get; set; }
+		public IConfigurationManager _configManager { get; set; }
 
-		public MailService(ILogger logger)
+		public MailService(ILogger logger, IConfigurationManager configManager)
 		{
 			_logger = logger;
+			_configManager = configManager;
 		}
 
 		public void MailError(string message, Exception ex)
 		{
+			var config = _configManager.GetDeviceConfig();
+			var deviceName = config.Get<string>(SettingParams.DeviceName);
+
 			var setts = System.Configuration.ConfigurationManager.AppSettings;
 
 			var server = setts["mail:server"];
@@ -29,8 +35,8 @@ namespace forte.devices.services
 				SmtpClient SmtpServer = new SmtpClient(server);
 
 				mail.From = new MailAddress(from);
-				mail.Subject = "Autobot Error";
-				mail.Body = $"{Environment.MachineName} {Environment.NewLine} {message} {Environment.NewLine} Error details: {ex.Message} {ex.StackTrace}";
+				mail.Subject = $"Autobot Error on {deviceName}";
+				mail.Body = $"{deviceName} {Environment.NewLine} {message} {Environment.NewLine} Error details: {ex.Message} {ex.StackTrace}";
 				foreach(var i in to)
 				{
 					var iTrimmed = i.Trim();

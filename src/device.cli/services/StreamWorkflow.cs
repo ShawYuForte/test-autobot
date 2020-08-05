@@ -59,7 +59,7 @@ namespace forte.devices.workflow
 			//_serverListener.Connect();
 			using(var server = _server.Run(port))
 			{
-				_logger.Information("Running device local UI web server v2.0.28.");
+				_logger.Information("Running device local UI web server v2.0.29.");
 				//synchronous loop for keeping the app alive
 				while(_running)
 				{
@@ -82,6 +82,8 @@ namespace forte.devices.workflow
 
 		private async void Run()
 		{
+			//_ms.MailError("111", new Exception("222"));
+
 			int commandFetchedRetries = 0;
 			try
 			{
