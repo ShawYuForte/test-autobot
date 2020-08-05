@@ -81,7 +81,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {D4D5E4E5-1EA4-45CB-842C-3B7FEBAD5053}
 		EnterpriseLibraryConfigurationToolBinariesPath = packages\TransientFaultHandling.Core.5.1.1209.1\lib\NET4
+		SolutionGuid = {D4D5E4E5-1EA4-45CB-842C-3B7FEBAD5053}
 	EndGlobalSection
 EndGlobal

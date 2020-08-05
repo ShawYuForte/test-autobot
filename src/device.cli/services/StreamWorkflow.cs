@@ -24,6 +24,7 @@ namespace forte.devices.workflow
 {
 	public class StreamWorkflow: IDeviceDaemon
 	{
+		private readonly MailService _ms;
 		private readonly IApiServer _server;
         private readonly ILogger _logger;
 		private readonly IConfigurationManager _configurationManager;
@@ -33,16 +34,19 @@ namespace forte.devices.workflow
 		private RestClient _clientDevice;
 
 		private bool _running = true;
+		private bool _verbose = true;
 		private string _deviceId;
 		private ConcurrentDictionary<Guid, SessionState> _lockedSessions = new ConcurrentDictionary<Guid, SessionState>();
 
 		public StreamWorkflow(
+			MailService ms,
 			IApiServer server,
 			IStreamingClient streamingClient, 
 			DbRepository dbRepository, 
 			IConfigurationManager configurationManager, 
 			ILogger logger)
 		{
+			_ms = ms;
 			_server = server;
 			_streamingClient = streamingClient;
 			_dbRepository = dbRepository;
@@ -55,7 +59,7 @@ namespace forte.devices.workflow
 			//_serverListener.Connect();
 			using(var server = _server.Run(port))
 			{
-				_logger.Information("Running device local UI web server.");
+				_logger.Information("Running device local UI web server v2.0.28.");
 				//synchronous loop for keeping the app alive
 				while(_running)
 				{
@@ -68,6 +72,7 @@ namespace forte.devices.workflow
 		{
 			var config = _configurationManager.GetDeviceConfig();
 			var apiPath = config.Get<string>(SettingParams.ServerApiPath);
+			_verbose = config.Get<bool>(SettingParams.VerboseDebug);
 			_deviceId = config.Get<string>(SettingParams.DeviceId);
 			_client = _client ?? new RestClient($"{apiPath}/streams/");
 			_clientDevice = _clientDevice ?? new RestClient($"{apiPath}/devices/");
@@ -77,191 +82,218 @@ namespace forte.devices.workflow
 
 		private async void Run()
 		{
-			var config = _configurationManager.GetDeviceConfig();
-			var linkRetrySeconds = 15;
-			var streamRetrySeconds = 15;
-			var streamStopRetrySeconds = 15;
-			var linkTimeSeconds = 10 * 60;
-			var staticImageSeconds = config.Get(VmixSettingParams.StaticImageTime, 30);
-			var serverStreamSeconds = staticImageSeconds + 10;
-			var sessions = _dbRepository.GetSessions();
-			var seconds = 0;
-			double overdue = 0;
-
-			while(true)
+			int commandFetchedRetries = 0;
+			try
 			{
-				await Task.Delay(1000);
+				var config = _configurationManager.GetDeviceConfig();
+				var linkRetrySeconds = 15;
+				var streamRetrySeconds = 15;
+				var streamStopRetrySeconds = 15;
+				var linkTimeSeconds = 10 * 60;
+				var staticImageSeconds = config.Get(VmixSettingParams.StaticImageTime, 30);
+				var serverStreamSeconds = staticImageSeconds + 10;
+				var sessions = _dbRepository.GetSessions();
+				var seconds = 0;
+				double overdue = 0;
 
-				if(seconds != 0)
+				while(true)
 				{
-					seconds--;
-				}
-				else if(seconds == 0)
-				{
-					StreamingDeviceCommandModel command = null;
-					try
-					{
-						command = ThreadSafeFetchCommand();
-					}
-					catch(Exception exception)
-					{
-						_logger.Error(exception, exception.Message);
-					}
+					await Task.Delay(1000);
 
-					//executer pending commands before processing further
-					if(command != null)
+					if(seconds != 0)
 					{
+						seconds--;
+					}
+					else if(seconds == 0)
+					{
+						StreamingDeviceCommandModel command = null;
 						try
 						{
-							command.ExecutionAttempts++;
-
-							var session = sessions.FirstOrDefault(s => s.SessioId == command.SessionId.Value);
-							var isNew = session == null;
-							switch(command.Command)
-							{
-								case StreamingDeviceCommands.UpdateSession:
-									session = UpdateSession(session, command);
-									if(isNew)
-									{
-										sessions.Add(session);
-									}
-									break;
-								case StreamingDeviceCommands.CancelSession:
-									session = CancelSession(session, command);
-									break;
-								default:
-									throw new ArgumentOutOfRangeException();
-							}
-
-							command.ExecutionSucceeded = true;
-							command.ExecutedOn = DateTime.UtcNow;
+							command = ThreadSafeFetchCommand();
 						}
 						catch(Exception exception)
 						{
-							if(string.IsNullOrWhiteSpace(command.ExecutionMessages))
+							if(commandFetchedRetries == 0)
 							{
-								command.ExecutionMessages = exception.Message;
+								_ms.MailError(exception.Message, exception);
 							}
-							else
-							{
-								command.ExecutionMessages += $"{exception.Message};\n\r";
-							}
+							_logger.Error(exception, exception.Message);
+							commandFetchedRetries--;
+						}
 
-							if(command.ExecutionAttempts >= command.MaxAttemptsAllowed)
+						//executer pending commands before processing further
+						if(command != null)
+						{
+							commandFetchedRetries = 25;
+							try
 							{
+								command.ExecutionAttempts++;
+
+								var session = sessions.FirstOrDefault(s => s.SessioId == command.SessionId.Value);
+								var isNew = session == null;
+								switch(command.Command)
+								{
+									case StreamingDeviceCommands.UpdateSession:
+										session = UpdateSession(session, command);
+										if(isNew)
+										{
+											sessions.Add(session);
+										}
+										break;
+									case StreamingDeviceCommands.CancelSession:
+										session = CancelSession(session, command);
+										break;
+									default:
+										throw new ArgumentOutOfRangeException();
+								}
+
+								command.ExecutionSucceeded = true;
 								command.ExecutedOn = DateTime.UtcNow;
-								command.ExecutionSucceeded = false;
-								_logger.Fatal(exception, "Could not execute command {@command}", command);
 							}
-							else
+							catch(Exception exception)
 							{
-								_logger.Error(exception, "Could not execute command {@command}", command);
+								if(string.IsNullOrWhiteSpace(command.ExecutionMessages))
+								{
+									command.ExecutionMessages = exception.Message;
+								}
+								else
+								{
+									command.ExecutionMessages += $"{exception.Message};\n\r";
+								}
+
+								if(command.ExecutionAttempts >= command.MaxAttemptsAllowed)
+								{
+									command.ExecutedOn = DateTime.UtcNow;
+									command.ExecutionSucceeded = false;
+									_ms.MailError($"Could not execute command {command}", exception);
+									_logger.Fatal(exception, "Could not execute command {@command}", command);
+								}
+								else
+								{
+									_logger.Error(exception, "Could not execute command {@command}", command);
+								}
+							}
+
+							try
+							{
+								SaveCommandOnServer(command);
+							}
+							catch(Exception exception)
+							{
+								_ms.MailError($"Could not save command on the server {command}", exception);
+								_logger.Fatal(exception, "Could not save command on the server {@command}", command);
 							}
 						}
-
-						try
+						else
 						{
-							SaveCommandOnServer(command);
-						}
-						catch(Exception exception)
-						{
-							_logger.Fatal(exception, "Could not save command on the server {@command}", command);
+							seconds = 10;
 						}
 					}
-					else
+
+					sessions = sessions.Where(s => s.Status != WorkflowState.Processed).OrderBy(s => s.StartTime).ToList();
+					if(!sessions.Any()) continue;
+
+					var vmixSession = sessions.FirstOrDefault(s => s.VmixUsed == true);
+					foreach(var s in sessions)
 					{
-						seconds = 10;
+						if(_lockedSessions.ContainsKey(s.SessioId)) continue;
+						//check if vmix is free to use for this session and it's time
+						var isVmixSession = (vmixSession == null || vmixSession.Id == s.Id);
+						var needsLinking = s.StartTime.AddSeconds(-linkTimeSeconds) <= DateTime.UtcNow;
+						if(isVmixSession)
+						{
+							SetSessionVmix(s, needsLinking);
+						}
+
+						//terminate outdated session
+						if(s.EndTime <= DateTime.UtcNow || s.Status == WorkflowState.CancelPending)
+						{
+							_logger.Warning($"{s.Permalink}: {(DateTime.UtcNow - s.EndTime).TotalSeconds} seconds after end, terminate");
+							_lockedSessions[s.SessioId] = s;
+							StopStream(s, streamStopRetrySeconds);
+							continue;
+						}
+
+						//start new session
+						if(s.Status == WorkflowState.Idle && needsLinking)
+						{
+							_logger.Warning($"{s.Permalink}: {(s.StartTime - DateTime.UtcNow).TotalSeconds} seconds before start, link resources");
+							_lockedSessions[s.SessioId] = s;
+							LinkStream(s, linkRetrySeconds);
+							continue;
+						}
+
+						//run this as soon as session linked resources
+						if(s.Status == WorkflowState.Linked)
+						{
+							if(!isVmixSession) continue;
+							_logger.Warning($"{s.Permalink}");
+							//if(!fakeRun)
+							{
+								var r = await LoadPreset(s);
+								if(!r) continue; //something went wrong with loading preset
+							}
+							SetSessionStatus(s, WorkflowState.VmixLoaded);
+							continue;
+						}
+
+						//run this as we approach session start. default is starting 10 seconds before static image
+						if(s.Status == WorkflowState.VmixLoaded && s.StartTime.AddSeconds(-serverStreamSeconds) <= DateTime.UtcNow)
+						{
+							_logger.Warning($"{s.Permalink}: {(s.StartTime - DateTime.UtcNow).TotalSeconds} seconds before start, start server stream");
+							_lockedSessions[s.SessioId] = s;
+							StartStream(s, streamRetrySeconds);
+							continue;
+						}
+
+						//run this as we approach session start. default is starting static image 30 seconds before start
+						if(s.Status == WorkflowState.StreamingServer)
+						{
+							if(!isVmixSession) continue;
+							overdue = (s.StartTime - DateTime.UtcNow).TotalSeconds;
+							if(overdue > staticImageSeconds) continue; //wait
+							_logger.Warning($"{s.Permalink}: {overdue} seconds before start, start static image stream");
+							//if(!fakeRun)
+							{
+								var r1 = await StartClientStream(s);
+								if(!r1) continue; //something went wrong
+							}
+							SetSessionStatus(s, WorkflowState.StreamingPublish);
+							continue;
+						}
+
+						//client stream started, mark session live on server
+						if(s.Status == WorkflowState.StreamingPublish)
+						{
+							_logger.Warning($"{s.Permalink}: publish stream");
+							_lockedSessions[s.SessioId] = s;
+							PublishStream(s, streamRetrySeconds);
+							continue;
+						}
+
+						//start session
+						if(s.Status == WorkflowState.StreamingClient)
+						{
+							if(!isVmixSession) continue;
+							overdue = (s.StartTime - DateTime.UtcNow).TotalSeconds;
+							if(overdue > 0) continue; //wait
+							_logger.Warning($"{s.Permalink}: {overdue} seconds before start, start program");
+							//if(!fakeRun)
+							{
+								var r2 = await StartProgram(s);
+								if(!r2) continue; //something went wrong
+							}
+							SetSessionStatus(s, WorkflowState.Program);
+							continue;
+						}
 					}
 				}
-
-				sessions = sessions.Where(s => s.Status != WorkflowState.Processed).OrderBy(s => s.StartTime).ToList();
-				if(!sessions.Any()) continue;
-
-				var vmixSession = sessions.FirstOrDefault(s => s.VmixUsed == true);
-				foreach(var s in sessions)
-				{
-					if(_lockedSessions.ContainsKey(s.SessioId)) continue;
-					//check if vmix is free to use for this session and it's time
-					var isVmixSession = (vmixSession == null || vmixSession.Id == s.Id);
-					var needsLinking = s.StartTime.AddSeconds(-linkTimeSeconds) <= DateTime.UtcNow;
-					if(isVmixSession)
-					{
-						SetSessionVmix(s, needsLinking);
-					}
-
-					//terminate outdated session
-					if(s.EndTime <= DateTime.UtcNow || s.Status == WorkflowState.CancelPending)
-					{
-						_logger.Warning($"{s.Permalink}: {(DateTime.UtcNow - s.EndTime).TotalSeconds} seconds after end, terminate");
-						_lockedSessions[s.SessioId] = s;
-						StopStream(s, streamStopRetrySeconds);
-						continue;
-					}
-
-					//start new session
-					if(s.Status == WorkflowState.Idle && needsLinking)
-					{
-						_logger.Warning($"{s.Permalink}: {(s.StartTime - DateTime.UtcNow).TotalSeconds} seconds before start, link resources");
-						_lockedSessions[s.SessioId] = s;
-						LinkStream(s, linkRetrySeconds);
-						continue;
-					}
-
-					//run this as soon as session linked resources
-					if(s.Status == WorkflowState.Linked)
-					{
-						if(!isVmixSession) continue;
-						_logger.Warning($"{s.Permalink}");
-						//if(!fakeRun)
-						{
-							var r = await LoadPreset(s);
-							if(!r) continue; //something went wrong with loading preset
-						}
-						SetSessionStatus(s, WorkflowState.VmixLoaded);
-						continue;
-					}
-
-					//run this as we approach session start. default is starting 10 seconds before static image
-					if(s.Status == WorkflowState.VmixLoaded && s.StartTime.AddSeconds(-serverStreamSeconds) <= DateTime.UtcNow)
-					{
-						_logger.Warning($"{s.Permalink}: {(s.StartTime - DateTime.UtcNow).TotalSeconds} seconds before start, start server stream");
-						_lockedSessions[s.SessioId] = s;
-						StartStream(s, streamRetrySeconds);
-						continue;
-					}
-
-					//run this as we approach session start. default is starting static image 30 seconds before start
-					if(s.Status == WorkflowState.StreamingServer)
-					{
-						if(!isVmixSession) continue;
-						overdue = (s.StartTime - DateTime.UtcNow).TotalSeconds;
-						if(overdue > staticImageSeconds) continue; //wait
-						_logger.Warning($"{s.Permalink}: {overdue} seconds before start, start static image stream");
-						//if(!fakeRun)
-						{
-							var r1 = StartClientStream(s);
-							if(!r1) continue; //something went wrong
-						}
-						SetSessionStatus(s, WorkflowState.StreamingClient);
-						continue;
-					}
-
-					//start session
-					if(s.Status == WorkflowState.StreamingClient)
-					{
-						if(!isVmixSession) continue;
-						overdue = (s.StartTime - DateTime.UtcNow).TotalSeconds;
-						if(overdue > 0) continue; //wait
-						_logger.Warning($"{s.Permalink}: {overdue} seconds before start, start program");
-						//if(!fakeRun)
-						{
-							var r2 = StartProgram(s);
-							if(!r2) continue; //something went wrong
-						}
-						SetSessionStatus(s, WorkflowState.Program);
-						continue;
-					}
-				}
+			}
+			catch(Exception ex)
+			{
+				_ms.MailError($"Running failed.", ex);
+				_logger.Fatal(ex, $"Running failed.");
+				_running = false;
 			}
 		}
 
@@ -277,20 +309,29 @@ namespace forte.devices.workflow
 					{
 						if(m.StatusCode != HttpStatusCode.OK)
 						{
-							_logger.Error($"{s.Permalink}: bad response: {m.Content}, retry in {retrySeconds} seconds");
+							ReportError(new Exception($"{s.Permalink}: bad response: {m.Content}, retry in {retrySeconds} seconds"), s, "Link Stream");
 							await Task.Delay(retrySeconds * 1000);
 							return;
 						}
 
 						_logger.Debug($"{s.Permalink}: LinkStream success");
+						if(_verbose) { _logger.Debug($"{m.Content}"); }
 
-						SetSessionUrl(s, m.Data.PrimaryIngestUrl);
+						if(m.Data == null)
+						{
+							SetSessionStatus(s, WorkflowState.Processed);
+							ClearSessionRetry(s);
+							return;
+						}
+
+						SetSessionUrl(s, m.Data?.PrimaryIngestUrl);
 						SetSessionStatus(s, WorkflowState.Linked);
 						ClearSessionRetry(s);
 					}
 					catch(Exception ex)
 					{
-						_logger.Debug(ex, "");
+						ReportError(ex, s, "Link Stream");
+						await Task.Delay(retrySeconds * 1000);
 					}
 					finally
 					{
@@ -301,6 +342,7 @@ namespace forte.devices.workflow
 			catch(Exception ex)
 			{
 				ReportError(ex, s, "Link Stream");
+				await Task.Delay(retrySeconds * 1000);
 			}
 		}
 
@@ -316,20 +358,29 @@ namespace forte.devices.workflow
 					{
 						if(m.StatusCode != HttpStatusCode.OK)
 						{
-							_logger.Error($"{s.Permalink}: bad response: {m.Content}, retry in {retrySeconds} seconds");
+							ReportError(new Exception($"{s.Permalink}: bad response: {m.Content}, retry in {retrySeconds} seconds"), s, "Start Stream");
 							await Task.Delay(retrySeconds * 1000);
 							return;
 						}
 
 						_logger.Debug($"{s.Permalink}: StartStream success");
+						if(_verbose) { _logger.Debug($"{m.Content}"); }
 
-						SetSessionUrl(s, m.Data.PrimaryIngestUrl);
+						if(m.Data == null)
+						{
+							SetSessionStatus(s, WorkflowState.Processed);
+							ClearSessionRetry(s);
+							return;
+						}
+
+						SetSessionUrl(s, m.Data?.PrimaryIngestUrl);
 						SetSessionStatus(s, WorkflowState.StreamingServer);
 						ClearSessionRetry(s);
 					}
 					catch(Exception ex)
 					{
-						_logger.Debug(ex, "");
+						ReportError(ex, s, "Start Stream");
+						await Task.Delay(retrySeconds * 1000);
 					}
 					finally
 					{
@@ -340,6 +391,55 @@ namespace forte.devices.workflow
 			catch(Exception ex)
 			{
 				ReportError(ex, s, "Start Stream");
+				await Task.Delay(retrySeconds * 1000);
+			}
+		}
+
+		private async Task PublishStream(SessionState s, int retrySeconds)
+		{
+			try
+			{
+				AddSessionRetry(s);
+				var request = new RestRequest($"streamPublish/{s.SessioId}?retryNum={s.RetryCount}&deviceId={_deviceId}&requestRef={s.Permalink}", Method.GET);
+				_client.ExecuteAsync<VideoStreamModel>(request, async (m) =>
+				{
+					try
+					{
+						if(m.StatusCode != HttpStatusCode.OK)
+						{
+							ReportError(new Exception($"{s.Permalink}: bad response: {m.Content}, retry in {retrySeconds} seconds"), s, "Publish Stream");
+							await Task.Delay(retrySeconds * 1000);
+							return;
+						}
+
+						_logger.Debug($"{s.Permalink}: PublishStream success");
+						if(_verbose) { _logger.Debug($"{m.Content}"); }
+
+						if(m.Data == null)
+						{
+							SetSessionStatus(s, WorkflowState.Processed);
+							ClearSessionRetry(s);
+							return;
+						}
+
+						SetSessionStatus(s, WorkflowState.StreamingClient);
+						ClearSessionRetry(s);
+					}
+					catch(Exception ex)
+					{
+						ReportError(ex, s, "Publish Stream");
+						await Task.Delay(retrySeconds * 1000);
+					}
+					finally
+					{
+						_lockedSessions.TryRemove(s.SessioId, out var t);
+					}
+				});
+			}
+			catch(Exception ex)
+			{
+				ReportError(ex, s, "Publish Stream");
+				await Task.Delay(retrySeconds * 1000);
 			}
 		}
 
@@ -363,12 +463,13 @@ namespace forte.devices.workflow
 					{
 						if(m.StatusCode != HttpStatusCode.OK)
 						{
-							_logger.Error($"{s.Permalink}: bad response: {m.Content}, retry in {retrySeconds} seconds");
+							ReportError(new Exception($"{s.Permalink}: bad response: {m.Content}, retry in {retrySeconds} seconds"), s, "Stop Stream");
 							await Task.Delay(retrySeconds * 1000);
 							return;
 						}
 
 						_logger.Debug($"{s.Permalink}: StopStream success");
+						if(_verbose) { _logger.Debug($"{m.Content}"); }
 
 						if(s.VmixUsed && s.SessionType != SessionType.Manual)
 						{
@@ -381,7 +482,8 @@ namespace forte.devices.workflow
 					}
 					catch(Exception ex)
 					{
-						_logger.Debug(ex, "");
+						ReportError(ex, s, "Stop Stream");
+						await Task.Delay(retrySeconds * 1000);
 					}
 					finally
 					{
@@ -392,6 +494,7 @@ namespace forte.devices.workflow
 			catch(Exception ex)
 			{
 				ReportError(ex, s, "Stop Stream");
+				await Task.Delay(retrySeconds * 1000);
 			}
 		}
 
@@ -456,13 +559,13 @@ namespace forte.devices.workflow
 			catch(Exception ex)
 			{
 				ReportError(s, ex, "Load Preset");
-				_logger.Debug(ex, "");
+				await Task.Delay(15000);
 			}
 
 			return false;
 		}
 
-		private bool StartClientStream(SessionState s)
+		private async Task<bool> StartClientStream(SessionState s)
 		{
 			try
 			{
@@ -477,14 +580,14 @@ namespace forte.devices.workflow
 			}
 			catch(Exception ex)
 			{
-				ReportError(s, ex, "Load Preset");
-				_logger.Debug(ex, "");
+				ReportError(s, ex, "Start Client Stream");
+				await Task.Delay(15000);
 			}
 
 			return false;
 		}
 
-		private bool StartProgram(SessionState s)
+		private async Task<bool> StartProgram(SessionState s)
 		{
 			try
 			{
@@ -498,8 +601,8 @@ namespace forte.devices.workflow
 			}
 			catch(Exception ex)
 			{
-				ReportError(s, ex, "Load Preset");
-				_logger.Debug(ex, "");
+				ReportError(s, ex, "Start Program");
+				await Task.Delay(15000);
 			}
 
 			return false;
@@ -548,6 +651,10 @@ namespace forte.devices.workflow
 			request.AddHeader("Content-Type", "application/json; charset=utf-8");
 			request.AddJsonBody(commandModel);
 			var response = _clientDevice.Execute<StreamingDeviceCommandModel>(request);
+			if(_verbose)
+			{
+				_logger.Debug(JsonConvert.SerializeObject(request.Body));
+			}
 			if(response.StatusCode == HttpStatusCode.OK) return;
 
 			_logger.Error("Could not update command because of {@status}, response {@resposne}", response.ErrorMessage ?? response.StatusDescription, response);
@@ -622,8 +729,14 @@ namespace forte.devices.workflow
 
 		private void ReportError(SessionState s, Exception ex, string message)
 		{
-			if(s.RetryCount != 5) return;
-			_logger.Fatal(ex, $"{s.Permalink}: Streaming action {message} have failed 5 times. The system might be trying to retry further, but it is recommended to check the cause of this error.");
+			if(s.RetryCount != 5)
+			{
+				_logger.Error(ex, message);
+				return;
+			}
+			var mess = $"{s.Permalink}: Streaming action {message} have failed 5 times. The system might be trying to retry further, but it is recommended to check the cause of this error.";
+			_ms.MailError(mess, ex);
+			_logger.Fatal(ex, mess);
 		}
 
 		#endregion

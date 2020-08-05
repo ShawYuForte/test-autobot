@@ -184,7 +184,7 @@ namespace forte.devices.services.clients
 
 #region stream
 
-		public void StartStreaming()
+		public async void StartStreaming()
 		{
 			var vmixState = GetVmixState();
 			if(vmixState == null) return;
@@ -200,8 +200,9 @@ namespace forte.devices.services.clients
 
 			_logger.Debug("Starting streaming...");
 
-			var retries = config.Get(VmixSettingParams.RetryCountForStreamException, 1);
-			StartStreamingCommand(retries == 0 ? 1 : retries);
+			//var retries = config.Get(VmixSettingParams.RetryCountForStreamException, 1);
+			//StartStreamingCommand(retries == 0 ? 1 : retries);
+			await StartStreamingCommand(5);
 
 			_logger.Debug("Starting started.");
 		}
@@ -221,32 +222,32 @@ namespace forte.devices.services.clients
 			}
 		}
 
-		private VmixState StartStreamingCommand(int retries)
+		private async Task<VmixState> StartStreamingCommand(int retries)
 		{
 			if(retries == 0) throw (new Exception("Streaming wasn't able to start"));
 			try
 			{
 				var config = _configurationManager.GetDeviceConfig();
 				CallAndFetchState("/?Function=StartStreaming", "start streaming");
-				Thread.Sleep(5000);
+				await Task.Delay(5000);
 				var state = GetVmixState();
 				if(config.Get(VmixSettingParams.AutoCloseVmixErrorDialog, false))
 				{
 					// When streaming fails, API returns true, but an error dialog is displayed, so make sure no dialogs open
 					CloseModalErrorWindowIfOpen();
-					Thread.Sleep(1000);
+					await Task.Delay(1000);
 				}
 				if(state.Streaming && !VmixDialogsOpen())
 				{
 					return state;
 				}
 				//no success, try again
-				return StartStreamingCommand(retries - 1);
+				return await StartStreamingCommand(retries - 1);
 			}
 			catch(Exception ex)
 			{
 				_logger.Error(ex, "Streaming wasn't able to start, retry");
-				return StartStreamingCommand(retries - 1);
+				return await StartStreamingCommand(retries - 1);
 			}
 		}
 

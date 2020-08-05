@@ -1,13 +1,19 @@
 ﻿#region
 
 using System;
+using System.Diagnostics;
+using System.Net.Mail;
+using System.Threading;
+using System.Threading.Tasks;
 using AutoMapper;
+using CommandLine;
 using device.logging;
 using device.web;
 using device.web.server;
 using forte.devices.config;
 using forte.devices.data;
 using forte.devices.entities;
+using forte.devices.options;
 using forte.devices.services;
 using forte.devices.utils;
 using forte.devices.workflow;
@@ -29,15 +35,10 @@ namespace forte.devices
 				return;
 			}
 
-			//var portFilePath = RuntimeUtility.GetPortFileName();
-			//if(_options.Port != 9000)
-			//{
-			//	File.WriteAllText(portFilePath, $"{_options.Port}");
-			//}
-			//else if(File.Exists(portFilePath))
-			//{
-			//	File.Delete(portFilePath);
-			//}
+			if(!ProcessArgs(args))
+			{
+				return;
+			}
 
 			var port = 9000;
 			var container = new UnityContainer();
@@ -52,6 +53,9 @@ namespace forte.devices
 			//logging
 			LoggerModule.Registrar.RegisterDependencies(container);
 			var logger = container.Resolve<ILogger>();
+
+			//mail
+			container.RegisterType<MailService, MailService>(new ContainerControlledLifetimeManager());
 
 			//db
 			container.RegisterType<DbRepository, DbRepository>(new ContainerControlledLifetimeManager());
@@ -75,46 +79,67 @@ namespace forte.devices
 
 			container.RegisterType<IDeviceDaemon, StreamWorkflow>(new ContainerControlledLifetimeManager());
 			var daemon = container.Resolve<IDeviceDaemon>();
+
 			daemon.Start();
 			daemon.Await(port);
+		}
 
+		private static bool ProcessArgs(string[] args)
+		{
+			if(args.Length == 0)
+			{
+				args = new string[] { "run" };
+			}
 
-			//string verb = null;
-			//         object options = null;
+			string verb = null;
+			object options = null;
+			var cliOptions = new CliOptions();
+			Parser.Default.ParseArguments(args, cliOptions, (parsedVerb, parsedOptions) =>
+			{
+				verb = parsedVerb;
+				options = parsedOptions;
+			});
 
-			//         var cliOptions = new CliOptions();
-			//         if (!Parser.Default.ParseArguments(args, cliOptions, (parsedVerb, parsedOptions) =>
-			//         {
-			//             verb = parsedVerb;
-			//             options = parsedOptions;
-			//         }))
-			//         {
-			//             Environment.Exit(Parser.DefaultExitCodeFail);
-			//         }
+			try
+			{
+				switch(verb)
+				{
+					case RunOptions.VerbName:
+						var optionsTyped = (RunOptions) options;
+						if(optionsTyped.Background)
+						{
+							optionsTyped.Background = false;
+							var process = new Process
+							{
+								StartInfo =
+								{
+									FileName = "device-cli.exe",
+									UseShellExecute = false,
+									CreateNoWindow = true,
+									WindowStyle = ProcessWindowStyle.Hidden,
+									Arguments = optionsTyped.ToArgs()
+								}
+							};
 
-			//         try
-			//         {
-			//             switch (verb)
-			//             {
-			//                 case RunOptions.VerbName:
-			//                     new RunCommand((RunOptions)options).Run();
-			//                     break;
-			//                 case SimulatorOptions.VerbName:
-			//                     new SimulatorCommand((SimulatorOptions)options).Run();
-			//                     break;
-			//                 case UpgradeOptions.VerbName:
-			//                     new UpgradeCommand((UpgradeOptions)options).Run();
-			//                     break;
-			//                 default:
-			//                     // Never happens
-			//                     break;
-			//             }
-			//         }
-			//         catch (Exception exception)
-			//         {
-			//             Console.WriteLine($"Error: {exception.Message}");
-			//             Environment.Exit(Parser.DefaultExitCodeFail);
-			//         }
+							process.Start();
+							return false;
+						}
+						break;
+					case UpgradeOptions.VerbName:
+						//var optionsTyped1 = (UpgradeOptions) options;
+						break;
+					default:
+						// Never happens
+						break;
+				}
+			}
+			catch(Exception exception)
+			{
+				Console.WriteLine($"Error: {exception.Message}");
+				Environment.Exit(Parser.DefaultExitCodeFail);
+			}
+
+			return true;
 		}
 
 		private static void SetDefaults(IConfigurationManager configManager)
@@ -141,6 +166,11 @@ namespace forte.devices
 			if(string.IsNullOrWhiteSpace(config.Get<string>(SettingParams.ServerRootPath)))
 			{
 				config = configManager.UpdateSetting(SettingParams.ServerRootPath, "server\\");
+			}
+
+			if(!config.Contains(SettingParams.VerboseDebug))
+			{
+				config = configManager.UpdateSetting(SettingParams.VerboseDebug, true);
 			}
 		}
     }

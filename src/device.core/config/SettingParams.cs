@@ -5,5 +5,6 @@
 		public static string DeviceId => "DeviceId";
 		public static string ServerApiPath => "server-api-path";
 		public static string ServerRootPath => "server-root-path";
+		public static string VerboseDebug => "use-extended-logging";
 	}
 }
