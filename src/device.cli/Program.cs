@@ -50,12 +50,21 @@ namespace forte.devices
 			cf.DataPath = "c:\\forte\\data";
 			cf.LogPath = "c:\\forte\\logs";
 
+			//web server
+			container.RegisterType<IApiServer, ApiServer>(new ContainerControlledLifetimeManager());
+			container.RegisterType<IServerListener, ServerListener>(new ContainerControlledLifetimeManager());
+			WebModule.Registrar.RegisterDependencies(container);
+			WebModule.Registrar.RegisterMappings();
+
 			//logging
 			LoggerModule.Registrar.RegisterDependencies(container);
 			var logger = container.Resolve<ILogger>();
 
 			//mail
 			container.RegisterType<MailService, MailService>(new ContainerControlledLifetimeManager());
+
+			//agora
+			container.RegisterType<AgoraService, AgoraService>();
 
 			//db
 			container.RegisterType<DbRepository, DbRepository>(new ContainerControlledLifetimeManager());
@@ -70,12 +79,6 @@ namespace forte.devices
 			//vmix
 			VmixClientModule.Registrar.RegisterDependencies(container);
 			VmixClientModule.Registrar.RegisterMappings();
-
-			//web server
-			container.RegisterType<IApiServer, ApiServer>(new ContainerControlledLifetimeManager());
-			container.RegisterType<IServerListener, ServerListener>(new ContainerControlledLifetimeManager());
-			WebModule.Registrar.RegisterDependencies(container);
-			WebModule.Registrar.RegisterMappings();
 
 			container.RegisterType<IDeviceDaemon, StreamWorkflow>(new ContainerControlledLifetimeManager());
 			var daemon = container.Resolve<IDeviceDaemon>();
@@ -176,6 +179,16 @@ namespace forte.devices
 			if(string.IsNullOrWhiteSpace(config.Get<string>(SettingParams.DeviceName)))
 			{
 				config = configManager.UpdateSetting(SettingParams.DeviceName, "Forte-device");
+			}
+
+			if(string.IsNullOrWhiteSpace(config.Get<string>(SettingParams.AgoraAppId)))
+			{
+				config = configManager.UpdateSetting(SettingParams.AgoraAppId, "false");
+			}
+
+			if(!string.IsNullOrWhiteSpace(config.Get<string>(SettingParams.AgoraApiUrl)))
+			{
+				configManager.DeleteSetting(SettingParams.AgoraApiUrl);
 			}
 		}
     }

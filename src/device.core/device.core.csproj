@@ -83,9 +83,11 @@
     <Compile Include="config\RuntimeConfig.cs" />
     <Compile Include="config\SettingParams.cs" />
     <Compile Include="CoreModule.cs" />
+    <Compile Include="enums\WorkflowState.cs" />
     <Compile Include="extensions\DictionarySafeCamelCasePropertyNamesContractResolver.cs" />
     <Compile Include="extensions\ExceptionHandlingExtensions.cs" />
     <Compile Include="extensions\NewtonsoftJsonSerializer.cs" />
+    <Compile Include="ISessionState.cs" />
     <Compile Include="models\Audio.cs" />
     <Compile Include="models\CommonEntityParams.cs" />
     <Compile Include="models\ExecutionStatus.cs" />

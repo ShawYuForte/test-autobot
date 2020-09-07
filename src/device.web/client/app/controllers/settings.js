@@ -43,8 +43,14 @@
         }
 
         function settingsFetched(data) {
-            $log.debug('Fetched settings', data);
-            $scope.settings = data.settings;
+			$log.debug('Fetched settings', data);
+
+			var ordered = {};
+			Object.keys(data.settings).sort().forEach(function (key) {
+				ordered[key] = data.settings[key];
+			});
+
+			$scope.settings = ordered;
             model.settings = data.settings;
         }
 

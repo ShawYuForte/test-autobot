@@ -134,6 +134,19 @@ namespace forte.devices.data
 			}
 		}
 
+		public void DeleteSetting(string setting)
+		{
+			using(var dbContext = new DeviceDbContext(_connectionString))
+			{
+				var existing = dbContext.Settings.FirstOrDefault(s => s.Name == setting);
+				if(existing != null)
+				{
+					dbContext.Settings.Remove(existing);
+					dbContext.SaveChanges();
+				}
+			}
+		}
+
 		public List<DeviceSetting> SaveSettings(List<DeviceSetting> settings)
 		{
 			using(var dbContext = new DeviceDbContext(_connectionString))

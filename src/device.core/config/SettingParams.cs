@@ -7,5 +7,7 @@
 		public static string ServerRootPath => "server-root-path";
 		public static string VerboseDebug => "use-extended-logging";
 		public static string DeviceName => "device-name";
+		public static string AgoraAppId => "agora-app-id";
+		public static string AgoraApiUrl => "agora-api-url";
 	}
 }

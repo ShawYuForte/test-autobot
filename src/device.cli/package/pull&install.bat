@@ -4,5 +4,7 @@ nuget sources add -name forte-approved -Source https://pkgs.dev.azure.com/forte-
 
 rem this script needs to be run on device to update device-cli
 cd /D c:\forte\repo
+nuget locals http-cache -clear
 nuget install device-cli
 choco upgrade device-cli --force -y
+rem finish

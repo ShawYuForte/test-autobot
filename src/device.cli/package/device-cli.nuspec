@@ -5,7 +5,7 @@
     <!-- Read this before publishing packages to chocolatey.org: https://github.com/chocolatey/chocolatey/wiki/CreatePackages -->
     <id>device-cli</id>
     <title>Device CLI (Install)</title>
-    <version>2.0.29</version>
+    <version>2.1.20</version>
     <authors>Forte Tech</authors>
     <owners>Forte Nexus, LLC</owners>
     <summary>Forte Device Command Line Interface</summary>
@@ -31,6 +31,6 @@
   </metadata>
   <files>
     <file src="tools\**" target="tools" />
-    <file src="..\bin\release\**" target="tools\cli" />
+    <file src="..\bin\**" target="tools\cli" />
   </files>
 </package>

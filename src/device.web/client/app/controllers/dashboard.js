@@ -14,7 +14,7 @@
         }
 
         function stateFetched(data) {
-            $scope.state = data;
+			$scope.state = data.model;
             toastr.success('Device state refreshed');
         }
 
@@ -47,7 +47,7 @@
             //$log.debug('Received log event', logEvent);
             $scope.$apply(function() {
                 $scope.logs.unshift(logEvent);
-                if ($scope.logs.length > 100) {
+                if ($scope.logs.length > 200) {
                     $scope.logs.pop();
                 }
             });

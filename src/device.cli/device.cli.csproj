@@ -15,20 +15,20 @@
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x64</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>bin\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x64</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>bin\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -186,7 +186,6 @@
     <Compile Include="data\entities\DeviceSetting.cs" />
     <Compile Include="data\entities\SessionState.cs" />
     <Compile Include="data\entities\Entity.cs" />
-    <Compile Include="data\enums\WorkflowState.cs" />
     <Compile Include="data\extensions\DataExtensions.cs" />
     <Compile Include="Migrations\201611021915557_Init.cs" />
     <Compile Include="Migrations\201611021915557_Init.Designer.cs">
@@ -218,6 +217,7 @@
     <Compile Include="options\UpgradeOptions.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="services\AgoraService.cs" />
     <Compile Include="services\ServerListener.cs" />
     <Compile Include="services\MailService.cs" />
     <Compile Include="utils\RuntimeUtility.cs" />
@@ -226,7 +226,9 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
-    <None Include="package\device-cli.nuspec" />
+    <None Include="package\device-cli.nuspec">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="package\pack&amp;push.bat" />
     <None Include="package\pull&amp;install.bat" />
     <None Include="package\tools\chocolateybeforemodify.ps1" />
@@ -243,6 +245,10 @@
     <ProjectReference Include="..\..\..\web\src\forte.specs\forte.specs.csproj">
       <Project>{5E1C27C1-9D29-4DBC-970C-F8766A18CB7B}</Project>
       <Name>forte.specs</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\AgoraSDK\AgoraSDK.csproj">
+      <Project>{9655d131-da85-434d-91be-4d4fa97a0a18}</Project>
+      <Name>AgoraSDK</Name>
     </ProjectReference>
     <ProjectReference Include="..\device.client.vmix\device.client.vmix.csproj">
       <Project>{bd82769b-e2b9-47d8-9962-ab7844548496}</Project>

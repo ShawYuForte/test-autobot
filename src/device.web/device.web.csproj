@@ -17,7 +17,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\device.cli\bin\Debug\</OutputPath>
+    <OutputPath>..\device.cli\bin\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -25,7 +25,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>..\device.cli\bin\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -139,16 +139,19 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="client\app\controllers\dashboard.js" />
+    <Content Include="client\app\controllers\settings.js" />
+    <Content Include="client\app\dashboard-app.js" />
+    <Content Include="client\app\services\api-service.js" />
+    <Content Include="client\app\services\signalr-service.js" />
+    <Content Include="client\app\views\dashboard.html" />
+    <Content Include="client\app\views\settings.html" />
     <Content Include="client\bower.json" />
+    <Content Include="client\css\client.css" />
     <Content Include="client\favicon.ico" />
     <Content Include="client\index.html" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="client\app\controllers\" />
-    <Folder Include="client\app\services\" />
-    <Folder Include="client\app\views\" />
-    <Folder Include="client\css\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

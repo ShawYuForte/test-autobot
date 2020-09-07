@@ -7,8 +7,8 @@ namespace forte.devices.services
 {
 	public class MailService
 	{
-		public ILogger _logger { get; set; }
-		public IConfigurationManager _configManager { get; set; }
+		private ILogger _logger { get; set; }
+		private IConfigurationManager _configManager { get; set; }
 
 		public MailService(ILogger logger, IConfigurationManager configManager)
 		{

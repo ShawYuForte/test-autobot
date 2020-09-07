@@ -5,7 +5,7 @@ using forte.models;
 
 namespace forte.devices.entities
 {
-    public class SessionState
+    public class SessionState: ISessionState
     {
 		[Key]
 		public int Id { get; set; }

@@ -16,17 +16,17 @@ namespace device.logging.services
     {
         private LoggerConfiguration _loggerConfiguration;
         private readonly IRuntimeConfig _cf;
-        //private readonly IHubContext _hubContext;
+		private readonly IHubContext _hubContext;
 
-        public SeriLoggerEx
+		public SeriLoggerEx
 		(
-			IRuntimeConfig cf 
-			//IHubContext hubContext
+			IRuntimeConfig cf,
+			IHubContext hubContext
 		)
         {
 			_cf = cf;
-            //_hubContext = hubContext;
-        }
+			_hubContext = hubContext;
+		}
 
         protected override LoggerConfiguration ConfigureSinks()
         {
@@ -43,9 +43,9 @@ namespace device.logging.services
             }
 
             _loggerConfiguration = base.ConfigureSinks();
-            //_loggerConfiguration.WriteTo.SignalR(_hubContext);
+			_loggerConfiguration.WriteTo.SignalR(_hubContext);
 
-            return _loggerConfiguration;
+			return _loggerConfiguration;
         }
     }
 }

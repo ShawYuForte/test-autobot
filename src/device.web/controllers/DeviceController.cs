@@ -28,8 +28,7 @@ namespace device.web.controllers
 		[Route, HttpGet]
 		public IHttpActionResult GetState()
 		{
-			return Ok("");
-			//return Ok(_deviceDaemon.GetState());
+			return Ok(new { model = _deviceDaemon.GetState()});
 		}
 
 		[Route("shutdown"), HttpPost]

@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using forte.models.devices;
 
 namespace forte.devices.services
 {
@@ -7,5 +9,6 @@ namespace forte.devices.services
 		void Await(int port);
 		Task Start();
 		void Shutdown();
-    }
+		List<ISessionState> GetState();
+	}
 }

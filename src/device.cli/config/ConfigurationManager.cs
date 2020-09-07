@@ -36,5 +36,10 @@ namespace forte.devices.services
             _deviceConfig = null;
             return GetDeviceConfig();
         }
-    }
+
+		public void DeleteSetting(string setting)
+		{
+            _deviceRepository.DeleteSetting(setting);
+		}
+	}
 }
