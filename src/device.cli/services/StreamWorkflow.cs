@@ -62,14 +62,12 @@ namespace forte.devices.workflow
 			//_serverListener.Connect();
 			using(var server = _server.Run(port))
 			{
-				_logger.Information("Running device local UI web server v2.1.20.");
+				_logger.Information("Running device local UI web server v2.1.22.");
 				//synchronous loop for keeping the app alive
 				while(_running)
 				{
 					Thread.Sleep(1);
 				}
-
-				_agora.Destroy();
 			}
 		}
 
@@ -206,7 +204,10 @@ namespace forte.devices.workflow
 					var vmixSession = sessions.FirstOrDefault(s => s.VmixUsed == true);
 					foreach(var s in sessions)
 					{
-						if(_lockedSessions.ContainsKey(s.SessioId)) continue;
+						//await ConnectToAgora(s);
+						//return;
+
+						if (_lockedSessions.ContainsKey(s.SessioId)) continue;
 						//check if vmix is free to use for this session and it's time
 						var isVmixSession = (vmixSession == null || vmixSession.Id == s.Id);
 						var needsLinking = s.StartTime.AddSeconds(-linkTimeSeconds) <= DateTime.UtcNow;

@@ -1242,7 +1242,7 @@ namespace AgoraSDK
             }
         }
 
-        public OnJoinChannelSuccessHandler OnJoinChannelSuccess;
+		public OnJoinChannelSuccessHandler OnJoinChannelSuccess;
 
         public OnReJoinChannelSuccessHandler OnReJoinChannelSuccess;
 
@@ -1392,7 +1392,7 @@ namespace AgoraSDK
 
         public static RtcEngine GetEngine(string appId)
         {
-            if (instance == null)
+            //if (instance == null)
             {
                 instance = new RtcEngine(appId);
             }

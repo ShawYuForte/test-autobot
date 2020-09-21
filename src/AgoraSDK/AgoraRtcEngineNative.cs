@@ -5,10 +5,11 @@ namespace AgoraSDK
 {
     public class AgoraRtcEngineNative
     {
-        /**
+		#region events
+		/**
         EngineEvent is only for engine, not for user,Please do not call this function.
         */
-        protected delegate void EngineEventOnCaptureVideoFrame(int videoFrameType, int width, int height, int yStride, IntPtr yBuffer, int rotation, long renderTimeMs);
+		protected delegate void EngineEventOnCaptureVideoFrame(int videoFrameType, int width, int height, int yStride, IntPtr yBuffer, int rotation, long renderTimeMs);
 
         protected delegate void EngineEventOnRenderVideoFrame(uint uid, int videoFrameType, int width, int height, int yStride, IntPtr yBuffer, int rotation, long renderTimeMs);
 
@@ -83,9 +84,11 @@ namespace AgoraSDK
 
         protected delegate void EngineEventOnLocalVideoStateChanged(int localVideoState, int error);
 
-        #region DllImport
+		#endregion
 
-        public const string MyLibName = "agoraSdkCWrapper";
+		#region DllImport
+
+		public const string MyLibName = "agoraSdkCWrapper";
 
         // standard sdk api
         [DllImport(MyLibName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]

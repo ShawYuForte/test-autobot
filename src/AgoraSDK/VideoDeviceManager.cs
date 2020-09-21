@@ -32,7 +32,7 @@ namespace AgoraSDK
         private VideoDeviceManager(RtcEngine rtcEngine)
         {
             _rtcEngine = rtcEngine;
-        }
+		}
 
         public static VideoDeviceManager GetInstance(RtcEngine rtcEngine)
         {
@@ -146,7 +146,7 @@ namespace AgoraSDK
             if (_rtcEngine == null)
                 return (int)ERROR_CODE.ERROR_NOT_INIT_ENGINE;
 
-            if (index >= 0 && index < GetVideoDeviceCount())
+            //if (index >= 0 && index < GetVideoDeviceCount())
             {
                 System.IntPtr videoDeviceName = Marshal.AllocHGlobal(512);
                 System.IntPtr videoDeviceId = Marshal.AllocHGlobal(512);
@@ -157,10 +157,10 @@ namespace AgoraSDK
                 Marshal.FreeHGlobal(videoDeviceId);
                 return ret;
             }
-            else
-            {
-                return (int)ERROR_CODE.ERROR_INVALID_ARGUMENT;
-            }
+            //else
+            //{
+            //    return (int)ERROR_CODE.ERROR_INVALID_ARGUMENT;
+            //}
         }
 
         /** Retrieves the device ID of the current video recording device.
