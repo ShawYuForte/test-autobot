@@ -11,6 +11,7 @@
 		StreamingClient = 25,
 		ProgramRunning = 30,
 		Processed = 40,
-		CancelPending = 100
+		CancelPending = 100,
+		RestartPending = 110
 	}
 }

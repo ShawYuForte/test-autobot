@@ -62,7 +62,7 @@ namespace forte.devices.workflow
 			//_serverListener.Connect();
 			using(var server = _server.Run(port))
 			{
-				_logger.Information("Running device local UI web server v2.1.22.");
+				_logger.Information("Running device local UI web server v2.1.23.");
 				//synchronous loop for keeping the app alive
 				while(_running)
 				{
@@ -217,7 +217,7 @@ namespace forte.devices.workflow
 						}
 
 						//terminate outdated session
-						if(s.EndTime <= DateTime.UtcNow || s.Status == WorkflowState.CancelPending)
+						if(s.EndTime <= DateTime.UtcNow || s.Status == WorkflowState.CancelPending || s.Status == WorkflowState.RestartPending)
 						{
 							_logger.Warning($"{s.Permalink}: {(DateTime.UtcNow - s.EndTime).TotalSeconds} seconds after end, terminate");
 							_lockedSessions[s.SessioId] = s;
@@ -432,7 +432,8 @@ namespace forte.devices.workflow
 			{
 				AddSessionRetry(s);
 
-				if(s.VmixUsed && s.SessionType != SessionType.Manual)
+				var handleVmix = s.VmixUsed && s.SessionType != SessionType.Manual;
+				if (handleVmix)
 				{
 					_logger.Warning($"{s.Permalink}");
 					_streamingClient.StopProgram();
@@ -450,13 +451,24 @@ namespace forte.devices.workflow
 				_logger.Debug($"{s.Permalink}: StopStream success");
 				if(_verbose) { _logger.Debug($"{m.Content}"); }
 
-				if(s.VmixUsed && s.SessionType != SessionType.Manual)
+				if(handleVmix)
 				{
 					_logger.Warning($"{s.Permalink}");
 					_streamingClient.StopStreaming(true);
 				}
 
-				SetSessionStatus(s, WorkflowState.Processed);
+				if (s.Status == WorkflowState.RestartPending)
+				{
+					//to restart session, revert it back to the initial state
+					//currently we only restart if type is changed, so change session type as well
+					s.SessionType = s.SessionType == SessionType.Manual ? SessionType.Scheduled : SessionType.Manual;
+					s.IsCancelled = false;
+					SetSessionStatus(s, WorkflowState.Idle);
+				}
+				else
+				{
+					SetSessionStatus(s, WorkflowState.Processed);
+				}
 				ClearSessionRetry(s);
 
 				_lockedSessions.TryRemove(s.SessioId, out var t);
@@ -682,6 +694,15 @@ namespace forte.devices.workflow
 					Status = WorkflowState.Idle,
 					SessionType = (SessionType) command.Type
 				};
+			}
+
+			var st = (SessionType) command.Type;
+			if (state.SessionType != st)
+			{
+				_logger.Warning($"{state.Permalink}: Session restart requested!");
+
+				state.IsCancelled = true;
+				state.Status = WorkflowState.RestartPending;
 			}
 
 			state.StartTime = command.TimeStart.Value;
