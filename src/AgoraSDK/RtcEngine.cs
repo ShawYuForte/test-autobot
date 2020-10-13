@@ -17,14 +17,15 @@ namespace AgoraSDK
             bool hasErrors = createEngine(appId);
             if (!hasErrors)
             {
-				_videoDeviceManager = VideoDeviceManager.GetInstance(this);
+				//_videoDeviceManager = VideoDeviceManager.GetInstance(this);
 
-				_callbackQueueThread = new Thread(() => {
-                    while (true)
-                    {
-                        AgoraCallbackQueue.Current.Update();
-                    }
-                });
+				_callbackQueueThread = new Thread(() => 
+				{
+					while (true)
+					{
+						AgoraCallbackQueue.Current.Update();
+					}
+				});
                 _callbackQueueThread.Start();
             }
         }
@@ -37,6 +38,7 @@ namespace AgoraSDK
             private static AgoraCallbackQueue _current;
             private int _queueTimeout = 500;
             private int _queueSize = 250;
+
             public static AgoraCallbackQueue Current
             {
                 get
@@ -93,7 +95,7 @@ namespace AgoraSDK
                 }
             }
 
-            void OnDestroy()
+            public void OnDestroy()
             {
                 _current = null;
             }
@@ -1392,7 +1394,7 @@ namespace AgoraSDK
 
         public static RtcEngine GetEngine(string appId)
         {
-            //if (instance == null)
+            if (instance == null)
             {
                 instance = new RtcEngine(appId);
             }
@@ -1435,13 +1437,19 @@ namespace AgoraSDK
 
         public int EnableVideo()
         {
-            return enableVideo();
-        }
+			//setChannelProfile(1);
+			enableVideo();
+			enableAudio();
+			enableDualStreamMode(true);
 
-		public int EnableAudio()
-		{
-			return enableAudio();
-		}
+			//adjustAudioMixingVolume(100);
+			//adjustPlaybackSignalVolume(100);
+			//adjustRecordingSignalVolume(100);
+			//adjustAudioMixingPlayoutVolume(100);
+			//adjustAudioMixingPublishVolume(100);
+
+			return 0;
+        }
 
 		public string GetSdkVersion()
         {
@@ -1491,7 +1499,8 @@ namespace AgoraSDK
 
         public void ReleaseQueue()
         {
-            _callbackQueueThread.Abort();
+			AgoraCallbackQueue.Current.OnDestroy();
+			_callbackQueueThread.Abort();
         }
     }
 }

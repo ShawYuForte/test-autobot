@@ -62,7 +62,7 @@ namespace forte.devices.workflow
 			//_serverListener.Connect();
 			using(var server = _server.Run(port))
 			{
-				_logger.Information("Running device local UI web server v2.1.23.");
+				_logger.Information("Running device local UI web server v2.1.24");
 				//synchronous loop for keeping the app alive
 				while(_running)
 				{
@@ -204,6 +204,12 @@ namespace forte.devices.workflow
 					var vmixSession = sessions.FirstOrDefault(s => s.VmixUsed == true);
 					foreach(var s in sessions)
 					{
+						//await ConnectToAgora(s);
+						//return;
+
+						//await ConnectToAgora(s);
+						//await Task.Delay(10000);
+						//await _agora.Disconnect();
 						//await ConnectToAgora(s);
 						//return;
 

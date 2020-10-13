@@ -52,7 +52,8 @@ namespace forte.devices.services
 
 					if (!_uids.ContainsKey(channelName))
 					{
-						_uids[channelName] = GetChannelUid();
+						_uids[channelName] = (uint) channelName.GetHashCode();
+						//_uids[channelName] = GetChannelUid();
 					}
 					var uid = _uids[channelName];
 
@@ -72,7 +73,6 @@ namespace forte.devices.services
 
 					// enable video
 					_rtcEngine.EnableVideo();
-					_rtcEngine.EnableAudio();
 
 					// join channel
 					var joinResult = _rtcEngine.JoinChannelByKey(channelKey, channelName.ToUpper(), null, uid);
@@ -111,8 +111,8 @@ namespace forte.devices.services
 				try
 				{
 					_rtcEngine.LeaveChannel();
-					_rtcEngine.ReleaseQueue();
-					_rtcEngine = null;
+					//_rtcEngine.ReleaseQueue();
+					//_rtcEngine = null;
 				}
 				catch(Exception ex)
 				{
