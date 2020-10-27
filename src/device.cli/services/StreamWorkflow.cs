@@ -129,7 +129,7 @@ namespace forte.devices.workflow
 							commandFetchedRetries--;
 						}
 
-						//executer pending commands before processing further
+						//execute pending commands before processing further
 						if(command != null)
 						{
 							commandFetchedRetries = 25;
@@ -149,7 +149,17 @@ namespace forte.devices.workflow
 										}
 										break;
 									case StreamingDeviceCommands.CancelSession:
-										session = CancelSession(session, command);
+									case StreamingDeviceCommands.RestartSession:
+										if (session == null) { break; }
+										session.IsCancelled = true;
+										_dbRepository.UpdateSession(session);
+
+										var restart = command.Command == StreamingDeviceCommands.RestartSession;
+										var message = command.Command == StreamingDeviceCommands.CancelSession ? "cancel session" : "restart session";
+										_logger.Warning($"{session.Permalink}: {message}");
+										_lockedSessions[session.SessioId] = session;
+										await StopStream(session, streamStopRetrySeconds, restart);
+										await _agora.Disconnect();
 										break;
 									default:
 										throw new ArgumentOutOfRangeException();
@@ -223,7 +233,7 @@ namespace forte.devices.workflow
 						}
 
 						//terminate outdated session
-						if(s.EndTime <= DateTime.UtcNow || s.Status == WorkflowState.CancelPending || s.Status == WorkflowState.RestartPending)
+						if(s.EndTime <= DateTime.UtcNow)
 						{
 							_logger.Warning($"{s.Permalink}: {(DateTime.UtcNow - s.EndTime).TotalSeconds} seconds after end, terminate");
 							_lockedSessions[s.SessioId] = s;
@@ -432,7 +442,7 @@ namespace forte.devices.workflow
 			}
 		}
 
-		private async Task StopStream(SessionState s, int retrySeconds)
+		private async Task StopStream(SessionState s, int retrySeconds, bool restart = false)
 		{
 			try
 			{
@@ -445,7 +455,7 @@ namespace forte.devices.workflow
 					_streamingClient.StopProgram();
 				}
 
-				var url = $"streamStop/{s.SessioId}?retryNum={s.RetryCount}&deviceId={_deviceId}&requestRef={s.Permalink}&deleteAsset={s.IsCancelled == true}";
+				var url = $"streamStop/{s.SessioId}?retryNum={s.RetryCount}&deviceId={_deviceId}&requestRef={s.Permalink}&deleteAsset={s.IsCancelled == true}&restart={restart}";
 				var request = new RestRequest(url, Method.GET);
 				var m = await _client.ExecuteAsync<bool>(request);
 
@@ -463,18 +473,7 @@ namespace forte.devices.workflow
 					_streamingClient.StopStreaming(true);
 				}
 
-				if (s.Status == WorkflowState.RestartPending)
-				{
-					//to restart session, revert it back to the initial state
-					//currently we only restart if type is changed, so change session type as well
-					s.SessionType = s.SessionType == SessionType.Manual ? SessionType.Scheduled : SessionType.Manual;
-					s.IsCancelled = false;
-					SetSessionStatus(s, WorkflowState.Idle);
-				}
-				else
-				{
-					SetSessionStatus(s, WorkflowState.Processed);
-				}
+				SetSessionStatus(s, WorkflowState.Processed);
 				ClearSessionRetry(s);
 
 				_lockedSessions.TryRemove(s.SessioId, out var t);
@@ -668,8 +667,16 @@ namespace forte.devices.workflow
 				throw (new Exception($"Failed fetching command, response {response.Content}"));
 			}
 
+			var r = JsonConvert.DeserializeObject<StreamingDeviceCommandModel>(response.Content);
+
+			if (r.DeviceType != (int) StreamingDeviceType.Autobot)
+			{
+				return null;
+			}
+
 			_logger.Debug("Command retrieved {@command}", response.Content);
-			return JsonConvert.DeserializeObject<StreamingDeviceCommandModel>(response.Content);
+
+			return r;
 		}
 
 		private void SaveCommandOnServer(StreamingDeviceCommandModel commandModel)
@@ -702,15 +709,6 @@ namespace forte.devices.workflow
 				};
 			}
 
-			var st = (SessionType) command.Type;
-			if (state.SessionType != st)
-			{
-				_logger.Warning($"{state.Permalink}: Session restart requested!");
-
-				state.IsCancelled = true;
-				state.Status = WorkflowState.RestartPending;
-			}
-
 			state.StartTime = command.TimeStart.Value;
 			state.EndTime = command.TimeEnd.Value;
 			state.VmixPreset = command.Preset;
@@ -721,18 +719,6 @@ namespace forte.devices.workflow
 			}
 			else
 			{
-				_dbRepository.UpdateSession(state);
-			}
-
-			return state;
-		}
-
-		private SessionState CancelSession(SessionState state, StreamingDeviceCommandModel command)
-		{
-			if(state != null)
-			{
-				state.IsCancelled = true; 
-				state.Status = WorkflowState.CancelPending;
 				_dbRepository.UpdateSession(state);
 			}
 
