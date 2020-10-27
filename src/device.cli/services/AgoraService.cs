@@ -71,11 +71,11 @@ namespace forte.devices.services
 						bitrate = 3420
 					});
 
-					// enable video
-					_rtcEngine.EnableVideo();
+                    // enable video
+                    _rtcEngine.EnableVideo();
 
-					// join channel
-					var joinResult = _rtcEngine.JoinChannelByKey(channelKey, channelName.ToUpper(), null, uid);
+                    // join channel
+                    var joinResult = _rtcEngine.JoinChannelByKey(channelKey, channelName.ToUpper(), null, uid);
 					var waitTime = 0;
 					_logger.Debug($"Joined Agora result: {joinResult}");
 					_joined = false;

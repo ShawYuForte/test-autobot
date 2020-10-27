@@ -1437,18 +1437,29 @@ namespace AgoraSDK
 
         public int EnableVideo()
         {
-			//setChannelProfile(1);
-			enableVideo();
-			enableAudio();
-			enableDualStreamMode(true);
+            setChannelProfile((int)CHANNEL_PROFILE.CHANNEL_PROFILE_LIVE_BROADCASTING);
+            setClientRole((int)CLIENT_ROLE_TYPE.CLIENT_ROLE_BROADCASTER);
 
-			//adjustAudioMixingVolume(100);
-			//adjustPlaybackSignalVolume(100);
-			//adjustRecordingSignalVolume(100);
-			//adjustAudioMixingPlayoutVolume(100);
-			//adjustAudioMixingPublishVolume(100);
+            //for agora logs
+            getAudioRecordingDeviceVolume();
+            //internal device manager
+            creatAAudioRecordingDeviceManager();
 
-			return 0;
+            setAudioRecordingDeviceVolume(255);
+            adjustRecordingSignalVolume(400);
+
+            setParameters("{\"che.audio.enable.agc\":false}");
+
+            enableVideo();
+            enableAudio();
+            enableDualStreamMode(true);
+            //adjustAudioMixingVolume(100);
+            //adjustPlaybackSignalVolume(100);
+            //adjustRecordingSignalVolume(100);
+            //adjustAudioMixingPlayoutVolume(100);
+            //adjustAudioMixingPublishVolume(100);
+
+            return 0;
         }
 
 		public string GetSdkVersion()

@@ -62,7 +62,7 @@ namespace forte.devices.workflow
 			//_serverListener.Connect();
 			using(var server = _server.Run(port))
 			{
-				_logger.Information("Running device local UI web server v2.1.24");
+				_logger.Information("Running device local UI web server v2.1.45");
 				//synchronous loop for keeping the app alive
 				while(_running)
 				{
