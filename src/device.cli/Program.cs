@@ -109,6 +109,10 @@ namespace forte.devices
 				{
 					case RunOptions.VerbName:
 						var optionsTyped = (RunOptions) options;
+						if (optionsTyped.TestRun)
+						{
+							return false;
+						}
 						if(optionsTyped.Background)
 						{
 							optionsTyped.Background = false;

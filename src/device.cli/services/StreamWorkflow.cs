@@ -24,6 +24,8 @@ namespace forte.devices.workflow
 {
 	public class StreamWorkflow: IDeviceDaemon
 	{
+		private string _version = "2.1.48";
+
 		private readonly AgoraService _agora;
 		private readonly MailService _ms;
 		private readonly IApiServer _server;
@@ -62,7 +64,7 @@ namespace forte.devices.workflow
 			//_serverListener.Connect();
 			using(var server = _server.Run(port))
 			{
-				_logger.Information("Running device local UI web server v2.1.45");
+				_logger.Information($"Running device local UI web server v{_version}");
 				//synchronous loop for keeping the app alive
 				while(_running)
 				{

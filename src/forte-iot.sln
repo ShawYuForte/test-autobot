@@ -40,6 +40,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "forte.modules.serilog", "..
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgoraSDK", "AgoraSDK\AgoraSDK.csproj", "{9655D131-DA85-434D-91BE-4D4FA97A0A18}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutobotLauncher", "AutobotLauncher\AutobotLauncher.csproj", "{C15B109A-59E6-4477-8C6D-399818D1CF59}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -120,12 +122,20 @@ Global
 		{9655D131-DA85-434D-91BE-4D4FA97A0A18}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9655D131-DA85-434D-91BE-4D4FA97A0A18}.Release|x86.ActiveCfg = Release|x86
 		{9655D131-DA85-434D-91BE-4D4FA97A0A18}.Release|x86.Build.0 = Release|x86
+		{C15B109A-59E6-4477-8C6D-399818D1CF59}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C15B109A-59E6-4477-8C6D-399818D1CF59}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C15B109A-59E6-4477-8C6D-399818D1CF59}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C15B109A-59E6-4477-8C6D-399818D1CF59}.Debug|x86.Build.0 = Debug|Any CPU
+		{C15B109A-59E6-4477-8C6D-399818D1CF59}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C15B109A-59E6-4477-8C6D-399818D1CF59}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C15B109A-59E6-4477-8C6D-399818D1CF59}.Release|x86.ActiveCfg = Release|Any CPU
+		{C15B109A-59E6-4477-8C6D-399818D1CF59}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		EnterpriseLibraryConfigurationToolBinariesPath = packages\TransientFaultHandling.Core.5.1.1209.1\lib\NET4
 		SolutionGuid = {D4D5E4E5-1EA4-45CB-842C-3B7FEBAD5053}
+		EnterpriseLibraryConfigurationToolBinariesPath = packages\TransientFaultHandling.Core.5.1.1209.1\lib\NET4
 	EndGlobalSection
 EndGlobal

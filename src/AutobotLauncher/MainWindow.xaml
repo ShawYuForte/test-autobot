@@ -1,0 +1,93 @@
+﻿<Window x:Class="AutobotLauncher.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:AutobotLauncher"
+		xmlns:c="clr-namespace:AutobotLauncher.Utils.Converters"
+		mc:Ignorable="d"
+        Title="Autobot Launcher" Height="250" Width="600"
+		FontSize="15"
+		d:DataContext="{d:DesignInstance Type=local:MainWindowViewModel, IsDesignTimeCreatable=True}">
+
+	<Window.Resources>
+		<c:BoolToVisibilityConverter x:Key="BoolToVisibleConverter" FalseValue="Hidden" TrueValue="Visible" />
+		<c:BoolToVisibilityConverter x:Key="BoolToVisibleConverterInverse" FalseValue="Visible" TrueValue="Hidden" />
+		
+		<Style x:Key="Error" TargetType="Label">
+			<Setter Property="Foreground" Value="Red" />
+		</Style>
+		<Style x:Key="Success" TargetType="Label">
+			<Setter Property="Foreground" Value="Green" />
+		</Style>
+	</Window.Resources>
+
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"></RowDefinition>
+			<RowDefinition Height="Auto"></RowDefinition>
+		</Grid.RowDefinitions>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition></ColumnDefinition>
+			<ColumnDefinition></ColumnDefinition>
+		</Grid.ColumnDefinitions>
+
+		<StackPanel Grid.Row="0" Grid.ColumnSpan="2">
+			<Button Height="40px" Click="ClickCheck">
+				<TextBlock Text="{Binding Status}"></TextBlock>
+			</Button>
+		</StackPanel>
+
+		<Grid Grid.Row="1" Grid.Column="0">
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto"></RowDefinition>
+				<RowDefinition Height="Auto"></RowDefinition>
+				<RowDefinition Height="Auto"></RowDefinition>
+				<RowDefinition Height="Auto"></RowDefinition>
+				<RowDefinition Height="Auto"></RowDefinition>
+			</Grid.RowDefinitions>
+			
+			<StackPanel Grid.Row="0" Orientation="Horizontal" Visibility="{Binding IsNugetInstalled, Converter={StaticResource BoolToVisibleConverterInverse}}">
+				<Label Style="{StaticResource Error}">Nuget is not installed.</Label>
+			</StackPanel>
+			<StackPanel Grid.Row="0" Orientation="Horizontal" Visibility="{Binding IsNugetInstalled, Converter={StaticResource BoolToVisibleConverter}}">
+				<Label Style="{StaticResource Success}">Nuget is installed.</Label>
+			</StackPanel>
+			
+			<StackPanel Grid.Row="1" Orientation="Horizontal" Visibility="{Binding IsChocoInstalled, Converter={StaticResource BoolToVisibleConverterInverse}}">
+				<Label Style="{StaticResource Error}">Choco is not installed.</Label>
+			</StackPanel>
+			<StackPanel Grid.Row="1" Orientation="Horizontal" Visibility="{Binding IsChocoInstalled, Converter={StaticResource BoolToVisibleConverter}}">
+				<Label Style="{StaticResource Success}">Choco is installed.</Label>
+			</StackPanel>
+			
+			<StackPanel Grid.Row="2" Orientation="Horizontal" Visibility="{Binding IsClientInstalled, Converter={StaticResource BoolToVisibleConverterInverse}}">
+				<Label Style="{StaticResource Error}">Client is not installed.</Label>
+			</StackPanel>
+			<StackPanel Grid.Row="2" Orientation="Horizontal" Visibility="{Binding IsClientInstalled, Converter={StaticResource BoolToVisibleConverter}}">
+				<Label Style="{StaticResource Success}">Client is installed.</Label>
+			</StackPanel>
+			
+			<StackPanel Grid.Row="3" Orientation="Horizontal" Visibility="{Binding IsVmixInstalled, Converter={StaticResource BoolToVisibleConverterInverse}}">
+				<Label Style="{StaticResource Error}">Vmix is not installed.</Label>
+				<Label>
+					<Hyperlink NavigateUri="https://www.vmix.com/software/download.aspx"> Install </Hyperlink>
+				</Label>
+			</StackPanel>
+			<StackPanel Grid.Row="3" Orientation="Horizontal" Visibility="{Binding IsVmixInstalled, Converter={StaticResource BoolToVisibleConverter}}">
+				<Label Style="{StaticResource Success}">Vmix is installed.</Label>
+			</StackPanel>
+
+			<StackPanel Grid.Row="4" Orientation="Horizontal" Visibility="{Binding IsApiConnected, Converter={StaticResource BoolToVisibleConverterInverse}}">
+				<Label Style="{StaticResource Error}">Api is not connected.</Label>
+			</StackPanel>
+			<StackPanel Grid.Row="4" Orientation="Horizontal" Visibility="{Binding IsApiConnected, Converter={StaticResource BoolToVisibleConverter}}">
+				<Label Style="{StaticResource Success}">Api is connected.</Label>
+			</StackPanel>
+		</Grid>
+
+		<StackPanel Grid.Column="1">
+			
+		</StackPanel>
+    </Grid>
+</Window>

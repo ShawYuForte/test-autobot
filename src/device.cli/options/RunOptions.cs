@@ -26,7 +26,10 @@ namespace forte.devices.options
         [Option('b', "background", HelpText = "Runs the daemon in the background (no console).")]
         public bool Background { get; set; }
 
-        [HelpOption]
+		[Option('t', "testrun", HelpText = "Close the app after the launch.")]
+		public bool TestRun { get; set; }
+
+		[HelpOption]
         public string GetUsage()
         {
             return HelpText.AutoBuild(this, (HelpText current) => HelpText.DefaultParsingErrorsHandler(this, current));
