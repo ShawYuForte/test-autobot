@@ -1,5 +1,7 @@
 ﻿#region
 
+using System.Net;
+using System.Net.Http;
 using System.Web.Http;
 using AutoMapper;
 using device.web.models;
@@ -67,11 +69,32 @@ namespace device.web.controllers
 			return Ok(Mapper.Map<SettingsModel>(config));
 		}
 
+		[Route("setting-text"), HttpGet]
+		public HttpResponseMessage GetSetting(string name)
+		{
+			_logger.Debug("Fetching setting");
+			var config = _configManager.GetDeviceConfig();
+			var resp = new HttpResponseMessage(HttpStatusCode.OK);
+			resp.Content = new StringContent(config.Get(name)?.ToString(), System.Text.Encoding.UTF8, "text/plain");
+			return resp;
+		}
+
+		[Route("settings-plain/{setting}"), HttpPost]
+		public IHttpActionResult UpdateSetting([FromUri]string setting, [FromBody]DataValueSimplified dataValue)
+		{
+			return Update(setting, dataValue);
+		}
+
 		[Route("settings/{setting}"), HttpPost]
 		public IHttpActionResult UpdateSetting([FromUri]string setting, [FromBody]DataValue dataValue)
 		{
+			return Update(setting, dataValue);
+		}
+
+		private IHttpActionResult Update(string setting, DataValue dataValue)
+		{
 			var config = _configManager.GetDeviceConfig();
-			if(!config.Contains(setting))
+			if (!config.Contains(setting))
 			{
 				return BadRequest("Setting does not exist");
 			}

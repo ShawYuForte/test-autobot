@@ -2,6 +2,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Net.Mail;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,6 +13,7 @@ using device.web;
 using device.web.server;
 using forte.devices.config;
 using forte.devices.data;
+using forte.devices.data.enums;
 using forte.devices.entities;
 using forte.devices.options;
 using forte.devices.services;
@@ -27,28 +29,55 @@ namespace forte.devices
 {
 	public class Program
     {
+		private static UnityContainer _container;
+
 		private static void Main(string[] args)
         {
-			if(RuntimeUtility.IsAlreadyRunning())
+			//run -d "D:\!Projects\TDM-FORTE\iot\src\AutobotLauncher\bin\data" -l "D:\!Projects\TDM-FORTE\iot\src\AutobotLauncher\bin\logs" --pr "D:\!Projects\TDM-FORTE\iot\src\AutobotLauncher\bin\device-cli.2.2.3\tools\cli\preset\Forte Preset.vmix" -test-preset
+
+			//args = new string[]
+			//{
+			//	//"run",
+			//	//"-p",
+			//	//"9000",
+			//	//"-d",
+			//	//"c:\\forte\\data",
+			//	//"-l",
+			//	//"c:\\forte\\logs"
+
+			//	//"run",
+			//	//"-b",
+			////	"-d",
+			////	@"D:\!Projects\TDM-FORTE\iot\src\AutobotLauncher\bin\data",
+			////	"-l",
+			////	@"D:\!Projects\TDM-FORTE\iot\src\AutobotLauncher\bin\logs",
+			////	"--pr",
+			////	@"D:\!Projects\TDM-FORTE\iot\src\AutobotLauncher\bin\preset\Forte Preset.vmix",
+			////	"--test-api"
+			//};
+
+			var checkVersion = args.Any(arg => arg == "-version");
+			if (checkVersion)
 			{
-				Console.WriteLine("Daemon is already running.");
+				Console.WriteLine(Constants.Version);
 				return;
 			}
 
-			if(!ProcessArgs(args))
-			{
-				return;
-			}
+			var argsParsed = ProcessArgs(args);
+			if (argsParsed == null) { return; }
 
 			var port = 9000;
-			var container = new UnityContainer();
+			var container = _container = new UnityContainer();
 
 			//core configs
 			CoreModule.SetDefaultSerializerSettings();
 			container.RegisterType<IRuntimeConfig, RuntimeConfig>(new ContainerControlledLifetimeManager());
-			var cf = container.Resolve<IRuntimeConfig>();
-			cf.DataPath = "c:\\forte\\data";
-			cf.LogPath = "c:\\forte\\logs";
+			var rc = _container.Resolve<IRuntimeConfig>();
+
+			//set runtime configs
+			if (!string.IsNullOrEmpty(argsParsed.DataPath)) { rc.DataPath = argsParsed.DataPath; }
+			if (!string.IsNullOrEmpty(argsParsed.LogPath)) { rc.LogPath = argsParsed.LogPath; }
+			rc.PresetPath = argsParsed.PresetPath;
 
 			//web server
 			container.RegisterType<IApiServer, ApiServer>(new ContainerControlledLifetimeManager());
@@ -83,70 +112,74 @@ namespace forte.devices
 			container.RegisterType<IDeviceDaemon, StreamWorkflow>(new ContainerControlledLifetimeManager());
 			var daemon = container.Resolve<IDeviceDaemon>();
 
+			if (argsParsed.TestPreset)
+			{
+				daemon.RunPresetTest().Wait();
+				return;
+			}
+
+			if (argsParsed.TestApi)
+			{
+				daemon.RunApiTest().Wait();
+				return;
+			}
+
+			if (RuntimeUtility.IsAlreadyRunning())
+			{
+				Console.WriteLine("Daemon is already running.");
+				return;
+			}
+
 			daemon.Start();
 			daemon.Await(port);
 		}
 
-		private static bool ProcessArgs(string[] args)
+		private static RunOptions ProcessArgs(string[] args)
 		{
 			if(args.Length == 0)
 			{
 				args = new string[] { "run" };
 			}
 
-			string verb = null;
 			object options = null;
 			var cliOptions = new CliOptions();
 			Parser.Default.ParseArguments(args, cliOptions, (parsedVerb, parsedOptions) =>
 			{
-				verb = parsedVerb;
 				options = parsedOptions;
 			});
 
 			try
 			{
-				switch(verb)
+				var optionsTyped = (RunOptions) options;
+				if (optionsTyped.Background)
 				{
-					case RunOptions.VerbName:
-						var optionsTyped = (RunOptions) options;
-						if (optionsTyped.TestRun)
+					optionsTyped.Background = false;
+					var process = new Process
+					{
+						StartInfo =
 						{
-							return false;
+							FileName = "device-cli.exe",
+							//UseShellExecute = true,
+							UseShellExecute = false,
+							CreateNoWindow = true,
+							WindowStyle = ProcessWindowStyle.Hidden,
+							Arguments = optionsTyped.ToArgs()
 						}
-						if(optionsTyped.Background)
-						{
-							optionsTyped.Background = false;
-							var process = new Process
-							{
-								StartInfo =
-								{
-									FileName = "device-cli.exe",
-									UseShellExecute = false,
-									CreateNoWindow = true,
-									WindowStyle = ProcessWindowStyle.Hidden,
-									Arguments = optionsTyped.ToArgs()
-								}
-							};
+					};
 
-							process.Start();
-							return false;
-						}
-						break;
-					case UpgradeOptions.VerbName:
-						//var optionsTyped1 = (UpgradeOptions) options;
-						break;
-					default:
-						// Never happens
-						break;
+					process.Start();
+					return null;
 				}
+
+				return optionsTyped;
 			}
-			catch(Exception exception)
+			catch (Exception exception)
 			{
 				Console.WriteLine($"Error: {exception.Message}");
-				Environment.Exit(Parser.DefaultExitCodeFail);
+				return null;
 			}
 
-			return true;
+			return null;
 		}
 
 		private static void SetDefaults(IConfigurationManager configManager)

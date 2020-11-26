@@ -6,5 +6,6 @@ namespace forte.devices.config
 	{
 		public string DataPath { get; set; }
 		public string LogPath { get; set; }
+		public string PresetPath { get; set; }
 	}
 }

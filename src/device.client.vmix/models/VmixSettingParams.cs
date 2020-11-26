@@ -22,7 +22,6 @@
         public static string VmixExePath => "vmix-exe-path";
         public static string VmixLoadTimeout => "vmix-load-timeout";
         public static string VmixPlaylistName => "vmix-playlist-name";
-        public static string VmixPresetFolderPath => "vmix-preset-folder-path";
         public static string VmixPresetTemplateFilePath => "vmix-preset-template-file-path";
 
 		public static string EnableIntro => "vmix-intro-video-enabled";

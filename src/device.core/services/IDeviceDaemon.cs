@@ -8,6 +8,8 @@ namespace forte.devices.services
     {
 		void Await(int port);
 		Task Start();
+		Task RunPresetTest();
+		Task RunApiTest();
 		void Shutdown();
 		List<ISessionState> GetState();
 	}

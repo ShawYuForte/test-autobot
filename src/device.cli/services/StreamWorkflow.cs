@@ -24,8 +24,6 @@ namespace forte.devices.workflow
 {
 	public class StreamWorkflow: IDeviceDaemon
 	{
-		private string _version = "2.1.48";
-
 		private readonly AgoraService _agora;
 		private readonly MailService _ms;
 		private readonly IApiServer _server;
@@ -57,6 +55,18 @@ namespace forte.devices.workflow
 			_dbRepository = dbRepository;
 			_configurationManager = configurationManager;
 			_logger = logger;
+
+			var config = _configurationManager.GetDeviceConfig();
+			var apiPath = config.Get<string>(SettingParams.ServerApiPath);
+			_verbose = config.Get<bool>(SettingParams.VerboseDebug);
+			_deviceId = config.Get<string>(SettingParams.DeviceId);
+
+			try
+			{
+				_client = _client ?? new RestClient($"{apiPath}/streams/");
+				_clientDevice = _clientDevice ?? new RestClient($"{apiPath}/devices/");
+			}
+			catch { }
 		}
 
 		public void Await(int port)
@@ -64,7 +74,7 @@ namespace forte.devices.workflow
 			//_serverListener.Connect();
 			using(var server = _server.Run(port))
 			{
-				_logger.Information($"Running device local UI web server v{_version}");
+				_logger.Information($"Running device local UI web server v{Constants.Version}");
 				//synchronous loop for keeping the app alive
 				while(_running)
 				{
@@ -75,14 +85,56 @@ namespace forte.devices.workflow
 
 		public async Task Start()
 		{
-			var config = _configurationManager.GetDeviceConfig();
-			var apiPath = config.Get<string>(SettingParams.ServerApiPath);
-			_verbose = config.Get<bool>(SettingParams.VerboseDebug);
-			_deviceId = config.Get<string>(SettingParams.DeviceId);
-			_client = _client ?? new RestClient($"{apiPath}/streams/");
-			_clientDevice = _clientDevice ?? new RestClient($"{apiPath}/devices/");
-
 			Run();
+		}
+
+		public async Task RunPresetTest()
+		{
+			var s = new SessionState
+			{
+				Permalink = "test",
+				StartTime = DateTime.Now,
+				EndTime = DateTime.Now.AddMinutes(5),
+				SessionType = SessionType.Scheduled,
+				PrimaryIngestUrl = "http://test"
+			};
+
+			var r1 = await LoadPreset(s, true);
+			var r2 = await StartClientStream(s, true);
+			var r3 = await StartProgram(s, true);
+			var r4 = true;
+			var r5 = true;
+			try { _streamingClient.StopProgram(); } catch { r4 = false; }
+			try { _streamingClient.StopStreaming(true); } catch { r5 = false; }
+
+			if (!r1) { _logger.Error("ERROR: Loading preset"); }
+			if (!r2) { _logger.Error("ERROR: Starting Client"); }
+			if (!r3) { _logger.Error("ERROR: Starting Program"); }
+			if (!r4) { _logger.Error("ERROR: Stopping Program"); }
+			if (!r5) { _logger.Error("ERROR: Stopping Streaming"); }
+		}
+
+		public async Task RunApiTest()
+		{
+			if (_clientDevice == null)
+			{
+				_logger.Error("ERROR: Wrong api address");
+				return;
+			}
+
+			var request = new RestRequest($"{_deviceId}/commands/next", Method.GET);
+			var response = _clientDevice.Execute(request);
+
+			// Not found if no command
+			if (response.StatusCode == HttpStatusCode.NotFound)
+			{
+				return;
+			}
+
+			if (response.StatusCode != HttpStatusCode.OK)
+			{
+				_logger.Error("ERROR: Wrong status code");
+			}
 		}
 
 		private async void Run()
@@ -488,6 +540,30 @@ namespace forte.devices.workflow
 			}
 		}
 
+		private async Task<bool> ConnectToAgora(SessionState s)
+		{
+			try
+			{
+				AddSessionRetry(s);
+				if (s.SessionType != SessionType.Manual)
+				{
+					await _agora.Connect(s.SessioId.ToString().ToUpper(), _deviceId);
+					//await _agora.Connect("TestRoom1", _deviceId);
+				}
+				ClearSessionRetry(s);
+				_lockedSessions.TryRemove(s.SessioId, out var t);
+				return true;
+			}
+			catch (Exception ex)
+			{
+				ReportError(s, ex, "Connect To Agora");
+				await Task.Delay(10000);
+				_lockedSessions.TryRemove(s.SessioId, out var t);
+			}
+
+			return false;
+		}
+
 		private void ReportError(Exception ex, SessionState s, string name)
 		{
 			_logger.Debug(ex, "");
@@ -519,108 +595,102 @@ namespace forte.devices.workflow
 			_dbRepository.UpdateSession(s);
 		}
 
-		private void AddSessionRetry(SessionState s)
+		private void AddSessionRetry(SessionState s, bool testrun = false)
 		{
 			s.RetryCount++;
-			_dbRepository.UpdateSession(s);
+			if (!testrun)
+			{
+				_dbRepository.UpdateSession(s);
+			}
 		}
 
-		private void ClearSessionRetry(SessionState s)
+		private void ClearSessionRetry(SessionState s, bool testrun = false)
 		{
 			s.RetryCount = 0;
-			_dbRepository.UpdateSession(s);
+			if (!testrun)
+			{
+				_dbRepository.UpdateSession(s);
+			}
 		}
 
 		#region vmix steps
 
-		private async Task<bool> LoadPreset(SessionState s)
+		private async Task<bool> LoadPreset(SessionState s, bool testrun = false)
 		{
 			try
 			{
-				AddSessionRetry(s);
+				_logger.Debug("Load Preset");
+				AddSessionRetry(s, testrun);
 				if(s.SessionType != SessionType.Manual)
 				{
 					await _streamingClient.LoadVideoStreamPreset(s.VmixPreset, s.PrimaryIngestUrl);
 				}
-				ClearSessionRetry(s);
+				ClearSessionRetry(s, testrun);
 				_lockedSessions.TryRemove(s.SessioId, out var t);
 				return true;
 			}
 			catch(Exception ex)
 			{
 				ReportError(s, ex, "Load Preset");
-				await Task.Delay(15000);
+				if (!testrun)
+				{
+					await Task.Delay(15000);
+				}
 				_lockedSessions.TryRemove(s.SessioId, out var t);
 			}
 
 			return false;
 		}
 
-		private async Task<bool> StartClientStream(SessionState s)
+		private async Task<bool> StartClientStream(SessionState s, bool testrun = false)
 		{
 			try
 			{
-				AddSessionRetry(s);
+				_logger.Debug("Start Client Stream");
+				AddSessionRetry(s, testrun);
 				if(s.SessionType != SessionType.Manual)
 				{
 					FlushDns();
-					_streamingClient.StartStreaming();
+					_streamingClient.StartStreaming(testrun);
 				}
-				ClearSessionRetry(s);
+				ClearSessionRetry(s, testrun);
 				_lockedSessions.TryRemove(s.SessioId, out var t);
 				return true;
 			}
 			catch(Exception ex)
 			{
 				ReportError(s, ex, "Start Client Stream");
-				await Task.Delay(15000);
+				if (!testrun)
+				{
+					await Task.Delay(15000);
+				}
 				_lockedSessions.TryRemove(s.SessioId, out var t);
 			}
 
 			return false;
 		}
 
-		private async Task<bool> StartProgram(SessionState s)
+		private async Task<bool> StartProgram(SessionState s, bool testrun = false)
 		{
 			try
 			{
-				AddSessionRetry(s);
+				_logger.Debug("Start Program");
+				AddSessionRetry(s, testrun);
 				if(s.SessionType != SessionType.Manual)
 				{
 					_streamingClient.StartProgram();
 				}
-				ClearSessionRetry(s);
+				ClearSessionRetry(s, testrun);
 				_lockedSessions.TryRemove(s.SessioId, out var t);
 				return true;
 			}
 			catch(Exception ex)
 			{
 				ReportError(s, ex, "Start Program");
-				await Task.Delay(15000);
-				_lockedSessions.TryRemove(s.SessioId, out var t);
-			}
-
-			return false;
-		}
-
-		private async Task<bool> ConnectToAgora(SessionState s)
-		{
-			try
-			{
-				AddSessionRetry(s);
-				if(s.SessionType != SessionType.Manual)
+				if (!testrun)
 				{
-					await _agora.Connect(s.SessioId.ToString().ToUpper(), _deviceId);
-					//await _agora.Connect("TestRoom1", _deviceId);
+					await Task.Delay(15000);
 				}
-				ClearSessionRetry(s);
-				_lockedSessions.TryRemove(s.SessioId, out var t);
-				return true;
-			}
-			catch(Exception ex)
-			{
-				ReportError(s, ex, "Connect To Agora");
-				await Task.Delay(10000);
 				_lockedSessions.TryRemove(s.SessioId, out var t);
 			}
 
@@ -653,6 +723,11 @@ namespace forte.devices.workflow
 
 		private StreamingDeviceCommandModel ThreadSafeFetchCommand()
 		{
+			if (_clientDevice == null)
+			{
+				return null;
+			}
+
 			var request = new RestRequest($"{_deviceId}/commands/next", Method.GET);
 			var response = _clientDevice.Execute(request);
 

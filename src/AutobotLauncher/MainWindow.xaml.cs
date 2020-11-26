@@ -1,15 +1,20 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Documents;
 using AutobotLauncher.Enums;
+using AutobotLauncher.Forms;
 using AutobotLauncher.Utils;
 
 namespace AutobotLauncher
 {
-	/// <summary>
-	/// Interaction logic for MainWindow.xaml
-	/// </summary>
 	public partial class MainWindow : Window
 	{
 		private MainWindowViewModel _model = new MainWindowViewModel();
@@ -17,148 +22,226 @@ namespace AutobotLauncher
 		public MainWindow()
 		{
 			InitializeComponent();
-
 			DataContext = _model;
-
 			Check();
 		}
 
-		private void Check()
+		private async Task Check()
 		{
-			_model.IsNugetInstalled = _model.IsNugetInstalled == true || "nuget".ProcessExists();
-			_model.IsChocoInstalled = _model.IsChocoInstalled == true || "choco".ProcessExists();
-			_model.IsClientInstalled = _model.IsClientInstalled == true || "device-cli".ProcessExists("-t");
-			_model.IsVmixInstalled = File.Exists(Constants.VmixPath);
-			_model.IsApiConnected = _model.IsClientInstalled;
+			if (_model.CheckInProgress) { return; }
+			_model.CheckInProgress = true;
+			_model.Reset();
+
+			var tasks = new List<Task>();
+			var vmixTask = new Task(() =>
+			{
+				_model.IsVmixInstalled = File.Exists(Constants.VmixPath);
+				_model.IsVmixInstalled = false;
+			});
+			vmixTask.Start();
+			tasks.Add(vmixTask);
+
+			await CheckNuget();
+			await UpdateNugetSources();
+			CheckLatest();
+			await CheckClient();
+
+			await Launch();
+			await CheckApi();
+
+			await Task.WhenAll(tasks.ToArray());
 
 			_model.SetStatus();
+			_model.CheckInProgress = false;
 		}
 
-		private void ClickCheck(object sender, RoutedEventArgs e)
+		private async Task UpdateNugetSources()
 		{
-			if (_model.StatusEnum == LaunchStatus.None)
-			{
-				Check();
-			}
+			var cm1 = "sources remove -name forte-approved";
+			var cm2 = "sources add -name forte-approved -Source https://pkgs.dev.azure.com/forte-fit/_packaging/forte-approved/nuget/v3/index.json -username NugetUser -password 24cmiauw26nqlzp7o5u7oinrcczwujeqx2zaghavpn2prs4w2fwa";
 
-			if (_model.StatusEnum == LaunchStatus.None)
+			await "nuget".ProcessRunAndWaitAsAdmin(cm1);
+			await "nuget".ProcessRunAndWaitAsAdmin(cm2);
+		}
+
+		private async Task CheckNuget()
+		{
+			var r = await "nuget".ProcessRunAndWaitAsAdmin();
+			_model.IsNugetInstalled = r != null;
+		}
+
+		private async Task CheckClient()
+		{
+			//check if client is installed
+			var vfPath = Constants.VersionFileName.GetAbsolutePath();
+			if (!File.Exists(vfPath))
 			{
-				//launch
+				var vInst = await CheckLatest();
+				//got new package
+				if (vInst != null)
+				{
+					File.WriteAllText(vfPath, vInst);
+					await CheckClient();
+				}
 				return;
 			}
 
-			if (_model.StatusEnum == LaunchStatus.AutoInstall)
+			var v = File.ReadAllText(vfPath);
+			//if no version installed
+			if (v == null) { return; }
+
+			//verify that client is ready to use
+			var r = await FileUtils.GetClientPath(v).ProcessRunAndWaitAsAdmin("-version");
+			if (r != null)
 			{
-				if (_model.IsChocoInstalled != true)
-				{
-					InstallChoco();
-				}
+				_model.ClientVersion = r.FirstOrDefault();
 			}
 
-			Check();
+			_model.IsClientInstalled = r != null;
 		}
 
-		private void InstallChoco()
+		private async Task<string> CheckLatest()
 		{
-			"nuget".ProcessRunAndWaitAsAdmin("install chocolatey");
-			"powershell.exe".ProcessRunAndWaitAsAdmin(@"-executionpolicy unrestricted \chocolatey.0.10.14\tools\Install.ps1");
+			var cm1 = "locals http-cache -clear";
+			var cm2 = "install device-cli";
 
-			Console.WriteLine("InstallChoco complete");
+			await "nuget".ProcessRunAndWaitAsAdmin(cm1);
+			var r = await "nuget".ProcessRunAndWaitAsAdmin(cm2);
+
+			//package is installed
+			var pinstalled = r.FirstOrDefault(m => m != null && m.Contains("is already installed.")); //"Package "device-cli.2.2.0" is already installed."
+			//package was installed
+			if (pinstalled == null)
+			{
+				pinstalled = r.FirstOrDefault(m => m != null && m.Contains("Successfully installed")); //Successfully installed 'device-cli 2.1.45'
+			}
+			//nothing installed
+			if (pinstalled == null)
+			{
+				_model.ClientVersionLatest = null;
+				return null;
+			}
+
+			//get package version
+			var match = Regex.Match(pinstalled, @"device-cli[ ]?[0-9\.]+");
+			if (match.Success)
+			{
+				_model.ClientVersionLatest = Regex.Match(match.Value, @"[0-9][0-9\.]+").Value;
+				var vfPath = Constants.LatestFileName.GetAbsolutePath();
+				File.WriteAllText(vfPath, _model.ClientVersionLatest);
+				return _model.ClientVersionLatest;
+			}
+			else
+			{
+				_model.ClientVersionLatest = null;
+				return null;
+			}
 		}
-
-		private void InstallClient()
+		
+		private async Task InstallLatest()
 		{
+			if (_model.CheckInProgress) { return; }
+			if (_model.InstallInProgress) { return; }
+			_model.InstallInProgress = true;
+
+			_model.IsClientInstalled = null;
+			Shutdown();
+			var newVersion = File.ReadAllText(Constants.LatestFileName.GetAbsolutePath());
+			File.WriteAllText(Constants.VersionFileName.GetAbsolutePath(), newVersion);
+			await Check();
+
+			_model.InstallInProgress = false;
 		}
 
-		//public void Run()
-		//{
-		//	DownloadNewPackage();
-		//	Console.WriteLine("Attempting to update...");
+		private async Task Launch()
+		{
+			_model.IsClientLaunched = await ClientInteractor.StartClient(_model.ClientVersion);
+		}
 
-		//	try
-		//	{
-		//		var stateJson = RuntimeUtility.FetchRunningDaemonState();
-		//		var parsedState = JObject.Parse(stateJson);
-		//		var statusString = parsedState.SelectToken("status").Value<string>();
-		//		var status = (StreamingDeviceStatuses) Enum.Parse(typeof(StreamingDeviceStatuses), statusString);
-		//		switch (status)
-		//		{
-		//			case StreamingDeviceStatuses.Idle:
-		//			case StreamingDeviceStatuses.Offline:
-		//			case StreamingDeviceStatuses.Error:
-		//				break;
-		//			case StreamingDeviceStatuses.Streaming:
-		//			case StreamingDeviceStatuses.StreamingProgram:
-		//			case StreamingDeviceStatuses.StreamingAndRecording:
-		//			case StreamingDeviceStatuses.StreamingAndRecordingProgram:
-		//			case StreamingDeviceStatuses.Recording:
-		//			case StreamingDeviceStatuses.RecordingProgram:
-		//				Console.WriteLine("Device is not idle, cannot upgrade at this time.");
-		//				Environment.Exit(Parser.DefaultExitCodeFail);
-		//				break;
-		//			default:
-		//				throw new ArgumentOutOfRangeException();
-		//		}
-		//	}
-		//	catch (WebException)
-		//	{
-		//		// Ignore
-		//	}
+		private async Task CheckApi()
+		{
+			_model.IsApiConnected = await ClientInteractor.CheckApi(_model.ClientVersion);
+		}
 
-		//	var startup = new ProcessStartInfo("choco.exe")
-		//	{
-		//		UseShellExecute = true,
-		//		CreateNoWindow = false,
-		//		Arguments = $"upgrade device-cli --source {_options.Repo} -y"
-		//	};
-		//	Process.Start(startup);
-		//}
+		private async Task Shutdown()
+		{
+			_model.IsClientLaunched = null;
 
-		//private void DownloadNewPackage()
-		//{
-		//	if (!Directory.Exists(_options.Repo))
-		//		Directory.CreateDirectory(_options.Repo);
+			await ClientApiInteractor.Shutdown();
+		}
 
-		//	var existingPackages = Directory.GetDirectories(_options.Repo);
-		//	Console.WriteLine("Looking for updates from nuget feed...");
-		//	Console.WriteLine();
+		#region handlers
 
-		//	var process = new Process
-		//	{
-		//		StartInfo =
-		//		{
-		//			FileName = "nuget.exe",
-		//			UseShellExecute = false,
-		//			RedirectStandardOutput = true,
-		//			Arguments = string.IsNullOrWhiteSpace(_options.Source)
-		//				? "install device-cli"
-		//				: $"install device-cli -source {_options.Source}",
-		//			WorkingDirectory = _options.Repo
-		//		}
-		//	};
-		//	process.OutputDataReceived += Process_OutputDataReceived;
+		private async void ClickCheck(object sender, RoutedEventArgs e)
+		{
+			if (_model.CheckInProgress) { return; }
 
-		//	process.Start();
+			await Check();
+		}
 
-		//	// Start the asynchronous read of the sort output stream.
-		//	process.BeginOutputReadLine();
+		private async void ClickInstall(object sender, RoutedEventArgs e)
+		{
+			await InstallLatest();
+		}
 
-		//	process.WaitForExit();
+		private async void ClickShutdown(object sender, RoutedEventArgs e)
+		{
+			await Shutdown();
+		}
 
-		//	Console.WriteLine();
-		//	if (process.ExitCode != 0)
-		//	{
-		//		Console.WriteLine($"Nuget process exited with code {process.ExitCode}");
-		//	}
+		private async void ClickCheckPreset(object sender, RoutedEventArgs e)
+		{
+			if (_model.CheckInProgress) { return; }
+			_model.CheckInProgress = true;
+			try
+			{
+				await ClientInteractor.CheckPreset(_model.ClientVersion);
+			}
+			catch (Exception ex)
+			{
+				ex.Error();
+			}
+			_model.CheckInProgress = false;
+		}
 
-		//	var latestPackages = Directory.GetDirectories(_options.Repo);
-		//	if (latestPackages.Any(current => existingPackages.All(previous => current != previous)))
-		//	{
-		//		Console.WriteLine("New package downloaded!");
-		//		return;
-		//	}
+		private async void ClickEditApiPath(object sender, RoutedEventArgs e)
+		{
+			if (_model.CheckInProgress) { return; }
+			try
+			{
+				var dlg = new BaseConfigForm();
+				await dlg.Init();
+				if (dlg.ShowDialog() == true)
+				{
+					_model.IsApiConnected = null;
 
-		//	Console.WriteLine("No new versions found.");
-		//}
+					try
+					{
+						await Shutdown();
+					}
+					catch { }
+
+					await Launch();
+					await CheckApi();
+				}
+			}
+			catch (Exception ex)
+			{
+				ex.Error();
+			}
+		}
+
+		private async void ClickVmixLink(object sender, RoutedEventArgs e)
+		{
+			var hl = (Hyperlink) sender;
+
+			string navigateUri = hl.NavigateUri.ToString();
+
+			Process.Start(new ProcessStartInfo(navigateUri));
+
+			e.Handled = true;
+		}
+
+		#endregion
 	}
 }

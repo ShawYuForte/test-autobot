@@ -1,0 +1,28 @@
+﻿<Window x:Class="AutobotLauncher.Forms.BaseConfigForm"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:AutobotLauncher.Forms"
+        mc:Ignorable="d"
+        Title="Edit Configuration" Height="220.856" Width="282.836" ResizeMode="NoResize" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterOwner">
+	<Grid>
+		<StackPanel>
+			<Label>Please contact support team to retrieve these values.</Label>
+			<Label>Device id:</Label>
+			<TextBox Text="{Binding DeviceId}"></TextBox>
+			<Label>Api path:</Label>
+			<TextBox Text="{Binding ApiPath}"></TextBox>
+			<Label>Agora app id:</Label>
+			<TextBox Text="{Binding AgoraApp}"></TextBox>
+			<StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+				<Button Click="ClickCancel" Margin="2">
+					Cancel
+				</Button>
+				<Button Click="ClickSave" Margin="2">
+					Save &amp; Close
+				</Button>
+			</StackPanel>
+		</StackPanel>
+	</Grid>
+</Window>

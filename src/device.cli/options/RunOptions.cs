@@ -26,8 +26,14 @@ namespace forte.devices.options
         [Option('b', "background", HelpText = "Runs the daemon in the background (no console).")]
         public bool Background { get; set; }
 
-		[Option('t', "testrun", HelpText = "Close the app after the launch.")]
-		public bool TestRun { get; set; }
+		[Option("pr", HelpText = "Path where vmix preset is stored.")]
+		public string PresetPath { get; set; }
+
+		[Option("test-preset", DefaultValue = false, HelpText = "Run vmix preset flow, without streaming")]
+		public bool TestPreset { get; set; }
+
+		[Option("test-api", DefaultValue = false, HelpText = "Run api test request")]
+		public bool TestApi { get; set; }
 
 		[HelpOption]
         public string GetUsage()
@@ -41,15 +47,24 @@ namespace forte.devices.options
 
             buffer.Append("run");
 
-            if (!string.IsNullOrWhiteSpace(ServerUrl))
-                buffer.Append($" -s {ServerUrl}");
+			if (!string.IsNullOrWhiteSpace(ServerUrl))
+			{
+				buffer.Append($" -s {ServerUrl}");
+			}
 
             buffer.Append($" -p {Port}");
-            buffer.Append($" -d {DataPath}");
-            buffer.Append($" -l {LogPath}");
+            buffer.Append($" -d \"{DataPath}\"");
+            buffer.Append($" -l \"{LogPath}\"");
 
-            if (Background)
-                buffer.Append(" -b");
+			if (!string.IsNullOrEmpty(PresetPath))
+			{
+				buffer.Append($" -pr \"{PresetPath}\"");
+			}
+
+			if (Background)
+			{
+				buffer.Append(" -b");
+			}
 
             return buffer.ToString();
         }

@@ -224,7 +224,10 @@
     <Compile Include="services\StreamWorkflow.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="bin\preset\Forte Preset.vmix" />
     <None Include="packages.config" />
     <None Include="package\device-cli.nuspec">
       <SubType>Designer</SubType>
@@ -286,6 +289,15 @@
     <EmbeddedResource Include="Migrations\202007151214290_refactor4.resx">
       <DependentUpon>202007151214290_refactor4.cs</DependentUpon>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="bin\agoraSdkCWrapper.dll" />
+    <Content Include="bin\agora_rtc_sdk.dll" />
+    <Content Include="bin\preset\Final2.jpg" />
+    <Content Include="bin\preset\Final3.jpg" />
+    <Content Include="bin\preset\Forte_IntroFinal.mp4" />
+    <Content Include="bin\preset\Forte_OutroFinal.mp4" />
+    <Content Include="bin\preset\OverlayNew 1080.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

@@ -4,5 +4,6 @@
 	{
 		string DataPath { get; set; }
 		string LogPath { get; set; }
+		string PresetPath { get; set; }
 	}
 }

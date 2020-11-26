@@ -7,6 +7,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -23,23 +24,18 @@ namespace forte.devices.services.clients
 	public class VmixStreamingClient : IStreamingClient
     {
         const uint WM_CLOSE = 0x0010;
-
-		#if DEBUG
-		private readonly Regex _cameraRegex = new Regex(@"Webcam");
-		#else
-        private readonly Regex _cameraRegex = new Regex(@"RTSPTCP rtsp:\/\/root:pass@[0-9.]*\/axis-media\/media\.amp");
-		#endif
-
-        private readonly RestClient _client;
+		private readonly RestClient _client;
         private readonly IConfigurationManager _configurationManager;
         private readonly ILogger _logger;
+        private readonly IRuntimeConfig _cfg;
 
 #region init
 
-		public VmixStreamingClient(IConfigurationManager configurationManager, ILogger logger)
+		public VmixStreamingClient(IConfigurationManager configurationManager, ILogger logger, IRuntimeConfig cfg)
         {
             _configurationManager = configurationManager;
             _logger = logger;
+			_cfg = cfg;
 
 			var config = _configurationManager.GetDeviceConfig();
 			if(string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.VmixApiPath)))
@@ -51,15 +47,15 @@ namespace forte.devices.services.clients
 			if(string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.VmixPresetTemplateFilePath)))
 				config = _configurationManager.UpdateSetting(VmixSettingParams.VmixPresetTemplateFilePath, @"C:\forte\preset\Forte Preset.vmix");
 			if(string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.BroadcastStartupImage)))
-				config = _configurationManager.UpdateSetting(VmixSettingParams.BroadcastStartupImage, "logo_dark_background.jpg");
+				config = _configurationManager.UpdateSetting(VmixSettingParams.BroadcastStartupImage, "Final3.jpg");
 			if(string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.BroadcastStartupVideo)))
-				config = _configurationManager.UpdateSetting(VmixSettingParams.BroadcastStartupVideo, "logo_dark_background_mantis.mp4");
+				config = _configurationManager.UpdateSetting(VmixSettingParams.BroadcastStartupVideo, "Forte_IntroFinal.mp4");
 			if(string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.BroadcastClosingImage)))
-				config = _configurationManager.UpdateSetting(VmixSettingParams.BroadcastClosingImage, "logo_girl_warrior_stance.jpg");
+				config = _configurationManager.UpdateSetting(VmixSettingParams.BroadcastClosingImage, "Final2.jpg");
 			if(string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.BroadcastClosingVideo)))
-				config = _configurationManager.UpdateSetting(VmixSettingParams.BroadcastClosingVideo, "logo_reveal_house.mp4");
+				config = _configurationManager.UpdateSetting(VmixSettingParams.BroadcastClosingVideo, "Forte_OutroFinal.mp4");
 			if(string.IsNullOrWhiteSpace(config.Get<string>(VmixSettingParams.BroadcastOverlayImage)))
-				_configurationManager.UpdateSetting(VmixSettingParams.BroadcastOverlayImage, "overlay_1280_720.png");
+				_configurationManager.UpdateSetting(VmixSettingParams.BroadcastOverlayImage, "OverlayNew 1080.png");
 			if(!config.Contains(VmixSettingParams.AutoCloseVmixErrorDialog))
 				_configurationManager.UpdateSetting(VmixSettingParams.AutoCloseVmixErrorDialog, false);
 			if(!config.Contains(VmixSettingParams.RetryCountForStreamException))
@@ -94,8 +90,7 @@ namespace forte.devices.services.clients
 		{
 			var vmixProcessHandle = EnsureVmixIsRunning(startFresh: true);
 			var config = _configurationManager.GetDeviceConfig();
-			var presetTemplateFilePath = config.Get<string>(VmixSettingParams.VmixPresetTemplateFilePath);
-			var vmixPresetOutputFolder = config.Get<string>(VmixSettingParams.VmixPresetFolderPath);
+			var presetTemplateFilePath = string.IsNullOrEmpty(_cfg.PresetPath) ? config.Get<string>(VmixSettingParams.VmixPresetTemplateFilePath) : _cfg.PresetPath;
 			var timeout = config.Get(VmixSettingParams.VmixLoadTimeout, defaultValue: 120);
 			var timeStamp = DateTime.UtcNow.ToString(CultureInfo.InvariantCulture).Replace(":", "").Replace("/", "");
 			var vmixPresetOutputFile = $"{timeStamp}-{Guid.NewGuid()}.vmix";
@@ -103,46 +98,34 @@ namespace forte.devices.services.clients
 			_logger.Debug($"Custom preset? {preset}");
 			if(!string.IsNullOrEmpty(preset))
 			{
-				if(!preset.StartsWith("Test"))
+				var info = new FileInfo(presetTemplateFilePath);
+				if(info.Exists)
 				{
-					var info = new FileInfo(presetTemplateFilePath);
-					if(info.Exists)
-					{
-						preset = preset.Replace(".vmix", "");
-						var newPath = $"{info.DirectoryName}/{preset}.vmix";
+					preset = preset.Replace(".vmix", "");
+					var newPath = $"{info.DirectoryName}/{preset}.vmix";
 
-						if(File.Exists(newPath))
-						{
-							_logger.Debug($"Using preset {newPath} instead of {presetTemplateFilePath}");
-							presetTemplateFilePath = newPath;
-						}
-						else
-						{
-							_logger.Error($"Cannot find preset: {newPath}");
-						}
+					if(File.Exists(newPath))
+					{
+						_logger.Debug($"Using preset {newPath} instead of {presetTemplateFilePath}");
+						presetTemplateFilePath = newPath;
+					}
+					else
+					{
+						_logger.Error($"Cannot find preset: {newPath}");
 					}
 				}
 			}
-
-			if(string.IsNullOrWhiteSpace(vmixPresetOutputFolder))
-			{
-				vmixPresetOutputFolder = Path.GetTempPath();
-			}
-
-			_logger.Debug("Using preset output path {@vmixPresetOutputFolder}", vmixPresetOutputFolder);
-			vmixPresetOutputFile = Path.Combine(vmixPresetOutputFolder, vmixPresetOutputFile);
 
 			var vmixPreset = VmixPreset.FromFile(presetTemplateFilePath);
 			vmixPreset.Outputs = new List<VmixStreamDestination>
 			{
 				new VmixStreamDestination("Primary", primaryUrl),
-                //new VmixStreamDestination("Secondary", videoStream.SecondaryIngestUrl)
             };
 
 			_logger.Debug("Saving preset file {@vmixPresetOutputFile}", vmixPresetOutputFile);
-			vmixPreset.ToFile(vmixPresetOutputFile);
+			vmixPreset.ToFile(presetTemplateFilePath);
 
-			var requestUrl = $"/?Function=OpenPreset&Value={vmixPresetOutputFile}";
+			var requestUrl = $"/?Function=OpenPreset&Value={presetTemplateFilePath}";
 			var request = new RestRequest(requestUrl, Method.GET) { Timeout = 1 };
 			var response = _client.Execute<VmixState>(request);
 
@@ -184,11 +167,11 @@ namespace forte.devices.services.clients
 
 #region stream
 
-		public async void StartStreaming()
+		public async void StartStreaming(bool testrun = false)
 		{
 			var vmixState = GetVmixState();
 			if(vmixState == null) return;
-			var config = _configurationManager.GetDeviceConfig();
+			//var config = _configurationManager.GetDeviceConfig();
 
 			_logger.Debug("Loading static image intro...");
 			var openingImage = vmixState.Inputs.Single(input => input.Role == InputRole.OpeninStaticImage);
@@ -200,9 +183,10 @@ namespace forte.devices.services.clients
 
 			_logger.Debug("Starting streaming...");
 
-			//var retries = config.Get(VmixSettingParams.RetryCountForStreamException, 1);
-			//StartStreamingCommand(retries == 0 ? 1 : retries);
-			await StartStreamingCommand(5);
+			if (!testrun)
+			{
+				await StartStreamingCommand(5);
+			}
 
 			_logger.Debug("Starting started.");
 		}
@@ -272,9 +256,16 @@ namespace forte.devices.services.clients
 			}
 
 			// Set camera 1 at preview
-			var cameraInput = vmixState.Inputs.First(input => input.Role == InputRole.Camera);
-			SetPreview(cameraInput);
-			_logger.Debug("Set camera 1 as preview.");
+			var cameraInput = vmixState.Inputs.FirstOrDefault(input => input.Role == InputRole.Camera);
+			if (cameraInput != null)
+			{
+				SetPreview(cameraInput);
+				_logger.Debug("Set camera 1 as preview.");
+			}
+			else
+			{
+				_logger.Error("No camera input found: " + string.Join(Environment.NewLine, vmixState.Inputs.Select(i => i.Title)));
+			}
 
 			if(enableIntro)
 			{
@@ -349,11 +340,11 @@ namespace forte.devices.services.clients
 				_logger.Debug("Switched to closing image.");
 			}
 
-			if(!enableOutroStatic)
-			{
-				_logger.Debug("No outro closing image.");
-				StopStreaming(true);
-			}
+			//if(!enableOutroStatic)
+			//{
+			//	_logger.Debug("No outro closing image.");
+			//	StopStreaming(true);
+			//}
 		}
 
 #endregion
@@ -399,7 +390,22 @@ namespace forte.devices.services.clients
 				audioInput.Role = InputRole.Audio;
 			}
 
-			state.Inputs.Where(i => _cameraRegex.IsMatch(i.Title)).ToList().ForEach(i => i.Role = InputRole.Camera);
+			var reg1 = new Regex(@"RTSPTCP rtsp:\/\/root:pass@[0-9.]*\/axis-media\/media\.amp");
+			var reg2 = new Regex(@"RTSPUDP rtsp:\/\/root:pass@[0-9.]*\/axis-media\/media\.amp");
+
+			var primary = state.Inputs.Where(i => reg1.IsMatch(i.Title) || reg2.IsMatch(i.Title)).ToList();
+
+			if (!primary.Any())
+			{
+				primary = state.Inputs.Where(i => i.Title.StartsWith("RTSPTCP rtsp:") || i.Title.StartsWith("RTSPUDP rtsp:")).ToList();
+			}
+
+			if (!primary.Any())
+			{
+				primary = state.Inputs.Where(i => i.Title.Contains("Webcam")).ToList();
+			}
+
+			primary.ForEach(i => i.Role = InputRole.Camera);
 
 			state.Active = state.Inputs.FirstOrDefault(i => i.Number == state.ActiveNumber);
 			state.Preview = state.Inputs.FirstOrDefault(i => i.Number == state.PreviewNumber);
