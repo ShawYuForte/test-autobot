@@ -1449,15 +1449,11 @@ namespace AgoraSDK
             adjustRecordingSignalVolume(400);
 
             setParameters("{\"che.audio.enable.agc\":false}");
+			setAudioProfile((int) AUDIO_PROFILE_TYPE.AUDIO_PROFILE_MUSIC_HIGH_QUALITY_STEREO, (int) AUDIO_SCENARIO_TYPE.AUDIO_SCENARIO_DEFAULT);
 
-            enableVideo();
+			enableVideo();
             enableAudio();
             enableDualStreamMode(true);
-            //adjustAudioMixingVolume(100);
-            //adjustPlaybackSignalVolume(100);
-            //adjustRecordingSignalVolume(100);
-            //adjustAudioMixingPlayoutVolume(100);
-            //adjustAudioMixingPublishVolume(100);
 
             return 0;
         }
