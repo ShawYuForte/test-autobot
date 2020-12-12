@@ -1458,7 +1458,7 @@ namespace AgoraSDK
             //adjustRecordingSignalVolume(400);
 
             setParameters("{\"che.audio.enable.agc\":false}");
-			setAudioProfile((int) AUDIO_PROFILE_TYPE.AUDIO_PROFILE_MUSIC_HIGH_QUALITY_STEREO, (int) AUDIO_SCENARIO_TYPE.AUDIO_SCENARIO_GAME_STREAMING);
+			setAudioProfile((int) AUDIO_PROFILE_TYPE.AUDIO_PROFILE_MUSIC_HIGH_QUALITY, (int) AUDIO_SCENARIO_TYPE.AUDIO_SCENARIO_IOT);
 
 			enableVideo();
             enableAudio();
