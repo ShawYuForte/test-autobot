@@ -54,9 +54,19 @@ namespace AutobotLauncher.Utils
 			return !HasError(r);
 		}
 
+		public static string GetPresetFolderPath(string v)
+		{
+			return $"{FileUtils.GetClientFolder(v)}\\preset";
+		}
+
+		public static string GetPresetFilePath(string v)
+		{
+			return $"{GetPresetFolderPath(v)}\\Forte Preset.vmix";
+		}
+
 		private static string GetDefaultParams(string v)
 		{
-			return $"-d \"{FileUtils.Dir.FullName}\\data\" -l \"{FileUtils.Dir.FullName}\\logs\" --pr \"{FileUtils.GetClientFolder(v)}\\preset\\Forte Preset.vmix\"";
+			return $"-d \"{FileUtils.Dir.FullName}\\data\" -l \"{FileUtils.Dir.FullName}\\logs\" --pr \"{GetPresetFilePath(v)}\"";
 		}
 
 		private static bool HasError(List<string> appOutput)

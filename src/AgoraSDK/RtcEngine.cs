@@ -1445,11 +1445,20 @@ namespace AgoraSDK
             //internal device manager
             creatAAudioRecordingDeviceManager();
 
-            setAudioRecordingDeviceVolume(255);
-            adjustRecordingSignalVolume(400);
+			/*
+			2.2.* versions:
+			10 - gain, stereo
+			11 - no gain, no stereo
+			12 - no gain, stereo
+			13 - no gain, no stereo, gaming
+			14 - no gain, stereo, gaming
+			*/
+
+            //setAudioRecordingDeviceVolume(255);
+            //adjustRecordingSignalVolume(400);
 
             setParameters("{\"che.audio.enable.agc\":false}");
-			setAudioProfile((int) AUDIO_PROFILE_TYPE.AUDIO_PROFILE_MUSIC_HIGH_QUALITY_STEREO, (int) AUDIO_SCENARIO_TYPE.AUDIO_SCENARIO_DEFAULT);
+			setAudioProfile((int) AUDIO_PROFILE_TYPE.AUDIO_PROFILE_MUSIC_HIGH_QUALITY_STEREO, (int) AUDIO_SCENARIO_TYPE.AUDIO_SCENARIO_GAME_STREAMING);
 
 			enableVideo();
             enableAudio();

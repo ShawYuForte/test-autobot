@@ -145,12 +145,12 @@ namespace AutobotLauncher
 
 			if (IsNugetInstalled != true || IsClientInstalled != true || IsClientLaunched != true || IsVmixInstalled != true || IsApiConnected != true)
 			{
-				Status = "Required components need to be installed";
+				Status = "All components need to be installed for the application to function";
 				return;
 			}
 
 			StatusEnum = LaunchStatus.None;
-			Status = "Client is ready to use";
+			Status = "Agent is ready to use";
 		}
 
 		#endregion

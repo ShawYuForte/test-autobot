@@ -5,15 +5,15 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AutobotLauncher.Forms"
         mc:Ignorable="d"
-        Title="Edit Configuration" Height="220.856" Width="282.836" ResizeMode="NoResize" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterOwner">
+        Title="Settings" Height="220.856" Width="282.836" ResizeMode="NoResize" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterOwner">
 	<Grid>
 		<StackPanel>
-			<Label>Please contact support team to retrieve these values.</Label>
-			<Label>Device id:</Label>
+			<Label>Contact support to obtain this info.</Label>
+			<Label>Agent Device ID:</Label>
 			<TextBox Text="{Binding DeviceId}"></TextBox>
-			<Label>Api path:</Label>
+			<Label>Server URL:</Label>
 			<TextBox Text="{Binding ApiPath}"></TextBox>
-			<Label>Agora app id:</Label>
+			<Label>2-Way Video ID:</Label>
 			<TextBox Text="{Binding AgoraApp}"></TextBox>
 			<StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
 				<Button Click="ClickCancel" Margin="2">

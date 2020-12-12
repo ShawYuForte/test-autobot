@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
@@ -36,7 +34,6 @@ namespace AutobotLauncher
 			var vmixTask = new Task(() =>
 			{
 				_model.IsVmixInstalled = File.Exists(Constants.VmixPath);
-				_model.IsVmixInstalled = false;
 			});
 			vmixTask.Start();
 			tasks.Add(vmixTask);
@@ -231,11 +228,27 @@ namespace AutobotLauncher
 			}
 		}
 
-		private async void ClickVmixLink(object sender, RoutedEventArgs e)
+		private async void ClickPreset(object sender, RoutedEventArgs e)
+		{
+			var path = ClientInteractor.GetPresetFilePath(_model.ClientVersion);
+			await "explorer.exe".ProcessRunAndWaitAsAdmin(path);
+		}
+
+		private async void ClickPresetFolder(object sender, RoutedEventArgs e)
+		{
+			var path = ClientInteractor.GetPresetFolderPath(_model.ClientVersion);
+			await "explorer.exe".ProcessRunAndWaitAsAdmin(path);
+		}
+
+		private async void ClickAdvancedSettings(object sender, RoutedEventArgs e)
+		{
+			Process.Start(new ProcessStartInfo("http://localhost:9000/#/dashboard"));
+		}
+
+		private async void ClickLink(object sender, RoutedEventArgs e)
 		{
 			var hl = (Hyperlink) sender;
-
-			string navigateUri = hl.NavigateUri.ToString();
+			var navigateUri = hl.NavigateUri.ToString();
 
 			Process.Start(new ProcessStartInfo(navigateUri));
 

@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:AutobotLauncher"
 		xmlns:c="clr-namespace:AutobotLauncher.Utils.Converters"
 		mc:Ignorable="d"
-        Title="Autobot Launcher" Height="250" Width="600"
+        Title="Forte" Height="250" Width="600"
 		FontSize="15"
 		d:DataContext="{d:DesignInstance Type=local:MainWindowViewModel, IsDesignTimeCreatable=True}">
 
@@ -71,23 +71,23 @@
 			</Grid.RowDefinitions>
 
 			<StackPanel Grid.Row="0" Orientation="Horizontal" Visibility="{Binding IsNugetInstalled, Converter={StaticResource BoolToVisibleConverterProgress}}">
-				<Label Style="{StaticResource Progress}">Checking nuget...</Label>
+				<Label Style="{StaticResource Progress}">Checking update manager...</Label>
 			</StackPanel>
 			<StackPanel Grid.Row="0" Orientation="Horizontal" Visibility="{Binding IsNugetInstalled, Converter={StaticResource BoolToVisibleConverterInverse}}">
-				<Label Style="{StaticResource Error}">Nuget is not installed.</Label>
+				<Label Style="{StaticResource Error}">Update manager is not installed.</Label>
 			</StackPanel>
 			<StackPanel Grid.Row="0" Orientation="Horizontal" Visibility="{Binding IsNugetInstalled, Converter={StaticResource BoolToVisibleConverter}}">
-				<Label Style="{StaticResource Success}">Nuget is installed.</Label>
+				<Label Style="{StaticResource Success}">Update manager is installed.</Label>
 			</StackPanel>
 
 			<StackPanel Grid.Row="1" Orientation="Horizontal" Visibility="{Binding IsClientInstalled, Converter={StaticResource BoolToVisibleConverterProgress}}">
-				<Label Style="{StaticResource Progress}">Checking client...</Label>
+				<Label Style="{StaticResource Progress}">Checking agent...</Label>
 			</StackPanel>
 			<StackPanel Grid.Row="1" Orientation="Horizontal" Visibility="{Binding IsClientInstalled, Converter={StaticResource BoolToVisibleConverterInverse}}">
-				<Label Style="{StaticResource Error}">Client is not installed.</Label>
+				<Label Style="{StaticResource Error}">Agent is not installed.</Label>
 			</StackPanel>
 			<StackPanel Grid.Row="1" Orientation="Horizontal" Visibility="{Binding IsClientInstalled, Converter={StaticResource BoolToVisibleConverter}}">
-				<Label Style="{StaticResource Success}">Client is installed.</Label>
+				<Label Style="{StaticResource Success}">Agent is installed.</Label>
 				<Label>v.</Label>
 				<Label Style="{StaticResource Success}">
 					<TextBlock Text="{Binding ClientVersion}"></TextBlock>
@@ -102,47 +102,56 @@
 			</StackPanel>
 
 			<StackPanel Grid.Row="2" Orientation="Horizontal" Visibility="{Binding IsClientLaunched, Converter={StaticResource BoolToVisibleConverterProgress}}">
-				<Label Style="{StaticResource Progress}">Launching client...</Label>
+				<Label Style="{StaticResource Progress}">Launching agent...</Label>
 			</StackPanel>
 			<StackPanel Grid.Row="2" Orientation="Horizontal" Visibility="{Binding IsClientLaunched, Converter={StaticResource BoolToVisibleConverterInverse}}">
-				<Label Style="{StaticResource Error}">Client is not launched.</Label>
+				<Label Style="{StaticResource Error}">Agent is not launched.</Label>
 			</StackPanel>
 			<StackPanel Grid.Row="2" Orientation="Horizontal" Visibility="{Binding IsClientLaunched, Converter={StaticResource BoolToVisibleConverter}}">
-				<Label Style="{StaticResource Success}">Client is LIVE. [advanced console]</Label>
-				<Button Style="{StaticResource ActionButtonInfo}" Click="ClickShutdown">
-					<TextBlock Text="Shutdown"></TextBlock>
+				<Label Style="{StaticResource Success}">Agent is LIVE.</Label>
+				<Button  Style="{StaticResource ActionButtonInfo}" Click="ClickAdvancedSettings">
+					Advanced Settings
 				</Button>
+				<!--<Button Style="{StaticResource ActionButtonInfo}" Click="ClickShutdown">
+					<TextBlock Text="Shutdown"></TextBlock>
+				</Button>-->
 			</StackPanel>
 
 			<StackPanel Grid.Row="3" Orientation="Horizontal" Visibility="{Binding IsApiConnected, Converter={StaticResource BoolToVisibleConverterProgress}}">
-				<Label Style="{StaticResource Progress}">Checking api connection...</Label>
+				<Label Style="{StaticResource Progress}">Checking Server connection...</Label>
 			</StackPanel>
 			<StackPanel Grid.Row="3" Orientation="Horizontal" Visibility="{Binding IsApiConnected, Converter={StaticResource BoolToVisibleConverterInverse}}">
-				<Label Style="{StaticResource Error}">Api is not connected.</Label>
+				<Label Style="{StaticResource Error}">Server connection is not established.</Label>
 				<Button Style="{StaticResource ActionButtonCritical}" Visibility="{Binding IsClientLaunched, Converter={StaticResource BoolToVisibleConverter}}" Click="ClickEditApiPath">
 					<TextBlock Text="Edit Api Settings"></TextBlock>
 				</Button>
 			</StackPanel>
 			<StackPanel Grid.Row="3" Orientation="Horizontal" Visibility="{Binding IsApiConnected, Converter={StaticResource BoolToVisibleConverter}}">
-				<Label Style="{StaticResource Success}">Api is connected.</Label>
+				<Label Style="{StaticResource Success}">Server connection is established.</Label>
 				<Button Style="{StaticResource ActionButtonInfo}" Visibility="{Binding IsClientLaunched, Converter={StaticResource BoolToVisibleConverter}}" Click="ClickEditApiPath">
-					<TextBlock Text="Edit Api Settings"></TextBlock>
+					<TextBlock Text="Edit Server connection settings"></TextBlock>
 				</Button>
 			</StackPanel>
 
 			<StackPanel Grid.Row="4" Orientation="Horizontal" Visibility="{Binding IsVmixInstalled, Converter={StaticResource BoolToVisibleConverterProgress}}">
-				<Label Style="{StaticResource Progress}">Checking vmix...</Label>
+				<Label Style="{StaticResource Progress}">Checking vMix...</Label>
 			</StackPanel>
 			<StackPanel Grid.Row="4" Orientation="Horizontal" Visibility="{Binding IsVmixInstalled, Converter={StaticResource BoolToVisibleConverterInverse}}">
-				<Label Style="{StaticResource Error}">Vmix is not installed.</Label>
+				<Label Style="{StaticResource Error}">vMix is not installed.</Label>
 				<Label>
-					<Hyperlink RequestNavigate="ClickVmixLink" NavigateUri="https://www.vmix.com/software/download.aspx"> Install </Hyperlink>
+					<Hyperlink RequestNavigate="ClickLink" NavigateUri="https://www.vmix.com/software/download.aspx"> Install </Hyperlink>
 				</Label>
 			</StackPanel>
 			<StackPanel Grid.Row="4" Orientation="Horizontal" Visibility="{Binding IsVmixInstalled, Converter={StaticResource BoolToVisibleConverter}}">
-				<Label Style="{StaticResource Success}">Vmix is installed. [open preset] [open preset folder]</Label>
+				<Label Style="{StaticResource Success}">vMix is installed.</Label>
+				<Button Style="{StaticResource ActionButtonInfo}" Visibility="{Binding IsClientInstalled, Converter={StaticResource BoolToVisibleConverter}}" Click="ClickPreset">
+					<TextBlock Text="Open Preset"></TextBlock>
+				</Button>
+				<Button Margin="10 0" Style="{StaticResource ActionButtonInfo}" Visibility="{Binding IsClientInstalled, Converter={StaticResource BoolToVisibleConverter}}" Click="ClickPresetFolder">
+					<TextBlock Text="Open Preset Folder"></TextBlock>
+				</Button>
 				<Button Style="{StaticResource ActionButtonInfo}" Click="ClickCheckPreset" Visibility="{Binding IsClientInstalled, Converter={StaticResource BoolToVisibleConverter}}">
-					<TextBlock Text="Test Vmix Preset"></TextBlock>
+					<TextBlock Text="Test vMix Preset"></TextBlock>
 				</Button>
 			</StackPanel>
 

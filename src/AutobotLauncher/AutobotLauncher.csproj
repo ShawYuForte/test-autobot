@@ -7,7 +7,7 @@
     <ProjectGuid>{C15B109A-59E6-4477-8C6D-399818D1CF59}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <RootNamespace>AutobotLauncher</RootNamespace>
-    <AssemblyName>AutobotLauncher</AssemblyName>
+    <AssemblyName>Forte</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
