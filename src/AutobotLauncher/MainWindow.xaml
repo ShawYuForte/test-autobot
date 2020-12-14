@@ -71,13 +71,13 @@
 			</Grid.RowDefinitions>
 
 			<StackPanel Grid.Row="0" Orientation="Horizontal" Visibility="{Binding IsNugetInstalled, Converter={StaticResource BoolToVisibleConverterProgress}}">
-				<Label Style="{StaticResource Progress}">Checking update manager...</Label>
+				<Label Style="{StaticResource Progress}">Checking Update Manager...</Label>
 			</StackPanel>
 			<StackPanel Grid.Row="0" Orientation="Horizontal" Visibility="{Binding IsNugetInstalled, Converter={StaticResource BoolToVisibleConverterInverse}}">
-				<Label Style="{StaticResource Error}">Update manager is not installed.</Label>
+				<Label Style="{StaticResource Error}">Update Manager is not installed.</Label>
 			</StackPanel>
 			<StackPanel Grid.Row="0" Orientation="Horizontal" Visibility="{Binding IsNugetInstalled, Converter={StaticResource BoolToVisibleConverter}}">
-				<Label Style="{StaticResource Success}">Update manager is installed.</Label>
+				<Label Style="{StaticResource Success}">Update Manager is installed.</Label>
 			</StackPanel>
 
 			<StackPanel Grid.Row="1" Orientation="Horizontal" Visibility="{Binding IsClientInstalled, Converter={StaticResource BoolToVisibleConverterProgress}}">
@@ -123,7 +123,7 @@
 			<StackPanel Grid.Row="3" Orientation="Horizontal" Visibility="{Binding IsApiConnected, Converter={StaticResource BoolToVisibleConverterInverse}}">
 				<Label Style="{StaticResource Error}">Server connection is not established.</Label>
 				<Button Style="{StaticResource ActionButtonCritical}" Visibility="{Binding IsClientLaunched, Converter={StaticResource BoolToVisibleConverter}}" Click="ClickEditApiPath">
-					<TextBlock Text="Edit Api Settings"></TextBlock>
+					<TextBlock Text="Edit Server connection settings"></TextBlock>
 				</Button>
 			</StackPanel>
 			<StackPanel Grid.Row="3" Orientation="Horizontal" Visibility="{Binding IsApiConnected, Converter={StaticResource BoolToVisibleConverter}}">
