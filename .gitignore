@@ -15,7 +15,6 @@ Files/*
 assets/*
 temp/*
 **/node_modules/*
-**/bower_components/*
 node_modules
 *.suo
 *.DotSettings
