@@ -39,6 +39,14 @@
       <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.SqlServer.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="forte.modules.serilog, Version=1.1.3.38033, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\forte.modules.serilog\forte.modules.serilog.dll</HintPath>
+    </Reference>
+    <Reference Include="forte.specs, Version=1.1.2.38032, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\forte.specs\forte.specs.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.AspNet.SignalR.Core, Version=2.2.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNet.SignalR.Core.2.2.1\lib\net45\Microsoft.AspNet.SignalR.Core.dll</HintPath>
       <Private>True</Private>
@@ -158,14 +166,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\web\src\forte.modules.serilog\forte.modules.serilog.csproj">
-      <Project>{045a37a3-0cbc-4e61-a39d-58355aacd983}</Project>
-      <Name>forte.modules.serilog</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\web\src\forte.specs\forte.specs.csproj">
-      <Project>{5E1C27C1-9D29-4DBC-970C-F8766A18CB7B}</Project>
-      <Name>forte.specs</Name>
-    </ProjectReference>
     <ProjectReference Include="..\device.core\device.core.csproj">
       <Project>{4fc451ca-14c1-46da-95ff-5c177463cfd4}</Project>
       <Name>device.core</Name>
