@@ -212,12 +212,6 @@ namespace AutobotLauncher
 				{
 					_model.IsApiConnected = null;
 
-					try
-					{
-						await Shutdown();
-					}
-					catch { }
-
 					await Launch();
 					await CheckApi();
 				}
