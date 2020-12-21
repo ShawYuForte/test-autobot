@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.168
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30717.126
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "docs", "..\docs\", "{19413059-8740-4BDF-9E9F-D8B9AFF56602}"
 	ProjectSection(WebsiteProperties) = preProject
@@ -37,6 +37,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgoraSDK", "AgoraSDK\AgoraSDK.csproj", "{9655D131-DA85-434D-91BE-4D4FA97A0A18}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutobotLauncher", "AutobotLauncher\AutobotLauncher.csproj", "{C15B109A-59E6-4477-8C6D-399818D1CF59}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Autobot.Launcher.Setup", "Autobot.Launcher.Setup\Autobot.Launcher.Setup.vdproj", "{32D5E43E-E6C6-439A-AE4B-1A13D5364A1B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -110,12 +112,16 @@ Global
 		{C15B109A-59E6-4477-8C6D-399818D1CF59}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C15B109A-59E6-4477-8C6D-399818D1CF59}.Release|x86.ActiveCfg = Release|Any CPU
 		{C15B109A-59E6-4477-8C6D-399818D1CF59}.Release|x86.Build.0 = Release|Any CPU
+		{32D5E43E-E6C6-439A-AE4B-1A13D5364A1B}.Debug|Any CPU.ActiveCfg = Debug
+		{32D5E43E-E6C6-439A-AE4B-1A13D5364A1B}.Debug|x86.ActiveCfg = Debug
+		{32D5E43E-E6C6-439A-AE4B-1A13D5364A1B}.Release|Any CPU.ActiveCfg = Release
+		{32D5E43E-E6C6-439A-AE4B-1A13D5364A1B}.Release|x86.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		EnterpriseLibraryConfigurationToolBinariesPath = packages\TransientFaultHandling.Core.5.1.1209.1\lib\NET4
 		SolutionGuid = {D4D5E4E5-1EA4-45CB-842C-3B7FEBAD5053}
+		EnterpriseLibraryConfigurationToolBinariesPath = packages\TransientFaultHandling.Core.5.1.1209.1\lib\NET4
 	EndGlobalSection
 EndGlobal
