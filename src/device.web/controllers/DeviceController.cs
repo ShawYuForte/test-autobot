@@ -75,7 +75,8 @@ namespace device.web.controllers
 			_logger.Debug("Fetching setting");
 			var config = _configManager.GetDeviceConfig();
 			var resp = new HttpResponseMessage(HttpStatusCode.OK);
-			resp.Content = new StringContent(config.Get(name)?.ToString(), System.Text.Encoding.UTF8, "text/plain");
+            var returnValue = config.Get(name) != null ? config.Get(name).ToString() : "";
+			resp.Content = new StringContent(returnValue, System.Text.Encoding.UTF8, "text/plain");
 			return resp;
 		}
 

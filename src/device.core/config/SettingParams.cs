@@ -2,6 +2,7 @@
 {
 	public static class SettingParams
 	{
+		public static string CustomDeviceId => "CustomDeviceId";
 		public static string DeviceId => "DeviceId";
 		public static string ServerApiPath => "server-api-path";
 		public static string ServerRootPath => "server-root-path";
