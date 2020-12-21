@@ -395,9 +395,9 @@
         "Product"
         {
         "Name" = "8:Microsoft Visual Studio"
-        "ProductName" = "8:Autobot.Launcher.Bot"
+        "ProductName" = "8:Forte"
         "ProductCode" = "8:{7215C7FE-2502-4928-828D-1F858677FA0F}"
-        "PackageCode" = "8:{269C1940-E3E0-471E-BAC3-69BA6FEBFBBE}"
+        "PackageCode" = "8:{CD53BF10-EDA9-417F-B533-23DF5B4A28AB}"
         "UpgradeCode" = "8:{428161A5-EEA0-442D-AF62-59931121595B}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
