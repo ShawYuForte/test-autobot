@@ -1,4 +1,5 @@
-﻿using System;
+﻿using log4net;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
@@ -8,6 +9,8 @@ namespace AutobotLauncher.Utils
 {
 	public static class ProcessUtils
 	{
+		private static readonly ILog _logger = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
 		public delegate void OnConsoleOutput(string value);
 
 		public static async Task<List<string>> ProcessRunAndWaitAsAdmin(
@@ -15,9 +18,9 @@ namespace AutobotLauncher.Utils
 			string args = "", 
 			bool wait = true, 
 			OnConsoleOutput callback = null)
-		{
+		{			
 			var r = new List<string>();
-
+			_logger.Info($"ProcessRunAndWaitAsAdmin: {name}{args}");
 			var process = new Process
 			{
 				StartInfo =
@@ -53,6 +56,10 @@ namespace AutobotLauncher.Utils
 			}
 			catch(Exception ex)
 			{
+				_logger.Error(ex.Message);
+				_logger.Error(ex.InnerException);
+				_logger.Error(ex.StackTrace);
+
 				Console.WriteLine(ex.Message);
 				callback?.Invoke(null);
 			}
