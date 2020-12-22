@@ -34,6 +34,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "device.cli", "device.cli\de
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "device.web", "device.web\device.web.csproj", "{FBAB6E6A-2A8E-4FA9-B975-2755A14110AF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "forte.specs", "..\..\web\src\forte.specs\forte.specs.csproj", "{5E1C27C1-9D29-4DBC-970C-F8766A18CB7B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "forte.modules.serilog", "..\..\web\src\forte.modules.serilog\forte.modules.serilog.csproj", "{045A37A3-0CBC-4E61-A39D-58355AACD983}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgoraSDK", "AgoraSDK\AgoraSDK.csproj", "{9655D131-DA85-434D-91BE-4D4FA97A0A18}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutobotLauncher", "AutobotLauncher\AutobotLauncher.csproj", "{C15B109A-59E6-4477-8C6D-399818D1CF59}"
@@ -96,6 +100,22 @@ Global
 		{FBAB6E6A-2A8E-4FA9-B975-2755A14110AF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{FBAB6E6A-2A8E-4FA9-B975-2755A14110AF}.Release|x86.ActiveCfg = Release|Any CPU
 		{FBAB6E6A-2A8E-4FA9-B975-2755A14110AF}.Release|x86.Build.0 = Release|Any CPU
+		{5E1C27C1-9D29-4DBC-970C-F8766A18CB7B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5E1C27C1-9D29-4DBC-970C-F8766A18CB7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5E1C27C1-9D29-4DBC-970C-F8766A18CB7B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{5E1C27C1-9D29-4DBC-970C-F8766A18CB7B}.Debug|x86.Build.0 = Debug|Any CPU
+		{5E1C27C1-9D29-4DBC-970C-F8766A18CB7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5E1C27C1-9D29-4DBC-970C-F8766A18CB7B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5E1C27C1-9D29-4DBC-970C-F8766A18CB7B}.Release|x86.ActiveCfg = Release|Any CPU
+		{5E1C27C1-9D29-4DBC-970C-F8766A18CB7B}.Release|x86.Build.0 = Release|Any CPU
+		{045A37A3-0CBC-4E61-A39D-58355AACD983}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{045A37A3-0CBC-4E61-A39D-58355AACD983}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{045A37A3-0CBC-4E61-A39D-58355AACD983}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{045A37A3-0CBC-4E61-A39D-58355AACD983}.Debug|x86.Build.0 = Debug|Any CPU
+		{045A37A3-0CBC-4E61-A39D-58355AACD983}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{045A37A3-0CBC-4E61-A39D-58355AACD983}.Release|Any CPU.Build.0 = Release|Any CPU
+		{045A37A3-0CBC-4E61-A39D-58355AACD983}.Release|x86.ActiveCfg = Release|Any CPU
+		{045A37A3-0CBC-4E61-A39D-58355AACD983}.Release|x86.Build.0 = Release|Any CPU
 		{9655D131-DA85-434D-91BE-4D4FA97A0A18}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9655D131-DA85-434D-91BE-4D4FA97A0A18}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9655D131-DA85-434D-91BE-4D4FA97A0A18}.Debug|x86.ActiveCfg = Debug|x86

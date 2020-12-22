@@ -80,10 +80,6 @@
       <HintPath>..\packages\EntityFramework.SqlServerCompact.6.1.3\lib\net45\EntityFramework.SqlServerCompact.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="forte.specs, Version=1.1.2.38032, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\forte.specs\forte.specs.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.AspNet.SignalR.Client, Version=2.2.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNet.SignalR.Client.2.2.1\lib\net45\Microsoft.AspNet.SignalR.Client.dll</HintPath>
       <Private>True</Private>
@@ -278,6 +274,10 @@
     <None Include="package\tools\ReadMe.md" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\web\src\forte.specs\forte.specs.csproj">
+      <Project>{5E1C27C1-9D29-4DBC-970C-F8766A18CB7B}</Project>
+      <Name>forte.specs</Name>
+    </ProjectReference>
     <ProjectReference Include="..\AgoraSDK\AgoraSDK.csproj">
       <Project>{9655d131-da85-434d-91be-4d4fa97a0a18}</Project>
       <Name>AgoraSDK</Name>
