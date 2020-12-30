@@ -23,11 +23,11 @@ namespace AutobotLauncher.Forms
     {
         private BaseConfigModel _model = new BaseConfigModel();
 
-        public BaseConfigForm()
-        {
-            DataContext = _model;
-            InitializeComponent();
-        }
+		public BaseConfigForm()
+		{
+			InitializeComponent();
+			DataContext = _model;
+		}
 
         public async Task Init()
         {

@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Security.Principal;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Documents;
@@ -15,18 +16,30 @@ using log4net;
 
 namespace AutobotLauncher
 {
-    public partial class MainWindow : Window
-    {
-        private static readonly ILog _logger = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-        private MainWindowViewModel _model = new MainWindowViewModel();
+	public class ClassCreatedBySomeThread
+	{
+		Dispatcher dispatcher = Dispatcher.CurrentDispatcher;
 
-        public MainWindow()
-        {
+		public void SafelyCallMeFromAnyThread(Action a)
+		{
+			dispatcher.Invoke(a);
+		}
+	}
 
-            log4net.Config.XmlConfigurator.Configure();
-            InitializeComponent();
-            DataContext = _model;
-            Task.Run(() => Check());
+	public partial class MainWindow : Window
+	{
+		private MainWindowViewModel _model = new MainWindowViewModel();
+
+		public MainWindow()
+		{
+			InitializeComponent();
+
+			if (_model.CheckInProgress) { return; }
+			_model.CheckInProgress = false;
+			_model.Reset();
+			DataContext = _model;
+
+            ExecuteCheckSafelyCall();
         }
 
         private async Task Check()
@@ -35,13 +48,13 @@ namespace AutobotLauncher
             _model.CheckInProgress = true;
             _model.Reset();
 
-            var tasks = new List<Task>();
-            var vmixTask = new Task(() =>
-            {
-                _model.IsVmixInstalled = File.Exists(Constants.VmixPath);
-            });
-            vmixTask.Start();
-            tasks.Add(vmixTask);
+            RunAndWaitOffCompletion(new Task(() => { _model.IsVmixInstalled = File.Exists(Constants.VmixPath); }));
+            RunAndWaitOffCompletion(new Task(() => { _model.IsNugetInstalled = IsNugetInstalled().Result; }));
+            RunAndWaitOffCompletion(new Task(() => { UpdateNugetSources().Wait(); }));
+            RunAndWaitOffCompletion(new Task(() => { CheckLatest().Wait(); }));
+            RunAndWaitOffCompletion(new Task(() => { CheckClient().Wait(); }));
+            RunAndWaitOffCompletion(new Task(() => { Launch().Wait(); }));
+            RunAndWaitOffCompletion(new Task(() => { _model.IsApiConnected = IsApiConnected().Result; }));
 
             await CheckNuget();
             await UpdateNugetSources();
@@ -57,14 +70,17 @@ namespace AutobotLauncher
             _model.CheckInProgress = false;
         }
 
-        private async Task UpdateNugetSources()
+        private void ExecuteCheckSafelyCall()
         {
-            _logger.Info("UpdateNugetSources - started.");
-            var cm1 = "sources remove -name forte-approved";
-            var cm2 = "sources add -name forte-approved -Source https://pkgs.dev.azure.com/forte-fit/_packaging/forte-approved/nuget/v3/index.json -username NugetUser -password 24cmiauw26nqlzp7o5u7oinrcczwujeqx2zaghavpn2prs4w2fwa";
+            var c = new ClassCreatedBySomeThread();
+            c.SafelyCallMeFromAnyThread(Check);
+            Task.Run(() => Check()).ConfigureAwait(false);
+        }
 
-            await "nuget".ProcessRunAndWaitAsAdmin(cm1);
-            await "nuget".ProcessRunAndWaitAsAdmin(cm2);
+        private void RunAndWaitOffCompletion(Task task)
+        {
+            task.Start();
+            Task.WhenAll(task).Wait();
         }
 
         private async Task CheckNuget()
@@ -84,12 +100,12 @@ namespace AutobotLauncher
             var vfPath = Constants.VersionFileName.GetAbsolutePath();
             if (!File.Exists(vfPath))
             {
-                var vInst = await CheckLatest();
+                var vInst = CheckLatest().Result;
                 //got new package
                 if (vInst != null)
                 {
                     File.WriteAllText(vfPath, vInst);
-                    await CheckClient();
+                    _ = CheckClient().ConfigureAwait(true);
                 }
                 return;
             }
@@ -106,6 +122,17 @@ namespace AutobotLauncher
                 _model.ClientVersion = r.FirstOrDefault();
             }
 
+            // check if device-cli.exe exists for current installed version            
+            if (!File.Exists(FileUtils.GetClientPath(_model.ClientVersion)))
+            {
+                // install current version
+                var cm = $"install device-cli -version {_model.ClientVersion}";
+
+                var result = await "nuget".ProcessRunAndWaitAsAdmin(cm);
+
+                //package is installed
+                var pinstalled = result.FirstOrDefault(m => m != null && m.Contains("is already installed.")); //
+            }
             _model.IsClientInstalled = r != null;
             _logger.Info($"Client installed: {_model.IsClientInstalled}");
         }
@@ -158,11 +185,14 @@ namespace AutobotLauncher
             if (_model.InstallInProgress) { return; }
             _model.InstallInProgress = true;
 
-            _model.IsClientInstalled = null;
-            await Shutdown();
-            var newVersion = File.ReadAllText(Constants.LatestFileName.GetAbsolutePath());
-            File.WriteAllText(Constants.VersionFileName.GetAbsolutePath(), newVersion);
-            await Check();
+			_model.IsClientInstalled = null;
+			
+            Shutdown().Wait();
+
+			var newVersion = File.ReadAllText(Constants.LatestFileName.GetAbsolutePath());
+			File.WriteAllText(Constants.VersionFileName.GetAbsolutePath(), newVersion);
+
+            ExecuteCheckSafelyCall();
 
             _model.InstallInProgress = false;
         }
@@ -177,14 +207,9 @@ namespace AutobotLauncher
             }
         }
 
-        private async Task CheckApi()
+        private async Task<bool> IsApiConnected()
         {
-            _logger.Info("CheckApi - started.");
-            _model.IsApiConnected = await ClientInteractor.CheckApi(_model.ClientVersion);
-            if (_model.IsApiConnected.HasValue && !_model.IsApiConnected.Value)
-            {
-                _logger.Warn($"Api Connected: {_model.IsApiConnected}");
-            }
+            return await ClientInteractor.CheckApi(_model.ClientVersion);
         }
 
         private async Task Shutdown()
@@ -201,7 +226,7 @@ namespace AutobotLauncher
         {
             if (_model.CheckInProgress) { return; }
 
-            await Check();
+            ExecuteCheckSafelyCall();
         }
 
         private async void ClickInstall(object sender, RoutedEventArgs e)
@@ -235,6 +260,7 @@ namespace AutobotLauncher
             try
             {
                 var dlg = new BaseConfigForm();
+                
                 await dlg.Init();
                 if (dlg.ShowDialog() == true)
                 {

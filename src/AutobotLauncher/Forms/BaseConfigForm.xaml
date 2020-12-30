@@ -6,25 +6,27 @@
         xmlns:local="clr-namespace:AutobotLauncher.Forms"
         mc:Ignorable="d"
         Title="Settings" Height="220.856" Width="282.836" ResizeMode="NoResize" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterOwner">
-	<Grid>
-		<StackPanel>
-			<Label>Contact support to obtain this info.</Label>
-			<Label>Agent Device ID:</Label>
+    <Grid>
+        <StackPanel>
+            <Label>Contact support to obtain this info.</Label>
+            <Label>Agent Device ID:</Label>
             <TextBox Text="{Binding CustomDeviceId}"></TextBox>
-            <TextBox Text="{Binding DeviceId}" Visibility="Collapsed"></TextBox>
             
+            <Label Visibility="Collapsed">Agent Device ID:</Label>
+            <TextBox Text="{Binding DeviceId}" Visibility="Collapsed"></TextBox>
+
             <Label>Server URL:</Label>
-			<TextBox Text="{Binding ApiPath}"></TextBox>
-			<Label>2-Way Video ID:</Label>
-			<TextBox Text="{Binding AgoraApp}"></TextBox>
-			<StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-				<Button Click="ClickCancel" Margin="2">
-					Cancel
-				</Button>
-				<Button Click="ClickSave" Margin="2">
-					Save &amp; Close
-				</Button>
-			</StackPanel>
-		</StackPanel>
-	</Grid>
+            <TextBox Text="{Binding ApiPath}"></TextBox>
+            <Label>2-Way Video ID:</Label>
+            <TextBox Text="{Binding AgoraApp}"></TextBox>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button Click="ClickCancel" Margin="2">
+                    Cancel
+                </Button>
+                <Button Click="ClickSave" Margin="2">
+                    Save &amp; Close
+                </Button>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
 </Window>

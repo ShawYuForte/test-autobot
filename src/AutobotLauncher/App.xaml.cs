@@ -1,6 +1,8 @@
 ﻿using log4net;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Security.Principal;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace AutobotLauncher
@@ -59,6 +61,12 @@ namespace AutobotLauncher
         private void ExitApplication()
         {
             _isExit = true;
+
+            foreach (var process in Process.GetProcessesByName("device-cli"))
+            {
+                process.Kill();
+            }
+
             MainWindow.Close();
             Current.Shutdown();
             _notifyIcon.Dispose();

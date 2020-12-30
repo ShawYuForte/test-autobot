@@ -193,12 +193,33 @@ namespace forte.devices
 				config = configManager.UpdateSetting(SettingParams.DeviceId, guid.ToString());
 			}
 
-			if(string.IsNullOrWhiteSpace(config.Get<string>(SettingParams.DeviceId)))
+            var customDeviceId = config.Get<string>(SettingParams.CustomDeviceId);
+            if (customDeviceId == string.Empty)
+            {
+                config = configManager.UpdateSetting(SettingParams.CustomDeviceId, string.Empty);
+            }
+
+            var customDeviceIdPresent = config.Get<string>(SettingParams.CustomDeviceIdPresent);
+            if (customDeviceIdPresent == null)
+            {
+                config = configManager.UpdateSetting(SettingParams.CustomDeviceIdPresent, "False");
+            }
+            else
+            {
+                config = configManager.UpdateSetting(SettingParams.CustomDeviceIdPresent, customDeviceId == null);
+            }
+
+            if (string.IsNullOrWhiteSpace(config.Get<string>(SettingParams.DeviceId)))
 			{
 				config = configManager.UpdateSetting(SettingParams.DeviceId, Guid.NewGuid().ToString());
 			}
 
-			if(string.IsNullOrWhiteSpace(config.Get<string>(SettingParams.ServerApiPath)))
+			if (string.IsNullOrWhiteSpace(config.Get<string>(SettingParams.CustomDeviceId)))
+			{
+				config = configManager.UpdateSetting(SettingParams.CustomDeviceId, string.Empty);
+			}
+
+			if (string.IsNullOrWhiteSpace(config.Get<string>(SettingParams.ServerApiPath)))
 			{
 				config = configManager.UpdateSetting(SettingParams.ServerApiPath, "server\\api");
 			}
