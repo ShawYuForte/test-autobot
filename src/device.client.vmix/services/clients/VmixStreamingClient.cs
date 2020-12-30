@@ -288,8 +288,14 @@ namespace forte.devices.services.clients
 			_logger.Debug("Started the playlist");
 		}
 
-		public void StopProgram()
+		public void StopProgram(bool isPortable = false)
 		{
+			if (isPortable)
+			{
+				StopVmix();
+				return;
+			}
+
 			var vmixState = GetVmixState();
 			if(vmixState == null) return;
 			var config = _configurationManager.GetDeviceConfig();

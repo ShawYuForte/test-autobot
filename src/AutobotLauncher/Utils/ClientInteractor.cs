@@ -14,7 +14,7 @@ namespace AutobotLauncher.Utils
 			var error = false;
 			var args = $"run {GetDefaultParams(v)}";
 
-			FileUtils.GetClientPath(v).ProcessRunAndWaitAsAdmin(args, true, (m) =>
+			_ = FileUtils.GetClientPath(v).ProcessRunAndWaitAsAdmin(args, true, (m) =>
 			{
 				if (m == null)
 				{

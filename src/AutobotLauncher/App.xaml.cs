@@ -1,18 +1,16 @@
-﻿using log4net;
+﻿using AutobotLauncher.Utils;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Security.Principal;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace AutobotLauncher
 {
-	/// <summary>
-	/// Interaction logic for App.xaml
-	/// </summary>
-	public partial class App : Application
-	{
-        private static readonly ILog log = LogManager.GetLogger(typeof(App));
+    /// <summary>
+    /// Interaction logic for App.xaml
+    /// </summary>
+    public partial class App : Application
+    {
         private System.Windows.Forms.NotifyIcon _notifyIcon;
         private bool _isExit;
 
@@ -29,9 +27,6 @@ namespace AutobotLauncher
                     Current.Shutdown();
             }
 
-            log4net.Config.XmlConfigurator.Configure();
-            log.Info("        =============  Started Logging  =============        ");
-
             base.OnStartup(e);
             MainWindow = new MainWindow();
             MainWindow.Closing += MainWindow_Closing;
@@ -42,7 +37,6 @@ namespace AutobotLauncher
             _notifyIcon.Visible = true;
 
             CreateContextMenu();
-
         }
 
         private static bool IsAdministrator()

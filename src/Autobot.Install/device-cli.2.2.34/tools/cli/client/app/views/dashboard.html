@@ -1,0 +1,73 @@
+﻿<fieldset>
+    <legend>Streaming Device Dashboard</legend>
+
+    <div class="btn-group btn-group-justified" style="max-width: 200px;">
+        <!--<div class="btn-group">
+            <button type="button" class="btn btn-success" ng-click="fetchCommand()">Fetch Command</button>
+        </div>
+        <div class="btn-group">
+            <button type="button" class="btn btn-primary" ng-click="refreshState()">Refresh State</button>
+        </div>
+        <div class="btn-group">
+            <button type="button" class="btn btn-primary" ng-click="reset()">Force Reset</button>
+        </div>
+        <div class="btn-group">
+            <button type="button" class="btn btn-primary" ng-click="publishState()">Publish State</button>
+        </div>-->
+        <div class="btn-group">
+            <button type="button" class="btn btn-danger" ng-click="shutdown()">Shutdown</button>
+        </div>
+    </div>
+
+    <br />
+
+    <table class="table table-hover table-striped">
+        <thead>
+			<tr>
+				<th>Session</th>
+				<th>Start Time</th>
+				<th>End Time</th>
+				<th>Status</th>
+				<th>Vmix Preset</th>
+				<th>Type</th>
+				<th>Retry Count</th>
+			</tr>
+        </thead>
+        <tbody>
+			<tr ng-repeat="it in state">
+				<td>{{it.permalink}}</td>
+				<td>{{it.startTime}}</td>
+				<td>{{it.endTime}}</td>
+				<td>{{it.status}}</td>
+				<td>{{it.vmixPreset}}</td>
+				<td>{{it.sessionType}}</td>
+				<td>{{it.retryCount}}</td>
+			</tr>
+        </tbody>
+    </table>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4>
+                LOGS
+            </h4>
+        </div>
+        <table class="table table-fixed">
+            <thead>
+                <tr>
+                    <th class="col-xs-2">Time</th>
+                    <th class="col-xs-1">Level</th>
+                    <th class="col-xs-9">Message</th>
+                </tr>
+            </thead>
+            <tbody style="height: 5000px;">
+                <tr ng-repeat="log in logs" ng-class="toCss(log.level)">
+                    <td class="col-xs-2" ng-bind="log.timestamp | date: 'MM/dd/yyyy h:mma'"></td>
+                    <td class="col-xs-1 text-uppercase" ng-bind="log.level"></td>
+                    <td class="col-xs-9" ng-bind="log.renderedMessage"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</fieldset>

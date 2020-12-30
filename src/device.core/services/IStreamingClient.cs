@@ -17,6 +17,6 @@ namespace forte.devices.services
 		void StartStreaming(bool testrun = false);
 		void StopStreaming(bool shutdownClient);
 		void StartProgram();
-		void StopProgram();
+        void StopProgram(bool isPortable = false);
     }
 }

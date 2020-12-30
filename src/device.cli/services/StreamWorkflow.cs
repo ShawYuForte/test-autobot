@@ -22,15 +22,15 @@ using RestSharp;
 
 namespace forte.devices.workflow
 {
-	public class StreamWorkflow: IDeviceDaemon
+	public class StreamWorkflow : IDeviceDaemon
 	{
 		private readonly AgoraService _agora;
 		private readonly MailService _ms;
 		private readonly IApiServer _server;
-        private readonly ILogger _logger;
+		private readonly ILogger _logger;
 		private readonly IConfigurationManager _configurationManager;
 		private readonly DbRepository _dbRepository;
-        private readonly IStreamingClient _streamingClient;
+		private readonly IStreamingClient _streamingClient;
 		private RestClient _client;
 		private RestClient _clientDevice;
 
@@ -43,9 +43,9 @@ namespace forte.devices.workflow
 			AgoraService agora,
 			MailService ms,
 			IApiServer server,
-			IStreamingClient streamingClient, 
-			DbRepository dbRepository, 
-			IConfigurationManager configurationManager, 
+			IStreamingClient streamingClient,
+			DbRepository dbRepository,
+			IConfigurationManager configurationManager,
 			ILogger logger)
 		{
 			_agora = agora;
@@ -72,14 +72,23 @@ namespace forte.devices.workflow
 		public void Await(int port)
 		{
 			//_serverListener.Connect();
-			using(var server = _server.Run(port))
+			using (var server = _server.Run(port))
 			{
 				_logger.Information($"Running device local UI web server v{Constants.Version}");
 				//synchronous loop for keeping the app alive
-				while(_running)
+				while (_running)
 				{
 					Thread.Sleep(1);
 				}
+			}
+		}
+
+		public async Task CheckApi(int port)
+		{
+			using (var server = _server.Run(port))
+			{
+				_logger.Information($"Running device local UI web server v{Constants.Version}");
+				RunApiTest().Wait();
 			}
 		}
 
@@ -116,13 +125,15 @@ namespace forte.devices.workflow
 
 		public async Task RunApiTest()
 		{
+			_clientDevice = new RestClient("http://localhost:9000/api/device");
 			if (_clientDevice == null)
 			{
 				_logger.Error("ERROR: Wrong api address");
 				return;
 			}
 
-			var request = new RestRequest($"{_deviceId}/commands/next", Method.GET);
+			var request = new RestRequest($"/settings", Method.GET);
+			//var request = new RestRequest($"{_deviceId}/commands/next", Method.GET);
 			var response = _clientDevice.Execute(request);
 
 			// Not found if no command
@@ -134,6 +145,11 @@ namespace forte.devices.workflow
 			if (response.StatusCode != HttpStatusCode.OK)
 			{
 				_logger.Error("ERROR: Wrong status code");
+			}
+
+			if (response.StatusCode == HttpStatusCode.OK)
+			{
+				_logger.Information("Api works properly.");
 			}
 		}
 
@@ -158,24 +174,24 @@ namespace forte.devices.workflow
 				var seconds = 0;
 				double overdue = 0;
 
-				while(true)
+				while (true)
 				{
 					await Task.Delay(1000);
 
-					if(seconds != 0)
+					if (seconds != 0)
 					{
 						seconds--;
 					}
-					else if(seconds == 0)
+					else if (seconds == 0)
 					{
 						StreamingDeviceCommandModel command = null;
 						try
 						{
 							command = ThreadSafeFetchCommand();
 						}
-						catch(Exception exception)
+						catch (Exception exception)
 						{
-							if(commandFetchedRetries == 0)
+							if (commandFetchedRetries == 0)
 							{
 								_ms.MailError(exception.Message, exception);
 							}
@@ -184,7 +200,7 @@ namespace forte.devices.workflow
 						}
 
 						//execute pending commands before processing further
-						if(command != null)
+						if (command != null)
 						{
 							commandFetchedRetries = 25;
 							try
@@ -193,11 +209,11 @@ namespace forte.devices.workflow
 
 								var session = sessions.FirstOrDefault(s => s.SessioId == command.SessionId.Value);
 								var isNew = session == null;
-								switch(command.Command)
+								switch (command.Command)
 								{
 									case StreamingDeviceCommands.UpdateSession:
 										session = UpdateSession(session, command);
-										if(isNew)
+										if (isNew)
 										{
 											sessions.Add(session);
 										}
@@ -206,6 +222,10 @@ namespace forte.devices.workflow
 									case StreamingDeviceCommands.RestartSession:
 										if (session == null) { break; }
 										session.IsCancelled = true;
+
+										if (command.Type == 2) // this is portable session type
+											session.SessionType = SessionType.Portable;
+
 										_dbRepository.UpdateSession(session);
 
 										var restart = command.Command == StreamingDeviceCommands.RestartSession;
@@ -222,9 +242,9 @@ namespace forte.devices.workflow
 								command.ExecutionSucceeded = true;
 								command.ExecutedOn = DateTime.UtcNow;
 							}
-							catch(Exception exception)
+							catch (Exception exception)
 							{
-								if(string.IsNullOrWhiteSpace(command.ExecutionMessages))
+								if (string.IsNullOrWhiteSpace(command.ExecutionMessages))
 								{
 									command.ExecutionMessages = exception.Message;
 								}
@@ -233,7 +253,7 @@ namespace forte.devices.workflow
 									command.ExecutionMessages += $"{exception.Message};\n\r";
 								}
 
-								if(command.ExecutionAttempts >= command.MaxAttemptsAllowed)
+								if (command.ExecutionAttempts >= command.MaxAttemptsAllowed)
 								{
 									command.ExecutedOn = DateTime.UtcNow;
 									command.ExecutionSucceeded = false;
@@ -250,7 +270,7 @@ namespace forte.devices.workflow
 							{
 								SaveCommandOnServer(command);
 							}
-							catch(Exception exception)
+							catch (Exception exception)
 							{
 								_ms.MailError($"Could not save command on the server {command}", exception);
 								_logger.Fatal(exception, "Could not save command on the server {@command}", command);
@@ -263,10 +283,10 @@ namespace forte.devices.workflow
 					}
 
 					sessions = sessions.Where(s => s.Status != WorkflowState.Processed).OrderBy(s => s.StartTime).ToList();
-					if(!sessions.Any()) continue;
+					if (!sessions.Any()) continue;
 
 					var vmixSession = sessions.FirstOrDefault(s => s.VmixUsed == true);
-					foreach(var s in sessions)
+					foreach (var s in sessions)
 					{
 						//await ConnectToAgora(s);
 						//return;
@@ -281,13 +301,13 @@ namespace forte.devices.workflow
 						//check if vmix is free to use for this session and it's time
 						var isVmixSession = (vmixSession == null || vmixSession.Id == s.Id);
 						var needsLinking = s.StartTime.AddSeconds(-linkTimeSeconds) <= DateTime.UtcNow;
-						if(isVmixSession)
+						if (isVmixSession)
 						{
 							SetSessionVmix(s, needsLinking);
 						}
 
 						//terminate outdated session
-						if(s.EndTime <= DateTime.UtcNow)
+						if (s.EndTime <= DateTime.UtcNow)
 						{
 							_logger.Warning($"{s.Permalink}: {(DateTime.UtcNow - s.EndTime).TotalSeconds} seconds after end, terminate");
 							_lockedSessions[s.SessioId] = s;
@@ -297,7 +317,7 @@ namespace forte.devices.workflow
 						}
 
 						//start new session
-						if(s.Status == WorkflowState.Idle && needsLinking)
+						if (s.Status == WorkflowState.Idle && needsLinking)
 						{
 							_logger.Warning($"{s.Permalink}: {(s.StartTime - DateTime.UtcNow).TotalSeconds} seconds before start, link resources");
 							_lockedSessions[s.SessioId] = s;
@@ -306,21 +326,21 @@ namespace forte.devices.workflow
 						}
 
 						//run this as soon as session linked resources
-						if(s.Status == WorkflowState.LinkedToAzure)
+						if (s.Status == WorkflowState.LinkedToAzure)
 						{
-							if(!isVmixSession) continue;
+							if (!isVmixSession) continue;
 							_logger.Warning($"{s.Permalink}");
 							//if(!fakeRun)
 							{
 								var r = await LoadPreset(s);
-								if(!r) continue; //something went wrong with loading preset
+								if (!r) continue; //something went wrong with loading preset
 							}
 							SetSessionStatus(s, WorkflowState.VmixLoaded);
 							continue;
 						}
 
 						//run this as we approach session start. default is starting 10 seconds before static image
-						if(s.Status == WorkflowState.VmixLoaded && s.StartTime.AddSeconds(-serverStreamSeconds) <= DateTime.UtcNow)
+						if (s.Status == WorkflowState.VmixLoaded && s.StartTime.AddSeconds(-serverStreamSeconds) <= DateTime.UtcNow)
 						{
 							_logger.Warning($"{s.Permalink}: {(s.StartTime - DateTime.UtcNow).TotalSeconds} seconds before start, start server stream");
 							_lockedSessions[s.SessioId] = s;
@@ -329,33 +349,33 @@ namespace forte.devices.workflow
 						}
 
 						//run this as we approach session start. default is starting static image 30 seconds before start
-						if(s.Status == WorkflowState.StreamingServer)
+						if (s.Status == WorkflowState.StreamingServer)
 						{
-							if(!isVmixSession) continue;
+							if (!isVmixSession) continue;
 							overdue = (s.StartTime - DateTime.UtcNow).TotalSeconds;
-							if(overdue > staticImageSeconds) continue; //wait
+							if (overdue > staticImageSeconds) continue; //wait
 							_logger.Warning($"{s.Permalink}: {overdue} seconds before start, start static image stream");
 							//if(!fakeRun)
 							{
 								var r1 = await StartClientStream(s);
-								if(!r1) continue; //something went wrong
+								if (!r1) continue; //something went wrong
 							}
 							SetSessionStatus(s, WorkflowState.StreamingAgora);
 							continue;
 						}
 
 						//connect to agora after we started streaming on vmix
-						if(s.Status == WorkflowState.StreamingAgora)
+						if (s.Status == WorkflowState.StreamingAgora)
 						{
 							_logger.Warning($"{s.Permalink}: connect to agora");
 							var r = await ConnectToAgora(s);
-							if(!r) continue; //something went wrong with loading preset
+							if (!r) continue; //something went wrong with loading preset
 							SetSessionStatus(s, WorkflowState.StreamingPublish);
 							continue;
 						}
 
 						//client stream started, mark session live on server
-						if(s.Status == WorkflowState.StreamingPublish)
+						if (s.Status == WorkflowState.StreamingPublish)
 						{
 							_logger.Warning($"{s.Permalink}: publish stream");
 							_lockedSessions[s.SessioId] = s;
@@ -364,16 +384,16 @@ namespace forte.devices.workflow
 						}
 
 						//start session
-						if(s.Status == WorkflowState.StreamingClient)
+						if (s.Status == WorkflowState.StreamingClient)
 						{
-							if(!isVmixSession) continue;
+							if (!isVmixSession) continue;
 							overdue = (s.StartTime - DateTime.UtcNow).TotalSeconds;
-							if(overdue > 0) continue; //wait
+							if (overdue > 0) continue; //wait
 							_logger.Warning($"{s.Permalink}: {overdue} seconds before start, start program");
 							//if(!fakeRun)
 							{
 								var r2 = await StartProgram(s);
-								if(!r2) continue; //something went wrong
+								if (!r2) continue; //something went wrong
 							}
 							SetSessionStatus(s, WorkflowState.ProgramRunning);
 							continue;
@@ -381,7 +401,7 @@ namespace forte.devices.workflow
 					}
 				}
 			}
-			catch(Exception ex)
+			catch (Exception ex)
 			{
 				_ms.MailError($"Running failed.", ex);
 				_logger.Fatal(ex, $"Running failed.");
@@ -397,15 +417,15 @@ namespace forte.devices.workflow
 				var request = new RestRequest($"streamLink/{s.SessioId}?retryNum={s.RetryCount}&deviceId={_deviceId}&requestRef={s.Permalink}&programStart={s.StartTime}&programEnd={s.EndTime}", Method.GET);
 				var m = await _client.ExecuteAsync<VideoStreamModel>(request);
 
-				if(m.StatusCode != HttpStatusCode.OK)
+				if (m.StatusCode != HttpStatusCode.OK)
 				{
 					throw new Exception($"{s.Permalink}: bad response: {m.ErrorMessage} {m.Content}, retry in {retrySeconds} seconds");
 				}
 
 				_logger.Debug($"{s.Permalink}: LinkStream success");
-				if(_verbose) { _logger.Debug($"{m.Content}"); }
+				if (_verbose) { _logger.Debug($"{m.Content}"); }
 
-				if(m.Data == null)
+				if (m.Data == null)
 				{
 					SetSessionStatus(s, WorkflowState.Processed);
 					ClearSessionRetry(s);
@@ -417,7 +437,7 @@ namespace forte.devices.workflow
 				ClearSessionRetry(s);
 				_lockedSessions.TryRemove(s.SessioId, out var t);
 			}
-			catch(Exception ex)
+			catch (Exception ex)
 			{
 				ReportError(ex, s, "Link Stream");
 				await Task.Delay(retrySeconds * 1000);
@@ -433,15 +453,15 @@ namespace forte.devices.workflow
 				var request = new RestRequest($"streamStart/{s.SessioId}?retryNum={s.RetryCount}&deviceId={_deviceId}&requestRef={s.Permalink}&programStart={s.StartTime}&programEnd={s.EndTime}", Method.GET);
 				var m = await _client.ExecuteAsync<VideoStreamModel>(request);
 
-				if(m.StatusCode != HttpStatusCode.OK)
+				if (m.StatusCode != HttpStatusCode.OK)
 				{
 					throw new Exception($"{s.Permalink}: bad response: {m.ErrorMessage} {m.Content}, retry in {retrySeconds} seconds");
 				}
 
 				_logger.Debug($"{s.Permalink}: StartStream success");
-				if(_verbose) { _logger.Debug($"{m.Content}"); }
+				if (_verbose) { _logger.Debug($"{m.Content}"); }
 
-				if(m.Data == null)
+				if (m.Data == null)
 				{
 					SetSessionStatus(s, WorkflowState.Processed);
 					ClearSessionRetry(s);
@@ -453,7 +473,7 @@ namespace forte.devices.workflow
 				ClearSessionRetry(s);
 				_lockedSessions.TryRemove(s.SessioId, out var t);
 			}
-			catch(Exception ex)
+			catch (Exception ex)
 			{
 				ReportError(ex, s, "Start Stream");
 				await Task.Delay(retrySeconds * 1000);
@@ -469,15 +489,15 @@ namespace forte.devices.workflow
 				var request = new RestRequest($"streamPublish/{s.SessioId}?retryNum={s.RetryCount}&deviceId={_deviceId}&requestRef={s.Permalink}", Method.GET);
 				var m = await _client.ExecuteAsync<VideoStreamModel>(request);
 
-				if(m.StatusCode != HttpStatusCode.OK)
+				if (m.StatusCode != HttpStatusCode.OK)
 				{
 					throw new Exception($"{s.Permalink}: bad response: {m.ErrorMessage} {m.Content}, retry in {retrySeconds} seconds");
 				}
 
 				_logger.Debug($"{s.Permalink}: PublishStream success");
-				if(_verbose) { _logger.Debug($"{m.Content}"); }
+				if (_verbose) { _logger.Debug($"{m.Content}"); }
 
-				if(m.Data == null)
+				if (m.Data == null)
 				{
 					SetSessionStatus(s, WorkflowState.Processed);
 					ClearSessionRetry(s);
@@ -488,7 +508,7 @@ namespace forte.devices.workflow
 				ClearSessionRetry(s);
 				_lockedSessions.TryRemove(s.SessioId, out var t);
 			}
-			catch(Exception ex)
+			catch (Exception ex)
 			{
 				ReportError(ex, s, "Publish Stream");
 				await Task.Delay(retrySeconds * 1000);
@@ -506,22 +526,22 @@ namespace forte.devices.workflow
 				if (handleVmix)
 				{
 					_logger.Warning($"{s.Permalink}");
-					_streamingClient.StopProgram();
+					_streamingClient.StopProgram(s.SessionType == SessionType.Portable);
 				}
 
 				var url = $"streamStop/{s.SessioId}?retryNum={s.RetryCount}&deviceId={_deviceId}&requestRef={s.Permalink}&deleteAsset={s.IsCancelled == true}&restart={restart}";
 				var request = new RestRequest(url, Method.GET);
 				var m = await _client.ExecuteAsync<bool>(request);
 
-				if(m.StatusCode != HttpStatusCode.OK)
+				if (m.StatusCode != HttpStatusCode.OK)
 				{
 					throw new Exception($"{s.Permalink}: bad response: {m.ErrorMessage} {m.Content}, retry in {retrySeconds} seconds");
 				}
 
 				_logger.Debug($"{s.Permalink}: StopStream success");
-				if(_verbose) { _logger.Debug($"{m.Content}"); }
+				if (_verbose) { _logger.Debug($"{m.Content}"); }
 
-				if(handleVmix)
+				if (handleVmix)
 				{
 					_logger.Warning($"{s.Permalink}");
 					_streamingClient.StopStreaming(true);
@@ -532,7 +552,7 @@ namespace forte.devices.workflow
 
 				_lockedSessions.TryRemove(s.SessioId, out var t);
 			}
-			catch(Exception ex)
+			catch (Exception ex)
 			{
 				ReportError(ex, s, "Stop Stream");
 				await Task.Delay(retrySeconds * 1000);
@@ -571,7 +591,7 @@ namespace forte.devices.workflow
 			{
 				ReportError(s, ex, name);
 			}
-			catch(Exception ex1)
+			catch (Exception ex1)
 			{
 				_logger.Debug(ex1, "");
 			}
@@ -621,7 +641,7 @@ namespace forte.devices.workflow
 			{
 				_logger.Debug("Load Preset");
 				AddSessionRetry(s, testrun);
-				if(s.SessionType != SessionType.Manual)
+				if (s.SessionType != SessionType.Manual)
 				{
 					await _streamingClient.LoadVideoStreamPreset(s.VmixPreset, s.PrimaryIngestUrl);
 				}
@@ -629,7 +649,7 @@ namespace forte.devices.workflow
 				_lockedSessions.TryRemove(s.SessioId, out var t);
 				return true;
 			}
-			catch(Exception ex)
+			catch (Exception ex)
 			{
 				ReportError(s, ex, "Load Preset");
 				if (!testrun)
@@ -648,7 +668,7 @@ namespace forte.devices.workflow
 			{
 				_logger.Debug("Start Client Stream");
 				AddSessionRetry(s, testrun);
-				if(s.SessionType != SessionType.Manual)
+				if (s.SessionType != SessionType.Manual)
 				{
 					FlushDns();
 					_streamingClient.StartStreaming(testrun);
@@ -657,7 +677,7 @@ namespace forte.devices.workflow
 				_lockedSessions.TryRemove(s.SessioId, out var t);
 				return true;
 			}
-			catch(Exception ex)
+			catch (Exception ex)
 			{
 				ReportError(s, ex, "Start Client Stream");
 				if (!testrun)
@@ -676,7 +696,7 @@ namespace forte.devices.workflow
 			{
 				_logger.Debug("Start Program");
 				AddSessionRetry(s, testrun);
-				if(s.SessionType != SessionType.Manual)
+				if (s.SessionType != SessionType.Manual)
 				{
 					_streamingClient.StartProgram();
 				}
@@ -684,7 +704,7 @@ namespace forte.devices.workflow
 				_lockedSessions.TryRemove(s.SessioId, out var t);
 				return true;
 			}
-			catch(Exception ex)
+			catch (Exception ex)
 			{
 				ReportError(s, ex, "Start Program");
 				if (!testrun)
@@ -732,21 +752,21 @@ namespace forte.devices.workflow
 			var response = _clientDevice.Execute(request);
 
 			// Not found if no command
-			if(response.StatusCode == HttpStatusCode.NotFound)
+			if (response.StatusCode == HttpStatusCode.NotFound)
 			{
 				//_logger.Debug("No command available, exiting");
 				// ... so just exit
 				return null;
 			}
 
-			if(response.StatusCode != HttpStatusCode.OK)
+			if (response.StatusCode != HttpStatusCode.OK)
 			{
 				throw (new Exception($"Failed fetching command, response {response.Content}"));
 			}
 
 			var r = JsonConvert.DeserializeObject<StreamingDeviceCommandModel>(response.Content);
 
-			if (r.DeviceType != (int) StreamingDeviceType.Autobot)
+			if (r.DeviceType != (int)StreamingDeviceType.Autobot)
 			{
 				return null;
 			}
@@ -763,11 +783,11 @@ namespace forte.devices.workflow
 			request.AddHeader("Content-Type", "application/json; charset=utf-8");
 			request.AddJsonBody(commandModel);
 			var response = _clientDevice.Execute<StreamingDeviceCommandModel>(request);
-			if(_verbose)
+			if (_verbose)
 			{
 				_logger.Debug(JsonConvert.SerializeObject(request.Body));
 			}
-			if(response.StatusCode == HttpStatusCode.OK) return;
+			if (response.StatusCode == HttpStatusCode.OK) return;
 
 			_logger.Error("Could not update command because of {@status}, response {@resposne}", response.ErrorMessage ?? response.StatusDescription, response);
 		}
@@ -775,14 +795,14 @@ namespace forte.devices.workflow
 		private SessionState UpdateSession(SessionState state, StreamingDeviceCommandModel command)
 		{
 			var isNew = state == null;
-			if(isNew)
+			if (isNew)
 			{
 				state = new SessionState
 				{
 					SessioId = command.SessionId.Value,
 					Permalink = command.Permalink,
 					Status = WorkflowState.Idle,
-					SessionType = (SessionType) command.Type
+					SessionType = (SessionType)command.Type
 				};
 			}
 
@@ -790,7 +810,7 @@ namespace forte.devices.workflow
 			state.EndTime = command.TimeEnd.Value;
 			state.VmixPreset = command.Preset;
 
-			if(isNew)
+			if (isNew)
 			{
 				_dbRepository.CreateSession(state);
 			}
@@ -821,7 +841,7 @@ namespace forte.devices.workflow
 			process.BeginOutputReadLine();
 			process.WaitForExit();
 			var output = buffer.ToString();
-			if(string.IsNullOrWhiteSpace(output) || !output.Contains("Successfully flushed"))
+			if (string.IsNullOrWhiteSpace(output) || !output.Contains("Successfully flushed"))
 			{
 				_logger.Warning("Could not flush DNS Resolver Cache, process output: {@output}", output);
 			}
@@ -829,7 +849,7 @@ namespace forte.devices.workflow
 
 		private void ReportError(SessionState s, Exception ex, string message)
 		{
-			if(s.RetryCount != 5)
+			if (s.RetryCount != 5)
 			{
 				_logger.Error(ex, message);
 				return;

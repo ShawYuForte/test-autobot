@@ -11,10 +11,7 @@
             <Label>Contact support to obtain this info.</Label>
             <Label>Agent Device ID:</Label>
             <TextBox Text="{Binding CustomDeviceId}"></TextBox>
-            
-            <Label Visibility="Collapsed">Agent Device ID:</Label>
             <TextBox Text="{Binding DeviceId}" Visibility="Collapsed"></TextBox>
-
             <Label>Server URL:</Label>
             <TextBox Text="{Binding ApiPath}"></TextBox>
             <Label>2-Way Video ID:</Label>

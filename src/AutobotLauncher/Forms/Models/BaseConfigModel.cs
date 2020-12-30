@@ -2,22 +2,22 @@
 {
 	public class BaseConfigModel : BaseViewModel
 	{
-		private string _deviceId;
 		private string _customDeviceId;
+		private string _deviceId;
 		private string _apiPath;
 		private string _apiPathExt;
 		private string _agoraApp;
-
-		public string DeviceId
-		{
-			get { return _deviceId; }
-			set { _deviceId = value; OnPropertyChanged("DeviceId"); }
-		}
 
 		public string CustomDeviceId
 		{
 			get { return _customDeviceId; }
 			set { _customDeviceId = value; OnPropertyChanged("CustomDeviceId"); }
+		}
+
+		public string DeviceId
+		{
+			get { return _deviceId; }
+			set { _deviceId = value; OnPropertyChanged("DeviceId"); }
 		}
 
 		public string ApiPath

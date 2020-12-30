@@ -1,0 +1,1 @@
+﻿Remove-Item c:\forte\device-cli -Recurse:$true -Force:$true -Confirm:$false

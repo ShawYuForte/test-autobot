@@ -28,11 +28,11 @@ using Microsoft.Practices.Unity;
 namespace forte.devices
 {
 	public class Program
-    {
+	{
 		private static UnityContainer _container;
 
 		private static void Main(string[] args)
-        {
+		{
 			//run -d "D:\!Projects\TDM-FORTE\iot\src\AutobotLauncher\bin\data" -l "D:\!Projects\TDM-FORTE\iot\src\AutobotLauncher\bin\logs" --pr "D:\!Projects\TDM-FORTE\iot\src\AutobotLauncher\bin\device-cli.2.2.3\tools\cli\preset\Forte Preset.vmix" -test-preset
 
 			//args = new string[]
@@ -136,7 +136,7 @@ namespace forte.devices
 
 		private static RunOptions ProcessArgs(string[] args)
 		{
-			if(args.Length == 0)
+			if (args.Length == 0)
 			{
 				args = new string[] { "run" };
 			}
@@ -150,7 +150,7 @@ namespace forte.devices
 
 			try
 			{
-				var optionsTyped = (RunOptions) options;
+				var optionsTyped = (RunOptions)options;
 				if (optionsTyped.Background)
 				{
 					optionsTyped.Background = false;
@@ -188,35 +188,30 @@ namespace forte.devices
 
 			//for upgrade reasons
 			var guid = config.Get<Guid>(SettingParams.DeviceId);
-			if(guid != Guid.Empty)
+			if (guid != Guid.Empty)
 			{
 				config = configManager.UpdateSetting(SettingParams.DeviceId, guid.ToString());
 			}
 
-            var customDeviceId = config.Get<string>(SettingParams.CustomDeviceId);
-            if (customDeviceId == string.Empty)
-            {
-                config = configManager.UpdateSetting(SettingParams.CustomDeviceId, string.Empty);
-            }
-
-            var customDeviceIdPresent = config.Get<string>(SettingParams.CustomDeviceIdPresent);
-            if (customDeviceIdPresent == null)
-            {
-                config = configManager.UpdateSetting(SettingParams.CustomDeviceIdPresent, "False");
-            }
-            else
-            {
-                config = configManager.UpdateSetting(SettingParams.CustomDeviceIdPresent, customDeviceId == null);
-            }
-
-            if (string.IsNullOrWhiteSpace(config.Get<string>(SettingParams.DeviceId)))
-			{
-				config = configManager.UpdateSetting(SettingParams.DeviceId, Guid.NewGuid().ToString());
-			}
-
-			if (string.IsNullOrWhiteSpace(config.Get<string>(SettingParams.CustomDeviceId)))
+			var customDeviceId = config.Get<Guid>(SettingParams.CustomDeviceId);
+			if (customDeviceId == Guid.Empty)
 			{
 				config = configManager.UpdateSetting(SettingParams.CustomDeviceId, string.Empty);
+			}
+
+			var customDeviceIdPresent = config.Get<string>(SettingParams.CustomDeviceIdPresent);
+			if (customDeviceIdPresent == null)
+			{
+				config = configManager.UpdateSetting(SettingParams.CustomDeviceIdPresent, "False");
+			}
+			else
+			{
+				config = configManager.UpdateSetting(SettingParams.CustomDeviceIdPresent, customDeviceId == null);
+			}
+
+			if (string.IsNullOrWhiteSpace(config.Get<string>(SettingParams.DeviceId)))
+			{
+				config = configManager.UpdateSetting(SettingParams.DeviceId, Guid.NewGuid().ToString());
 			}
 
 			if (string.IsNullOrWhiteSpace(config.Get<string>(SettingParams.ServerApiPath)))
@@ -224,30 +219,30 @@ namespace forte.devices
 				config = configManager.UpdateSetting(SettingParams.ServerApiPath, "server\\api");
 			}
 
-			if(string.IsNullOrWhiteSpace(config.Get<string>(SettingParams.ServerRootPath)))
+			if (string.IsNullOrWhiteSpace(config.Get<string>(SettingParams.ServerRootPath)))
 			{
 				config = configManager.UpdateSetting(SettingParams.ServerRootPath, "server\\");
 			}
 
-			if(!config.Contains(SettingParams.VerboseDebug))
+			if (!config.Contains(SettingParams.VerboseDebug))
 			{
 				config = configManager.UpdateSetting(SettingParams.VerboseDebug, true);
 			}
 
-			if(string.IsNullOrWhiteSpace(config.Get<string>(SettingParams.DeviceName)))
+			if (string.IsNullOrWhiteSpace(config.Get<string>(SettingParams.DeviceName)))
 			{
 				config = configManager.UpdateSetting(SettingParams.DeviceName, "Forte-device");
 			}
 
-			if(string.IsNullOrWhiteSpace(config.Get<string>(SettingParams.AgoraAppId)))
+			if (string.IsNullOrWhiteSpace(config.Get<string>(SettingParams.AgoraAppId)))
 			{
 				config = configManager.UpdateSetting(SettingParams.AgoraAppId, "false");
 			}
 
-			if(!string.IsNullOrWhiteSpace(config.Get<string>(SettingParams.AgoraApiUrl)))
+			if (!string.IsNullOrWhiteSpace(config.Get<string>(SettingParams.AgoraApiUrl)))
 			{
 				configManager.DeleteSetting(SettingParams.AgoraApiUrl);
 			}
 		}
-    }
+	}
 }
