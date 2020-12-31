@@ -33,6 +33,10 @@ namespace forte.devices
 
 		private static void Main(string[] args)
 		{
+			//AppDomain.CurrentDomain.FirstChanceException += (sender, eventArgs) => {
+			//	Console.WriteLine(eventArgs.Exception.ToString());
+			//};
+
 			//run -d "D:\!Projects\TDM-FORTE\iot\src\AutobotLauncher\bin\data" -l "D:\!Projects\TDM-FORTE\iot\src\AutobotLauncher\bin\logs" --pr "D:\!Projects\TDM-FORTE\iot\src\AutobotLauncher\bin\device-cli.2.2.3\tools\cli\preset\Forte Preset.vmix" -test-preset
 
 			//args = new string[]
@@ -193,8 +197,8 @@ namespace forte.devices
 				config = configManager.UpdateSetting(SettingParams.DeviceId, guid.ToString());
 			}
 
-			var customDeviceId = config.Get<Guid>(SettingParams.CustomDeviceId);
-			if (customDeviceId == Guid.Empty)
+			var customDeviceId = config.Get<string>(SettingParams.CustomDeviceId);
+            if (customDeviceId == null)
 			{
 				config = configManager.UpdateSetting(SettingParams.CustomDeviceId, string.Empty);
 			}

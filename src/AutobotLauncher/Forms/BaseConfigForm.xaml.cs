@@ -31,7 +31,6 @@ namespace AutobotLauncher.Forms
 		private void ClickCancel(object sender, RoutedEventArgs e)
 		{
 			DialogResult = false;
-			Close();
 		}
 
 		private async void ClickSave(object sender, RoutedEventArgs e)
@@ -49,7 +48,6 @@ namespace AutobotLauncher.Forms
 			await ClientApiInteractor.SettingSave("server-root-path", _model.ApiPath);
 			await ClientApiInteractor.SettingSave("server-api-path", _model.ApiPathExt);
 			DialogResult = true;
-			Close();
 		}
 	}
 }

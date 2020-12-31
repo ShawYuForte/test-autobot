@@ -80,11 +80,42 @@ namespace AutobotLauncher
             //if no version installed
             if (v == null) { return; }
 
-            //verify that client is ready to use
-            var r = FileUtils.GetClientPath(v).ProcessRunAndWaitAsAdmin("-version").GetAwaiter().GetResult();
-            if (r != null)
+            if (!File.Exists(FileUtils.GetClientPath(v)))
             {
-                _model.ClientVersion = r.FirstOrDefault();
+                _model.ClientVersion = v;
+                // install current version
+                var cm = $"install device-cli -version {_model.ClientVersion}";
+
+                var result = await "nuget".ProcessRunAndWaitAsAdmin(cm);
+
+                //package is installed
+                var pinstalled = result.FirstOrDefault(m => m != null && m.Contains("is already installed.")); //
+
+                var r = FileUtils.GetClientPath(v).ProcessRunAndWaitAsAdmin("-version").GetAwaiter().GetResult();
+                if (r != null)
+                {
+                    _model.ClientVersion = r.FirstOrDefault();
+                }
+                else
+                {
+                    _model.ClientVersion = v;
+                }
+                _model.IsClientInstalled = r != null;
+            }
+            else
+            {
+                //verify that client is ready to use
+                var r = FileUtils.GetClientPath(v).ProcessRunAndWaitAsAdmin("-version").GetAwaiter().GetResult();
+                if (r != null)
+                {
+                    _model.ClientVersion = r.FirstOrDefault();
+                }
+                else
+                {
+                    _model.ClientVersion = v;
+                   
+                }
+                _model.IsClientInstalled = true;
             }
 
             // check if device-cli.exe exists for current installed version            
@@ -97,8 +128,10 @@ namespace AutobotLauncher
 
                 //package is installed
                 var pinstalled = result.FirstOrDefault(m => m != null && m.Contains("is already installed.")); //
+
+                var r = FileUtils.GetClientPath(v).ProcessRunAndWaitAsAdmin("-version").GetAwaiter().GetResult();
+                _model.IsClientInstalled = r != null;
             }
-            _model.IsClientInstalled = r != null;
         }
 
         private async Task<string> CheckLatest()
@@ -234,7 +267,7 @@ namespace AutobotLauncher
 
                     try
                     {
-                        await Shutdown();
+                        //await Shutdown();
                     }
                     catch { }
 
