@@ -1,2 +1,0 @@
-bower install -force
-pause;

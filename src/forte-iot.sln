@@ -42,7 +42,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AgoraSDK", "AgoraSDK\AgoraS
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutobotLauncher", "AutobotLauncher\AutobotLauncher.csproj", "{C15B109A-59E6-4477-8C6D-399818D1CF59}"
 EndProject
-Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Autobot.Launcher.Setup", "Autobot.Launcher.Setup\Autobot.Launcher.Setup.vdproj", "{32D5E43E-E6C6-439A-AE4B-1A13D5364A1B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutobotLauncher.InstallAsm", "AutobotLauncher.InstallAsm\AutobotLauncher.InstallAsm.csproj", "{C089B4A4-B387-4380-A41F-210283194396}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "AutobotLauncher.Install", "AutobotLauncher.Install\AutobotLauncher.Install.vdproj", "{B345C5B7-1BB4-4C23-A3EA-ABFEBB646FDF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -174,18 +176,30 @@ Global
 		{C15B109A-59E6-4477-8C6D-399818D1CF59}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C15B109A-59E6-4477-8C6D-399818D1CF59}.Release|x86.ActiveCfg = Release|Any CPU
 		{C15B109A-59E6-4477-8C6D-399818D1CF59}.Release|x86.Build.0 = Release|Any CPU
-		{32D5E43E-E6C6-439A-AE4B-1A13D5364A1B}.All|Any CPU.ActiveCfg = Release
-		{32D5E43E-E6C6-439A-AE4B-1A13D5364A1B}.All|x86.ActiveCfg = Release
-		{32D5E43E-E6C6-439A-AE4B-1A13D5364A1B}.Debug|Any CPU.ActiveCfg = Debug
-		{32D5E43E-E6C6-439A-AE4B-1A13D5364A1B}.Debug|x86.ActiveCfg = Debug
-		{32D5E43E-E6C6-439A-AE4B-1A13D5364A1B}.Release|Any CPU.ActiveCfg = Release
-		{32D5E43E-E6C6-439A-AE4B-1A13D5364A1B}.Release|x86.ActiveCfg = Release
+		{C089B4A4-B387-4380-A41F-210283194396}.All|Any CPU.ActiveCfg = Debug|Any CPU
+		{C089B4A4-B387-4380-A41F-210283194396}.All|Any CPU.Build.0 = Debug|Any CPU
+		{C089B4A4-B387-4380-A41F-210283194396}.All|x86.ActiveCfg = Debug|Any CPU
+		{C089B4A4-B387-4380-A41F-210283194396}.All|x86.Build.0 = Debug|Any CPU
+		{C089B4A4-B387-4380-A41F-210283194396}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C089B4A4-B387-4380-A41F-210283194396}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C089B4A4-B387-4380-A41F-210283194396}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C089B4A4-B387-4380-A41F-210283194396}.Debug|x86.Build.0 = Debug|Any CPU
+		{C089B4A4-B387-4380-A41F-210283194396}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C089B4A4-B387-4380-A41F-210283194396}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C089B4A4-B387-4380-A41F-210283194396}.Release|x86.ActiveCfg = Release|Any CPU
+		{C089B4A4-B387-4380-A41F-210283194396}.Release|x86.Build.0 = Release|Any CPU
+		{B345C5B7-1BB4-4C23-A3EA-ABFEBB646FDF}.All|Any CPU.ActiveCfg = Debug
+		{B345C5B7-1BB4-4C23-A3EA-ABFEBB646FDF}.All|x86.ActiveCfg = Debug
+		{B345C5B7-1BB4-4C23-A3EA-ABFEBB646FDF}.Debug|Any CPU.ActiveCfg = Debug
+		{B345C5B7-1BB4-4C23-A3EA-ABFEBB646FDF}.Debug|x86.ActiveCfg = Debug
+		{B345C5B7-1BB4-4C23-A3EA-ABFEBB646FDF}.Release|Any CPU.ActiveCfg = Release
+		{B345C5B7-1BB4-4C23-A3EA-ABFEBB646FDF}.Release|x86.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		EnterpriseLibraryConfigurationToolBinariesPath = packages\TransientFaultHandling.Core.5.1.1209.1\lib\NET4
 		SolutionGuid = {D4D5E4E5-1EA4-45CB-842C-3B7FEBAD5053}
+		EnterpriseLibraryConfigurationToolBinariesPath = packages\TransientFaultHandling.Core.5.1.1209.1\lib\NET4
 	EndGlobalSection
 EndGlobal
