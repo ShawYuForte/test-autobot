@@ -40,6 +40,7 @@ namespace AutobotLauncher.Forms
 				_model.DeviceId = _model.CustomDeviceId;
 			}
 
+			await UserSettingUtils.UpdateUserSettings(_model);
 			await ClientApiInteractor.SettingSave("CustomDeviceId", _model.CustomDeviceId);
 			await ClientApiInteractor.SettingSave("CustomDeviceIdPresent", (!string.IsNullOrEmpty(_model.CustomDeviceId)).ToString());
 
