@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>forte.specs</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>Forte Tech</authors>
+    <owners>Forte</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>$description$</description>
+    <copyright>Copyright 2016</copyright>
+    <tags>Forte</tags>
+  </metadata>
+</package>

@@ -28,8 +28,10 @@ namespace forte.devices.services.clients
         private readonly IConfigurationManager _configurationManager;
         private readonly ILogger _logger;
         private readonly IRuntimeConfig _cfg;
-
-#region init
+        private string _vmixPresetOutputFile;
+        private int _stopStreamRetryCount;
+        private int _stopStreamMaxRetryCount = 5;
+		#region init
 
 		public VmixStreamingClient(IConfigurationManager configurationManager, ILogger logger, IRuntimeConfig cfg)
         {
@@ -76,9 +78,9 @@ namespace forte.devices.services.clients
 
 #region preset
 
-		public async Task<string> LoadVideoStreamPreset(string preset, string primaryUrl)
+		public async Task<string> LoadVideoStreamPreset(string preset, string primaryUrl, string agoraUrl)
 		{
-			var presetIdentifier = await LoadPreset(preset, primaryUrl);
+			var presetIdentifier = await LoadPreset(preset, primaryUrl, agoraUrl);
 			if(presetIdentifier == null)
 			{
 				throw new Exception("Could not load preset");
@@ -86,14 +88,14 @@ namespace forte.devices.services.clients
 			return presetIdentifier;
 		}
 
-		private async Task<string> LoadPreset(string preset, string primaryUrl)
+		private async Task<string> LoadPreset(string preset, string primaryUrl, string agoraUrl)
 		{
 			var vmixProcessHandle = EnsureVmixIsRunning(startFresh: true);
 			var config = _configurationManager.GetDeviceConfig();
 			var presetTemplateFilePath = string.IsNullOrEmpty(_cfg.PresetPath) ? config.Get<string>(VmixSettingParams.VmixPresetTemplateFilePath) : _cfg.PresetPath;
 			var timeout = config.Get(VmixSettingParams.VmixLoadTimeout, defaultValue: 120);
 			var timeStamp = DateTime.UtcNow.ToString(CultureInfo.InvariantCulture).Replace(":", "").Replace("/", "");
-			var vmixPresetOutputFile = $"{timeStamp}-{Guid.NewGuid()}.vmix";
+            _vmixPresetOutputFile = $"{timeStamp}-{Guid.NewGuid()}.vmix";
 
 			_logger.Debug($"Custom preset? {preset}");
 			if(!string.IsNullOrEmpty(preset))
@@ -117,19 +119,19 @@ namespace forte.devices.services.clients
 			}
 
 			var vmixPreset = VmixPreset.FromFile(presetTemplateFilePath);
-			vmixPreset.Outputs = new List<VmixStreamDestination>
+            vmixPreset.Outputs = new List<VmixStreamDestination>
 			{
 				new VmixStreamDestination("Primary", primaryUrl),
-            };
+                new VmixStreamDestination("Agora", agoraUrl),
+			};
 
-			_logger.Debug("Saving preset file {@vmixPresetOutputFile}", vmixPresetOutputFile);
-			vmixPreset.ToFile(presetTemplateFilePath);
+			_logger.Debug("Saving preset file {@vmixPresetOutputFile}", _vmixPresetOutputFile);
+			vmixPreset.ToFile(_vmixPresetOutputFile);
 
-			var requestUrl = $"/?Function=OpenPreset&Value={presetTemplateFilePath}";
+			var requestUrl = $"/?Function=OpenPreset&Value={_vmixPresetOutputFile}";
 			var request = new RestRequest(requestUrl, Method.GET) { Timeout = 1 };
 			var response = _client.Execute<VmixState>(request);
-
-			const int fiveSeconds = 5000;
+            const int fiveSeconds = 5000;
 			var timeLeft = timeout * 60 * 1000;
 			while(true)
 			{
@@ -194,15 +196,28 @@ namespace forte.devices.services.clients
 		public void StopStreaming(bool shutdownClient)
 		{
 			var state = GetVmixState();
-			if(state != null && state.Streaming)
+            if(state != null && state.Streaming)
 			{
 				_logger.Debug("Stopping streaming...");
-				StopStreaming();
-				_logger.Debug("Stopped streaming.");
-			}
+                state = StopStreaming();
+                _logger.Debug("Stopped streaming.");
+            }
 			if(shutdownClient)
 			{
-				StopVmix();
+                if ((!state?.Streaming ?? true) || _stopStreamRetryCount >= _stopStreamMaxRetryCount)
+                {
+                    _stopStreamRetryCount = 0;
+                    _logger.Debug("Closing vMix...");
+					StopVmix();
+				}
+                else
+                {
+                    _stopStreamRetryCount++;
+                    _logger.Debug($"vMix streams didn`t stop, retry {_stopStreamRetryCount}");
+					int millisecondsToWait = 3000;
+                    Thread.Sleep(millisecondsToWait);
+                    StopStreaming(true);
+                }
 			}
 		}
 
@@ -571,13 +586,18 @@ namespace forte.devices.services.clients
 
 		private VmixState StopStreaming()
 		{
-			return CallAndFetchState("/?Function=StopStreaming", "stop streaming");
+			return CallAndFetchState($"/?Function=StopStreaming", $"stop streaming");
 		}
 
 		private void StopVmix()
 		{
 			var process = GetVmixProcess();
 			process?.Kill();
+            if (_vmixPresetOutputFile != null && File.Exists(_vmixPresetOutputFile))
+            {
+                _logger.Debug("Delete tmp preset file - {@_vmixPresetOutputFile}", _vmixPresetOutputFile);
+				File.Delete(_vmixPresetOutputFile);
+            }
 		}
 
 #endregion

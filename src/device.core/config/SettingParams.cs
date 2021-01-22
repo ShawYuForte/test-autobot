@@ -11,5 +11,6 @@
 		public static string DeviceName => "device-name";
 		public static string AgoraAppId => "agora-app-id";
 		public static string AgoraApiUrl => "agora-api-url";
+        public static string AgoraRtmpUrl => "agora-rtmp-url";
 	}
 }

@@ -13,7 +13,7 @@ namespace forte.devices.services
     /// </summary>
     public interface IStreamingClient
     {
-		Task<string> LoadVideoStreamPreset(string preset, string primaryUrl);
+		Task<string> LoadVideoStreamPreset(string preset, string primaryUrl, string agoraUrl);
 		void StartStreaming(bool testrun = false);
 		void StopStreaming(bool shutdownClient);
 		void StartProgram();

@@ -292,13 +292,9 @@
     <None Include="package\tools\ReadMe.md" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\web\src\forte.specs\forte.specs.csproj">
+    <ProjectReference Include="..\forte.specs\forte.specs.csproj">
       <Project>{5E1C27C1-9D29-4DBC-970C-F8766A18CB7B}</Project>
       <Name>forte.specs</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\AgoraSDK\AgoraSDK.csproj">
-      <Project>{9655d131-da85-434d-91be-4d4fa97a0a18}</Project>
-      <Name>AgoraSDK</Name>
     </ProjectReference>
     <ProjectReference Include="..\device.client.vmix\device.client.vmix.csproj">
       <Project>{bd82769b-e2b9-47d8-9962-ab7844548496}</Project>

@@ -37,6 +37,7 @@ namespace forte.devices.workflow
 		private bool _running = true;
 		private bool _verbose = true;
 		private string _deviceId;
+        private string _agoraRtmpUrl;
 		private ConcurrentDictionary<Guid, SessionState> _lockedSessions = new ConcurrentDictionary<Guid, SessionState>();
 
 		public StreamWorkflow(
@@ -60,6 +61,7 @@ namespace forte.devices.workflow
 			var apiPath = config.Get<string>(SettingParams.ServerApiPath);
 			_verbose = config.Get<bool>(SettingParams.VerboseDebug);
 			_deviceId = config.Get<string>(SettingParams.DeviceId);
+            _agoraRtmpUrl = config.Get<string>(SettingParams.AgoraRtmpUrl);
 
 			try
 			{
@@ -108,7 +110,7 @@ namespace forte.devices.workflow
 				PrimaryIngestUrl = "http://test"
 			};
 
-			var r1 = await LoadPreset(s, true);
+			var r1 = await LoadPreset(s, string.Empty, true);
 			var r2 = await StartClientStream(s, true);
 			var r3 = await StartProgram(s, true);
 			var r4 = true;
@@ -155,12 +157,7 @@ namespace forte.devices.workflow
 
 		private async void Run()
 		{
-			//_ms.MailError("111", new Exception("222"));
-			//_agora.Connect("TestRoom1");
-			//_agora.Disconnect();
-			//return;
-
-			int commandFetchedRetries = 0;
+            int commandFetchedRetries = 0;
 			try
 			{
 				var config = _configurationManager.GetDeviceConfig();
@@ -233,8 +230,7 @@ namespace forte.devices.workflow
 										_logger.Warning($"{session.Permalink}: {message}");
 										_lockedSessions[session.SessioId] = session;
 										await StopStream(session, streamStopRetrySeconds, restart);
-										await _agora.Disconnect();
-										break;
+                                        break;
 									default:
 										throw new ArgumentOutOfRangeException();
 								}
@@ -288,16 +284,7 @@ namespace forte.devices.workflow
 					var vmixSession = sessions.FirstOrDefault(s => s.VmixUsed == true);
 					foreach (var s in sessions)
 					{
-						//await ConnectToAgora(s);
-						//return;
-
-						//await ConnectToAgora(s);
-						//await Task.Delay(10000);
-						//await _agora.Disconnect();
-						//await ConnectToAgora(s);
-						//return;
-
-						if (_lockedSessions.ContainsKey(s.SessioId)) continue;
+                        if (_lockedSessions.ContainsKey(s.SessioId)) continue;
 						//check if vmix is free to use for this session and it's time
 						var isVmixSession = (vmixSession == null || vmixSession.Id == s.Id);
 						var needsLinking = s.StartTime.AddSeconds(-linkTimeSeconds) <= DateTime.UtcNow;
@@ -312,8 +299,7 @@ namespace forte.devices.workflow
 							_logger.Warning($"{s.Permalink}: {(DateTime.UtcNow - s.EndTime).TotalSeconds} seconds after end, terminate");
 							_lockedSessions[s.SessioId] = s;
 							StopStream(s, streamStopRetrySeconds);
-							_agora.Disconnect();
-							continue;
+                            continue;
 						}
 
 						//start new session
@@ -331,10 +317,15 @@ namespace forte.devices.workflow
 							if (!isVmixSession) continue;
 							_logger.Warning($"{s.Permalink}");
 							//if(!fakeRun)
-							{
-								var r = await LoadPreset(s);
+                            {
+                                var channelName = s.SessioId.ToString().ToUpper();
+                                var agoraUserId = (uint)channelName.GetHashCode();
+								var channelKey = _agora.GetChannelKey(channelName, _deviceId, agoraUserId);
+								var agoraRtmpUrl = $"{_agoraRtmpUrl}/live?appid={channelKey}&channel={channelName}&uid={agoraUserId}&abr=50000&end=true";
+                                _logger.Information($"vMix agora rtmp loading - {_agoraRtmpUrl}");
+								var r = await LoadPreset(s, agoraRtmpUrl);
 								if (!r) continue; //something went wrong with loading preset
-							}
+                            }
 							SetSessionStatus(s, WorkflowState.VmixLoaded);
 							continue;
 						}
@@ -367,10 +358,7 @@ namespace forte.devices.workflow
 						//connect to agora after we started streaming on vmix
 						if (s.Status == WorkflowState.StreamingAgora)
 						{
-							_logger.Warning($"{s.Permalink}: connect to agora");
-							var r = await ConnectToAgora(s);
-							if (!r) continue; //something went wrong with loading preset
-							SetSessionStatus(s, WorkflowState.StreamingPublish);
+                            SetSessionStatus(s, WorkflowState.StreamingPublish);
 							continue;
 						}
 
@@ -445,7 +433,7 @@ namespace forte.devices.workflow
 			}
 		}
 
-		private async Task StartStream(SessionState s, int retrySeconds)
+        private async Task StartStream(SessionState s, int retrySeconds)
 		{
 			try
 			{
@@ -560,30 +548,6 @@ namespace forte.devices.workflow
 			}
 		}
 
-		private async Task<bool> ConnectToAgora(SessionState s)
-		{
-			try
-			{
-				AddSessionRetry(s);
-				if (s.SessionType != SessionType.Manual)
-				{
-					await _agora.Connect(s.SessioId.ToString().ToUpper(), _deviceId);
-					//await _agora.Connect("TestRoom1", _deviceId);
-				}
-				ClearSessionRetry(s);
-				_lockedSessions.TryRemove(s.SessioId, out var t);
-				return true;
-			}
-			catch (Exception ex)
-			{
-				ReportError(s, ex, "Connect To Agora");
-				await Task.Delay(10000);
-				_lockedSessions.TryRemove(s.SessioId, out var t);
-			}
-
-			return false;
-		}
-
 		private void ReportError(Exception ex, SessionState s, string name)
 		{
 			_logger.Debug(ex, "");
@@ -635,7 +599,7 @@ namespace forte.devices.workflow
 
 		#region vmix steps
 
-		private async Task<bool> LoadPreset(SessionState s, bool testrun = false)
+		private async Task<bool> LoadPreset(SessionState s, string agoraUrl, bool testrun = false)
 		{
 			try
 			{
@@ -643,7 +607,7 @@ namespace forte.devices.workflow
 				AddSessionRetry(s, testrun);
 				if (s.SessionType != SessionType.Manual)
 				{
-					await _streamingClient.LoadVideoStreamPreset(s.VmixPreset, s.PrimaryIngestUrl);
+                    await _streamingClient.LoadVideoStreamPreset(s.VmixPreset, s.PrimaryIngestUrl, agoraUrl);
 				}
 				ClearSessionRetry(s, testrun);
 				_lockedSessions.TryRemove(s.SessioId, out var t);

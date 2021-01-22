@@ -158,11 +158,11 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\web\src\forte.modules.serilog\forte.modules.serilog.csproj">
+    <ProjectReference Include="..\forte.modules.serilog\forte.modules.serilog.csproj">
       <Project>{045a37a3-0cbc-4e61-a39d-58355aacd983}</Project>
       <Name>forte.modules.serilog</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\web\src\forte.specs\forte.specs.csproj">
+    <ProjectReference Include="..\forte.specs\forte.specs.csproj">
       <Project>{5E1C27C1-9D29-4DBC-970C-F8766A18CB7B}</Project>
       <Name>forte.specs</Name>
     </ProjectReference>
