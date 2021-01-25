@@ -195,12 +195,15 @@ namespace forte.devices.services.clients
 
 		public void StopStreaming(bool shutdownClient)
 		{
-			var state = GetVmixState();
-            if(state != null && state.Streaming)
+            int millisecondsToWait = 5000;
+            var state = GetVmixState();
+			if (state != null && state.Streaming)
 			{
 				_logger.Debug("Stopping streaming...");
-                state = StopStreaming();
-                _logger.Debug("Stopped streaming.");
+                StopStreaming();
+                Thread.Sleep(millisecondsToWait);
+                state = GetVmixState();
+				_logger.Debug("Stopped streaming.");
             }
 			if(shutdownClient)
 			{
@@ -214,8 +217,6 @@ namespace forte.devices.services.clients
                 {
                     _stopStreamRetryCount++;
                     _logger.Debug($"vMix streams didn`t stop, retry {_stopStreamRetryCount}");
-					int millisecondsToWait = 3000;
-                    Thread.Sleep(millisecondsToWait);
                     StopStreaming(true);
                 }
 			}
