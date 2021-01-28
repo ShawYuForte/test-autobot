@@ -1,4 +1,5 @@
-﻿using AutobotLauncher.Forms.Models;
+﻿using System;
+using AutobotLauncher.Forms.Models;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -28,6 +29,9 @@ namespace AutobotLauncher.Utils
                         await ClientApiInteractor.SettingSave("CustomDeviceId", customDeviceIdValue);
                         await ClientApiInteractor.SettingSave("DeviceId", customDeviceIdValue);
                         await ClientApiInteractor.SettingSave("CustomDeviceIdPresent", (!string.IsNullOrEmpty("True")).ToString());
+
+                        await ClientApiInteractor.SettingSave("agora-app-id", videoUrlValue);
+                        await ClientApiInteractor.SettingSave("server-root-path", studioUrlValue);
                     }
                 }
                 catch { }
@@ -46,12 +50,12 @@ namespace AutobotLauncher.Utils
                     XElement forteSettings = userSettingsXml.Root.Elements("forteSettings").FirstOrDefault();
 
                     forteSettings.Attribute("CustomDeviceId").SetValue(model.CustomDeviceId);
+                    forteSettings.Attribute("StudioUrl").SetValue(model.ApiPath);
+                    forteSettings.Attribute("VideoUrl").SetValue(model.AgoraApp);
                     userSettingsXml.Save(userSettingsPath);
                 }
                 catch { }
             }
-
-            await ClientApiInteractor.SettingSave("CustomDeviceId", "");
         }
     }
 }

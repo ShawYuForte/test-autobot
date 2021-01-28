@@ -2,13 +2,11 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Documents;
-using System.Xml.Linq;
 using AutobotLauncher.Enums;
 using AutobotLauncher.Forms;
 using AutobotLauncher.Utils;
@@ -32,32 +30,6 @@ namespace AutobotLauncher
             t1.Start();
         }
 
-        private async Task InitUserSettingsAfterInstallation()
-        {
-            var userSettingsPath = $"{FileUtils.Dir.FullName}\\userSettings.xml";
-
-            if (File.Exists(userSettingsPath))
-            {
-                try
-                {
-                    var userSettingsXml = XDocument.Load(userSettingsPath);
-                    XElement forteSettings = userSettingsXml.Root.Elements("forteSettings").FirstOrDefault();
-
-                    var customDeviceIdValue = forteSettings.Attribute("CustomDeviceId").Value;
-                    var studioUrlValue = forteSettings.Attribute("StudioUrl").Value;
-                    var videoUrlValue = forteSettings.Attribute("VideoUrl").Value;
-
-                    if (!string.IsNullOrEmpty(customDeviceIdValue))
-                    {
-                        await ClientApiInteractor.SettingSave("CustomDeviceId", customDeviceIdValue);
-                        await ClientApiInteractor.SettingSave("DeviceId", customDeviceIdValue);
-                        await ClientApiInteractor.SettingSave("CustomDeviceIdPresent", (!string.IsNullOrEmpty("True")).ToString());
-                    }
-                }
-                catch { }
-            }
-        }
-
         private void Check()
         {
             if (_model.CheckInProgress) { return; }
@@ -73,7 +45,7 @@ namespace AutobotLauncher
             RunAndWaitOffCompletion(new Task(() => { Launch().Wait(); }));
             RunAndWaitOffCompletion(new Task(() => { _model.IsApiConnected = IsApiConnected().Result; }));
 
-            RunAndWaitOffCompletion(new Task(() => { InitUserSettingsAfterInstallation().Wait(); }));
+            RunAndWaitOffCompletion(new Task(() => { UserSettingUtils.InitUserSettingsAfterInstallation().Wait(); }));
 
 
             _model.SetStatus();
