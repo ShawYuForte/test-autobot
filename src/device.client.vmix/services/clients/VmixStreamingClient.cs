@@ -121,9 +121,9 @@ namespace forte.devices.services.clients
 			var vmixPreset = VmixPreset.FromFile(presetTemplateFilePath);
             vmixPreset.Outputs = new List<VmixStreamDestination>
 			{
-				new VmixStreamDestination("Primary", primaryUrl),
                 new VmixStreamDestination("Agora", agoraUrl),
-			};
+				new VmixStreamDestination("Primary", primaryUrl),
+            };
 
 			_logger.Debug("Saving preset file {@vmixPresetOutputFile}", _vmixPresetOutputFile);
 			vmixPreset.ToFile(_vmixPresetOutputFile);

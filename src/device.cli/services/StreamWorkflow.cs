@@ -316,16 +316,16 @@ namespace forte.devices.workflow
 						{
 							if (!isVmixSession) continue;
 							_logger.Warning($"{s.Permalink}");
-							//if(!fakeRun)
-                            {
-                                var channelName = s.SessioId.ToString().ToUpper();
-                                var agoraUserId = (uint)channelName.GetHashCode();
-								var channelKey = _agora.GetChannelKey(channelName, _deviceId, agoraUserId);
-								var agoraRtmpUrl = $"{_agoraRtmpUrl}/live?appid={channelKey}&channel={channelName}&uid={agoraUserId}&abr=50000&end=true";
-                                _logger.Information($"vMix agora rtmp loading - {_agoraRtmpUrl}");
-								var r = await LoadPreset(s, agoraRtmpUrl);
-								if (!r) continue; //something went wrong with loading preset
-                            }
+                            var channelName = s.SessioId.ToString().ToUpper();
+                            var agoraUserId = (uint)channelName.GetHashCode();
+							var channelKey = _agora.GetChannelKey(channelName, _deviceId, agoraUserId);
+							//agora rtmp doesn`t handle forward slashes in parameters
+							channelKey = channelKey.Replace("/", "FORWARDSLASH");
+                            var agoraRtmpUrl = $"{_agoraRtmpUrl}/live?appid={channelKey}&channel={channelName}&uid={agoraUserId}&abr=150000&end=true";
+                            _logger.Information($"vMix agora rtmp loading - {agoraRtmpUrl}");
+							var r = await LoadPreset(s, agoraRtmpUrl);
+							if (!r) continue; //something went wrong with loading preset
+                            
 							SetSessionStatus(s, WorkflowState.VmixLoaded);
 							continue;
 						}
