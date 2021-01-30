@@ -145,6 +145,12 @@ namespace forte.devices.services.clients
 				timeLeft -= fiveSeconds;
 			}
 
+            var isFullScreenMode = config.Get<bool>(VmixSettingParams.VMixFullScreen);
+            if (isFullScreenMode)
+            {
+                SetFullScreenMode();
+            }
+
 			return vmixProcessHandle;
 		}
 
@@ -264,7 +270,13 @@ namespace forte.devices.services.clients
 			var openingVideo = vmixState.Inputs.Single(input => input.Role == InputRole.OpeningVideo);
 			_logger.Debug($"Starting intro video... Enable: {enableIntro}");
 
-			if(enableIntro)
+            var isFullScreenMode = config.Get<bool>(VmixSettingParams.VMixFullScreen);
+            if (isFullScreenMode)
+            {
+                SetFullScreenMode();
+            }
+
+			if (enableIntro)
 			{
 				SetPreview(openingVideo);
 				// Fade to intro video
@@ -601,9 +613,14 @@ namespace forte.devices.services.clients
             }
 		}
 
-#endregion
+        private void SetFullScreenMode()
+        {
+            CallAndFetchState($"/?Function=FullscreenOn", "set full screen");
+        }
 
-#region internal
+		#endregion
+
+		#region internal
 
 		/// <summary>
 		///     Find window by Caption only. Note you must pass IntPtr.Zero as the first parameter.

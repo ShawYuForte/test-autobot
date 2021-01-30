@@ -12,5 +12,6 @@
 		public static string AgoraAppId => "agora-app-id";
 		public static string AgoraApiUrl => "agora-api-url";
         public static string AgoraRtmpUrl => "agora-rtmp-url";
+        public static string VMixFullScreen => "vmx-full-screen";
 	}
 }

@@ -247,6 +247,11 @@ namespace forte.devices
 			{
 				configManager.DeleteSetting(SettingParams.AgoraApiUrl);
 			}
+
+            if (!config.Contains(SettingParams.VMixFullScreen))
+            {
+                configManager.UpdateSetting(SettingParams.VMixFullScreen, false);
+            }
 		}
 	}
 }

@@ -28,5 +28,6 @@
 		public static string EnableOutro => "vmix-outro-video-enabled";
 		public static string EnableOutroStatic => "vmix-outro-static-image-enabled";
 		public static string StaticImageTime => "vmix-intro-static-image-timeout-seconds";
-	}
+        public static string VMixFullScreen => "vmx-full-screen";
+    }
 }
