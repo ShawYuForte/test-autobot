@@ -319,8 +319,7 @@ namespace forte.devices.workflow
                             var channelName = s.SessioId.ToString().ToUpper();
                             var agoraUserId = (uint)channelName.GetHashCode();
 							var channelKey = _agora.GetChannelKey(channelName, _deviceId, agoraUserId);
-							//agora rtmp doesn`t handle forward slashes in parameters
-							channelKey = channelKey.Replace("/", "FORWARDSLASH");
+                            channelKey = channelKey.Replace("/", "%2F");
                             var agoraRtmpUrl = $"{_agoraRtmpUrl}/live?appid={channelKey}&channel={channelName}&uid={agoraUserId}&abr=150000&end=true";
                             _logger.Information($"vMix agora rtmp loading - {agoraRtmpUrl}");
 							var r = await LoadPreset(s, agoraRtmpUrl);
