@@ -252,6 +252,11 @@ namespace forte.devices
             {
                 configManager.UpdateSetting(SettingParams.VMixFullScreen, false);
             }
+
+            if (!config.Contains(SettingParams.AgoraRtmpUrl))
+            {
+                configManager.UpdateSetting(SettingParams.AgoraRtmpUrl, "rtmp://104.209.236.226:1935");
+            }
 		}
 	}
 }
