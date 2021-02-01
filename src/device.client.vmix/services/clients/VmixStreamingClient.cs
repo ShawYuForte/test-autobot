@@ -12,6 +12,7 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using forte.devices.config;
 using forte.devices.models;
 using forte.devices.models.presets;
 using forte.services;
@@ -118,7 +119,7 @@ namespace forte.devices.services.clients
 				}
 			}
 
-			var vmixPreset = VmixPreset.FromFile(presetTemplateFilePath);
+            var vmixPreset = VmixPreset.FromFile(presetTemplateFilePath);
             vmixPreset.Outputs = new List<VmixStreamDestination>
 			{
                 new VmixStreamDestination("Agora", agoraUrl),
@@ -145,12 +146,7 @@ namespace forte.devices.services.clients
 				timeLeft -= fiveSeconds;
 			}
 
-            var isFullScreenMode = config.Get<bool>(VmixSettingParams.VMixFullScreen);
-            if (isFullScreenMode)
-            {
-                SetFullScreenMode();
-            }
-
+            SetFullScreenMode();
 			return vmixProcessHandle;
 		}
 
@@ -179,7 +175,8 @@ namespace forte.devices.services.clients
 		{
 			var vmixState = GetVmixState();
 			if(vmixState == null) return;
-			//var config = _configurationManager.GetDeviceConfig();
+
+            SetFullScreenMode();
 
 			_logger.Debug("Loading static image intro...");
 			var openingImage = vmixState.Inputs.Single(input => input.Role == InputRole.OpeninStaticImage);
@@ -265,16 +262,11 @@ namespace forte.devices.services.clients
 		{
 			var vmixState = GetVmixState();
 			if(vmixState == null) return;
+
 			var config = _configurationManager.GetDeviceConfig();
 			var enableIntro = config.Get<bool>(VmixSettingParams.EnableIntro);
 			var openingVideo = vmixState.Inputs.Single(input => input.Role == InputRole.OpeningVideo);
 			_logger.Debug($"Starting intro video... Enable: {enableIntro}");
-
-            var isFullScreenMode = config.Get<bool>(VmixSettingParams.VMixFullScreen);
-            if (isFullScreenMode)
-            {
-                SetFullScreenMode();
-            }
 
 			if (enableIntro)
 			{
@@ -615,7 +607,14 @@ namespace forte.devices.services.clients
 
         private void SetFullScreenMode()
         {
-            CallAndFetchState($"/?Function=FullscreenOn", "set full screen");
+            var config = _configurationManager.GetDeviceConfig();
+
+            var isFullScreenMode = config.Get<bool>(VmixSettingParams.VMixFullScreen);
+            if (isFullScreenMode)
+            {
+                _logger.Debug("vMix: set fullscreen mode.");
+                CallAndFetchState($"/?Function=FullscreenOn", "set full screen");
+			}
         }
 
 		#endregion
