@@ -122,7 +122,7 @@ namespace forte.devices.services.clients
             var vmixPreset = VmixPreset.FromFile(presetTemplateFilePath);
             vmixPreset.Outputs = new List<VmixStreamDestination>
 			{
-                new VmixStreamDestination("Agora", agoraUrl),
+                new VmixStreamDestination(string.Empty, agoraUrl),
 				new VmixStreamDestination("Primary", primaryUrl),
             };
 
