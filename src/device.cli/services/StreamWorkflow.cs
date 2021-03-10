@@ -316,14 +316,21 @@ namespace forte.devices.workflow
 						{
 							if (!isVmixSession) continue;
 							_logger.Warning($"{s.Permalink}");
-                            var channelName = s.SessioId.ToString().ToUpper();
-                            var agoraUserId = (uint)channelName.GetHashCode();
-							var channelKey = _agora.GetChannelKey(channelName, _deviceId, agoraUserId);
-                            channelKey = channelKey.Replace("/", "%2F");
-                            var agoraRtmpUrl = $"{_agoraRtmpUrl}/live?appid={channelKey}&channel={channelName}&uid={agoraUserId}&abr=150000&dual=true&dfps=15&dvbr=500000&dwidth=640&dheight=360&end=true";
-                            _logger.Information($"vMix agora rtmp loading - {agoraRtmpUrl}");
-							var r = await LoadPreset(s, agoraRtmpUrl);
-							if (!r) continue; //something went wrong with loading preset
+
+							var agoraRtmpEnabled = config.Get<bool>(SettingParams.AgoraRtmpEnabled);
+                            string agoraRtmpUrl = null;
+							if (agoraRtmpEnabled && s.SessionType == SessionType.Scheduled)
+                            {
+								var channelName = s.SessioId.ToString().ToUpper();
+								var agoraUserId = (uint)channelName.GetHashCode();
+								var channelKey = _agora.GetChannelKey(channelName, _deviceId, agoraUserId);
+								channelKey = channelKey.Replace("/", "%2F");
+								agoraRtmpUrl = $"{_agoraRtmpUrl}/live?appid={channelKey}&channel={channelName}&uid={agoraUserId}&abr=150000&dual=true&dfps=15&dvbr=500000&dwidth=640&dheight=360&end=true";
+								_logger.Information($"vMix agora rtmp loading - {agoraRtmpUrl}");
+                            }
+
+							var loadPreset = await LoadPreset(s, agoraRtmpUrl);
+                            if (!loadPreset) continue; //something went wrong with loading preset
                             
 							SetSessionStatus(s, WorkflowState.VmixLoaded);
 							continue;
@@ -598,7 +605,7 @@ namespace forte.devices.workflow
 
 		#region vmix steps
 
-		private async Task<bool> LoadPreset(SessionState s, string agoraUrl, bool testrun = false)
+		private async Task<bool> LoadPreset(SessionState s, string agoraUrl = null, bool testrun = false)
 		{
 			try
 			{

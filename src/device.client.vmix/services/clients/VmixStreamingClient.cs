@@ -120,11 +120,15 @@ namespace forte.devices.services.clients
 			}
 
             var vmixPreset = VmixPreset.FromFile(presetTemplateFilePath);
-            vmixPreset.Outputs = new List<VmixStreamDestination>
-			{
-                new VmixStreamDestination(string.Empty, agoraUrl),
-				new VmixStreamDestination("Primary", primaryUrl),
-            };
+
+            var vMixOutputs = new List<VmixStreamDestination>();
+            if (!string.IsNullOrEmpty(agoraUrl))
+            {
+                vMixOutputs.Add(new VmixStreamDestination(string.Empty, agoraUrl));
+            }
+
+            vMixOutputs.Add(new VmixStreamDestination("Primary", primaryUrl));
+			vmixPreset.Outputs = vMixOutputs;
 
 			_logger.Debug("Saving preset file {@vmixPresetOutputFile}", _vmixPresetOutputFile);
 			vmixPreset.ToFile(_vmixPresetOutputFile);

@@ -238,9 +238,9 @@ namespace forte.devices
 				config = configManager.UpdateSetting(SettingParams.DeviceName, "Forte-device");
 			}
 
-			if (string.IsNullOrWhiteSpace(config.Get<string>(SettingParams.AgoraAppId)))
+			if (!config.Contains(SettingParams.AgoraRtmpEnabled))
 			{
-				config = configManager.UpdateSetting(SettingParams.AgoraAppId, "false");
+				config = configManager.UpdateSetting(SettingParams.AgoraRtmpEnabled, true);
 			}
 
 			if (!string.IsNullOrWhiteSpace(config.Get<string>(SettingParams.AgoraApiUrl)))
