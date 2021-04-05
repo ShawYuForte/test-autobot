@@ -160,7 +160,7 @@ namespace forte.devices.workflow
             int commandFetchedRetries = 0;
 			try
 			{
-				var config = _configurationManager.GetDeviceConfig();
+                var config = _configurationManager.GetDeviceConfig();
 				var linkRetrySeconds = 15;
 				var streamRetrySeconds = 15;
 				var streamStopRetrySeconds = 15;

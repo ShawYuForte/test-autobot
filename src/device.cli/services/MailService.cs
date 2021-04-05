@@ -2,60 +2,54 @@
 using System.Net.Mail;
 using forte.devices.config;
 using forte.services;
+using SendGrid;
 
 namespace forte.devices.services
 {
-	public class MailService
-	{
-		private ILogger _logger { get; set; }
-		private IConfigurationManager _configManager { get; set; }
+    public class MailService
+    {
+        private ILogger _logger { get; set; }
+        private IConfigurationManager _configManager { get; set; }
 
-		public MailService(ILogger logger, IConfigurationManager configManager)
-		{
-			_logger = logger;
-			_configManager = configManager;
-		}
+        public MailService(ILogger logger, IConfigurationManager configManager)
+        {
+            _logger = logger;
+            _configManager = configManager;
+        }
 
-		public void MailError(string message, Exception ex)
-		{
-			var config = _configManager.GetDeviceConfig();
-			var deviceName = config.Get<string>(SettingParams.DeviceName);
+        public void MailError(string message, Exception ex)
+        {
+            var config = _configManager.GetDeviceConfig();
+            var deviceName = config.Get<string>(SettingParams.DeviceName);
 
-			var setts = System.Configuration.ConfigurationManager.AppSettings;
+            var setts = System.Configuration.ConfigurationManager.AppSettings;
+            var from = setts["mail:from"];
+            var to = setts["mail:to"].Split(',');
+            var apiKey = setts["mail:SendGrid:ApiKey"];
 
-			var server = setts["mail:server"];
-			var from = setts["mail:from"];
-			var to = setts["mail:to"].Split(',');
-			var user = setts["mail:user"];
-			var password = setts["mail:password"];
+            try
+            {
+                var gridMessage = new SendGridMessage();
+                foreach (var i in to)
+                {
+                    var iTrimmed = i.Trim();
+                    #if DEBUG
+                    if (i == "ops@forte.fit") continue;
+                    #endif
+                    gridMessage.AddTo(iTrimmed);
+                }
 
-			try
-			{
-				MailMessage mail = new MailMessage();
-				SmtpClient SmtpServer = new SmtpClient(server);
+                gridMessage.From = new MailAddress(from);
+                gridMessage.Subject = $"Autobot Error on {deviceName}";
+                gridMessage.Text = $"{deviceName} {Environment.NewLine} {message} {Environment.NewLine} Error details: {ex.Message} {ex.StackTrace}";
 
-				mail.From = new MailAddress(from);
-				mail.Subject = $"Autobot Error on {deviceName}";
-				mail.Body = $"{deviceName} {Environment.NewLine} {message} {Environment.NewLine} Error details: {ex.Message} {ex.StackTrace}";
-				foreach(var i in to)
-				{
-					var iTrimmed = i.Trim();
-					#if DEBUG
-					if(i == "ops@forte.fit") continue;
-					#endif
-					mail.To.Add(iTrimmed);
-				}
-
-				//SmtpServer.Port = 587;
-				SmtpServer.Credentials = new System.Net.NetworkCredential(user, password);
-				//SmtpServer.EnableSsl = true;
-
-				SmtpServer.Send(mail);
-			}
-			catch(Exception exx)
-			{
-				_logger.Debug(exx, "");
-			}
-		}
-	}
+                var transportWeb = new Web(apiKey);
+                transportWeb.DeliverAsync(gridMessage);
+            }
+            catch (Exception exx)
+            {
+                _logger.Debug(exx, "");
+            }
+        }
+    }
 }
