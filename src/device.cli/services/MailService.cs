@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net.Mail;
+using System.Threading.Tasks;
 using forte.devices.config;
 using forte.services;
 using SendGrid;
@@ -17,7 +18,7 @@ namespace forte.devices.services
             _configManager = configManager;
         }
 
-        public void MailError(string message, Exception ex)
+        public async Task MailErrorAsync(string message, Exception ex)
         {
             var config = _configManager.GetDeviceConfig();
             var deviceName = config.Get<string>(SettingParams.DeviceName);
@@ -34,7 +35,7 @@ namespace forte.devices.services
                 {
                     var iTrimmed = i.Trim();
                     #if DEBUG
-                    if (i == "ops@forte.fit") continue;
+                    if (i == "techsupport@forte.fit") continue;
                     #endif
                     gridMessage.AddTo(iTrimmed);
                 }
@@ -44,7 +45,7 @@ namespace forte.devices.services
                 gridMessage.Text = $"{deviceName} {Environment.NewLine} {message} {Environment.NewLine} Error details: {ex.Message} {ex.StackTrace}";
 
                 var transportWeb = new Web(apiKey);
-                transportWeb.DeliverAsync(gridMessage);
+                await transportWeb.DeliverAsync(gridMessage);
             }
             catch (Exception exx)
             {

@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -190,7 +191,7 @@ namespace forte.devices.workflow
 						{
 							if (commandFetchedRetries == 0)
 							{
-								_ms.MailError(exception.Message, exception);
+                                await _ms.MailErrorAsync(exception.Message, exception);
 							}
 							_logger.Error(exception, exception.Message);
 							commandFetchedRetries--;
@@ -253,7 +254,7 @@ namespace forte.devices.workflow
 								{
 									command.ExecutedOn = DateTime.UtcNow;
 									command.ExecutionSucceeded = false;
-									_ms.MailError($"Could not execute command {command}", exception);
+									await _ms.MailErrorAsync($"Could not execute command {command}", exception);
 									_logger.Fatal(exception, "Could not execute command {@command}", command);
 								}
 								else
@@ -268,7 +269,7 @@ namespace forte.devices.workflow
 							}
 							catch (Exception exception)
 							{
-								_ms.MailError($"Could not save command on the server {command}", exception);
+								await _ms.MailErrorAsync($"Could not save command on the server {command}", exception);
 								_logger.Fatal(exception, "Could not save command on the server {@command}", command);
 							}
 						}
@@ -397,7 +398,7 @@ namespace forte.devices.workflow
 			}
 			catch (Exception ex)
 			{
-				_ms.MailError($"Running failed.", ex);
+                await _ms.MailErrorAsync($"Running failed.", ex);
 				_logger.Fatal(ex, $"Running failed.");
 				_running = false;
 			}
@@ -433,7 +434,7 @@ namespace forte.devices.workflow
 			}
 			catch (Exception ex)
 			{
-				ReportError(ex, s, "Link Stream");
+                await ReportErrorAsync(ex, s, "Link Stream");
 				await Task.Delay(retrySeconds * 1000);
 				_lockedSessions.TryRemove(s.SessioId, out var t);
 			}
@@ -469,7 +470,7 @@ namespace forte.devices.workflow
 			}
 			catch (Exception ex)
 			{
-				ReportError(ex, s, "Start Stream");
+                await ReportErrorAsync(ex, s, "Start Stream");
 				await Task.Delay(retrySeconds * 1000);
 				_lockedSessions.TryRemove(s.SessioId, out var t);
 			}
@@ -504,7 +505,7 @@ namespace forte.devices.workflow
 			}
 			catch (Exception ex)
 			{
-				ReportError(ex, s, "Publish Stream");
+				await ReportErrorAsync(ex, s, "Publish Stream");
 				await Task.Delay(retrySeconds * 1000);
 				_lockedSessions.TryRemove(s.SessioId, out var t);
 			}
@@ -548,18 +549,18 @@ namespace forte.devices.workflow
 			}
 			catch (Exception ex)
 			{
-				ReportError(ex, s, "Stop Stream");
+                await ReportErrorAsync(ex, s, "Stop Stream");
 				await Task.Delay(retrySeconds * 1000);
 				_lockedSessions.TryRemove(s.SessioId, out var t);
 			}
 		}
 
-		private void ReportError(Exception ex, SessionState s, string name)
+		private async Task ReportErrorAsync(Exception ex, SessionState s, string name)
 		{
 			_logger.Debug(ex, "");
 			try
 			{
-				ReportError(s, ex, name);
+                await ReportErrorAsync(s, ex, name);
 			}
 			catch (Exception ex1)
 			{
@@ -621,7 +622,7 @@ namespace forte.devices.workflow
 			}
 			catch (Exception ex)
 			{
-				ReportError(s, ex, "Load Preset");
+                await ReportErrorAsync(s, ex, "Load Preset");
 				if (!testrun)
 				{
 					await Task.Delay(15000);
@@ -649,7 +650,7 @@ namespace forte.devices.workflow
 			}
 			catch (Exception ex)
 			{
-				ReportError(s, ex, "Start Client Stream");
+                await ReportErrorAsync(s, ex, "Start Client Stream");
 				if (!testrun)
 				{
 					await Task.Delay(15000);
@@ -676,7 +677,7 @@ namespace forte.devices.workflow
 			}
 			catch (Exception ex)
 			{
-				ReportError(s, ex, "Start Program");
+                await ReportErrorAsync(s, ex, "Start Program");
 				if (!testrun)
 				{
 					await Task.Delay(15000);
@@ -817,7 +818,7 @@ namespace forte.devices.workflow
 			}
 		}
 
-		private void ReportError(SessionState s, Exception ex, string message)
+		private async Task ReportErrorAsync(SessionState s, Exception ex, string message)
 		{
 			if (s.RetryCount != 5)
 			{
@@ -825,7 +826,7 @@ namespace forte.devices.workflow
 				return;
 			}
 			var mess = $"{s.Permalink}: Streaming action {message} have failed 5 times. The system might be trying to retry further, but it is recommended to check the cause of this error.";
-			_ms.MailError(mess, ex);
+            await _ms.MailErrorAsync(mess, ex);
 			_logger.Fatal(ex, mess);
 		}
 
