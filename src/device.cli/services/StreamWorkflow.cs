@@ -326,7 +326,7 @@ namespace forte.devices.workflow
 								var agoraUserId = (uint)channelName.GetHashCode();
 								var channelKey = _agora.GetChannelKey(channelName, _deviceId, agoraUserId);
 								channelKey = channelKey.Replace("/", "%2F");
-								agoraRtmpUrl = $"{_agoraRtmpUrl}/live?appid={channelKey}&channel={channelName}&uid={agoraUserId}&abr=150000&dual=true&dfps=15&dvbr=500000&dwidth=640&dheight=360&end=true";
+								agoraRtmpUrl = $"{_agoraRtmpUrl}/live?appid={channelKey}&channel={channelName}&uid={agoraUserId}&abr=150000&dual=true&dfps=24&dvbr=500000&dwidth=640&dheight=360&end=true";
 								_logger.Information($"vMix agora rtmp loading - {agoraRtmpUrl}");
                             }
 
