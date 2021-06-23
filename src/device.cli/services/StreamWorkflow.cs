@@ -483,24 +483,33 @@ namespace forte.devices.workflow
 				AddSessionRetry(s);
 				var request = new RestRequest($"streamPublish/{s.SessioId}?retryNum={s.RetryCount}&deviceId={_deviceId}&requestRef={s.Permalink}", Method.GET);
 				var m = await _client.ExecuteAsync<VideoStreamModel>(request);
+				var _runWithoutAzure = false;
 
 				if (m.StatusCode != HttpStatusCode.OK)
 				{
-					throw new Exception($"{s.Permalink}: bad response: {m.ErrorMessage} {m.Content}, retry in {retrySeconds} seconds");
+					var exception = new InvalidOperationException($"{s.Permalink}: bad response: {m?.ErrorMessage} {m?.Content}, retry in {retrySeconds} seconds");
+					if(m.StatusCode == HttpStatusCode.NoContent)
+                    {
+						_runWithoutAzure = true;
+						_logger.Error($"Publish Stream have failed {s.RetryCount} times. Further stream might run without azure stream.");
+						await ReportErrorAsync(exception, s, "Publish Stream");
+					}
+					else
+                    {
+						throw exception;
+                    }
 				}
 
-				_logger.Debug($"{s.Permalink}: PublishStream success");
-				if (_verbose) { _logger.Debug($"{m.Content}"); }
-
-				if (m.Data == null)
+				if (!_runWithoutAzure && m.Data == null)
 				{
+					_logger.Debug($"{s.Permalink}: PublishStream success");
+					if (_verbose) { _logger.Debug($"{m.Content}"); }
 					SetSessionStatus(s, WorkflowState.Processed);
 					ClearSessionRetry(s);
 					return;
 				}
 
 				SetSessionStatus(s, WorkflowState.StreamingClient);
-				ClearSessionRetry(s);
 				_lockedSessions.TryRemove(s.SessioId, out var t);
 			}
 			catch (Exception ex)
