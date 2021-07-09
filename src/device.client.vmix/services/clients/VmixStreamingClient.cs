@@ -71,8 +71,10 @@ namespace forte.devices.services.clients
 				_configurationManager.UpdateSetting(VmixSettingParams.EnableOutroStatic, true);
 			if(!config.Contains(VmixSettingParams.StaticImageTime))
 				_configurationManager.UpdateSetting(VmixSettingParams.StaticImageTime, 30);
+			if (!config.Contains(VmixSettingParams.VmixLoadTimeout))
+				_configurationManager.UpdateSetting(VmixSettingParams.VmixLoadTimeout, 2);
 
-            _client = new RestClient(config.Get<string>(VmixSettingParams.VmixApiPath));
+			_client = new RestClient(config.Get<string>(VmixSettingParams.VmixApiPath));
         }
 
 #endregion

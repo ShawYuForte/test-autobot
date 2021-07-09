@@ -257,6 +257,11 @@ namespace forte.devices
             {
                 configManager.UpdateSetting(SettingParams.AgoraRtmpUrl, "rtmp://104.209.236.226:1935");
             }
+
+			if (!config.Contains(SettingParams.VmixLoadTimeout))
+			{
+				configManager.UpdateSetting(SettingParams.VmixLoadTimeout, 2);
+			}
 		}
 	}
 }
