@@ -73,6 +73,8 @@ namespace forte.devices.services.clients
 				_configurationManager.UpdateSetting(VmixSettingParams.StaticImageTime, 30);
 			if (!config.Contains(VmixSettingParams.VmixLoadTimeout))
 				_configurationManager.UpdateSetting(VmixSettingParams.VmixLoadTimeout, 2);
+			if (!config.Contains(VmixSettingParams.VMixFullScreen))
+				_configurationManager.UpdateSetting(VmixSettingParams.VMixFullScreen, false);
 
 			_client = new RestClient(config.Get<string>(VmixSettingParams.VmixApiPath));
         }

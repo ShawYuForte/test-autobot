@@ -12,7 +12,5 @@
 		public static string AgoraRtmpEnabled => "agora-rtmp-enabled";
 		public static string AgoraApiUrl => "agora-api-url";
         public static string AgoraRtmpUrl => "agora-rtmp-url";
-        public static string VMixFullScreen => "vmx-full-screen";
-		public static string VmixLoadTimeout => "vmix-load-timeout";
 	}
 }
