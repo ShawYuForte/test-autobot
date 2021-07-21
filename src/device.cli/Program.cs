@@ -248,11 +248,6 @@ namespace forte.devices
 				configManager.DeleteSetting(SettingParams.AgoraApiUrl);
 			}
 
-            if (!config.Contains(SettingParams.VMixFullScreen))
-            {
-                configManager.UpdateSetting(SettingParams.VMixFullScreen, false);
-            }
-
             if (!config.Contains(SettingParams.AgoraRtmpUrl))
             {
                 configManager.UpdateSetting(SettingParams.AgoraRtmpUrl, "rtmp://104.209.236.226:1935");
