@@ -418,7 +418,7 @@ namespace forte.devices.workflow
 				if (m.StatusCode != HttpStatusCode.OK)
 				{
 					var exception = new Exception($"{s.Permalink}: bad response: {m.ErrorMessage} {m.Content}, retry in {retrySeconds} seconds");
-					if (RunWithoutAzure(m.StatusCode, s.RetryCount))
+					if (RunWithoutAzure(m.StatusCode))
 					{
 						_logger.Error($"Link Stream have failed {s.RetryCount} times. Further stream might run without azure stream.");
 						await ReportErrorAsync(exception, s, "Link Stream");
@@ -500,7 +500,7 @@ namespace forte.devices.workflow
 				if (m.StatusCode != HttpStatusCode.OK)
 				{
 					var exception = new InvalidOperationException($"{s.Permalink}: bad response: {m?.ErrorMessage} {m?.Content}, retry in {retrySeconds} seconds");
-					if(RunWithoutAzure(m.StatusCode, s.RetryCount))
+					if(RunWithoutAzure(m.StatusCode))
 					{
 						_logger.Error($"Publish Stream have failed {s.RetryCount} times. Further stream might run without azure stream.");
 						await ReportErrorAsync(exception, s, "Publish Stream");
@@ -623,7 +623,7 @@ namespace forte.devices.workflow
 				_dbRepository.UpdateSession(s);
 			}
 		}
-		private bool RunWithoutAzure(HttpStatusCode httpStatusCode, int retryCount)
+		private bool RunWithoutAzure(HttpStatusCode httpStatusCode)
         {
 			// Continue stream with azure stream if NoContent or reaches max retry with api
 			if (httpStatusCode == HttpStatusCode.NoContent)
