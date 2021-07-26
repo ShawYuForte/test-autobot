@@ -40,6 +40,8 @@ namespace forte.devices.workflow
 		private string _deviceId;
         private string _agoraRtmpUrl;
 		private ConcurrentDictionary<Guid, SessionState> _lockedSessions = new ConcurrentDictionary<Guid, SessionState>();
+		private bool _runWithoutAzure = false;
+		private readonly int _clientTimeout;
 
 		public StreamWorkflow(
 			AgoraService agora,
@@ -63,10 +65,11 @@ namespace forte.devices.workflow
 			_verbose = config.Get<bool>(SettingParams.VerboseDebug);
 			_deviceId = config.Get<string>(SettingParams.DeviceId);
             _agoraRtmpUrl = config.Get<string>(SettingParams.AgoraRtmpUrl);
+			_clientTimeout = config.Get<int>(SettingParams.ClientTimeOut);
 
 			try
 			{
-				_client = _client ?? new RestClient($"{apiPath}/streams/");
+				_client = _client ?? new RestClient($"{apiPath}/streams/") { Timeout = _clientTimeout };
 				_clientDevice = _clientDevice ?? new RestClient($"{apiPath}/devices/");
 			}
 			catch { }
@@ -414,13 +417,22 @@ namespace forte.devices.workflow
 
 				if (m.StatusCode != HttpStatusCode.OK)
 				{
-					throw new Exception($"{s.Permalink}: bad response: {m.ErrorMessage} {m.Content}, retry in {retrySeconds} seconds");
+					var exception = new Exception($"{s.Permalink}: bad response: {m.ErrorMessage} {m.Content}, retry in {retrySeconds} seconds");
+					if (RunWithoutAzure(m.StatusCode))
+					{
+						_logger.Error($"Link Stream have failed {s.RetryCount} times. Further stream might run without azure stream.");
+						await ReportErrorAsync(exception, s, "Link Stream");
+					}
+					else
+					{
+						throw exception;
+					}
 				}
 
 				_logger.Debug($"{s.Permalink}: LinkStream success");
 				if (_verbose) { _logger.Debug($"{m.Content}"); }
 
-				if (m.Data == null)
+				if (!_runWithoutAzure && m.Data == null)
 				{
 					SetSessionStatus(s, WorkflowState.Processed);
 					ClearSessionRetry(s);
@@ -483,14 +495,13 @@ namespace forte.devices.workflow
 				AddSessionRetry(s);
 				var request = new RestRequest($"streamPublish/{s.SessioId}?retryNum={s.RetryCount}&deviceId={_deviceId}&requestRef={s.Permalink}", Method.GET);
 				var m = await _client.ExecuteAsync<VideoStreamModel>(request);
-				var _runWithoutAzure = false;
+				
 
 				if (m.StatusCode != HttpStatusCode.OK)
 				{
 					var exception = new InvalidOperationException($"{s.Permalink}: bad response: {m?.ErrorMessage} {m?.Content}, retry in {retrySeconds} seconds");
-					if(m.StatusCode == HttpStatusCode.NoContent)
-                    {
-						_runWithoutAzure = true;
+					if(RunWithoutAzure(m.StatusCode))
+					{
 						_logger.Error($"Publish Stream have failed {s.RetryCount} times. Further stream might run without azure stream.");
 						await ReportErrorAsync(exception, s, "Publish Stream");
 					}
@@ -611,6 +622,17 @@ namespace forte.devices.workflow
 			{
 				_dbRepository.UpdateSession(s);
 			}
+		}
+		private bool RunWithoutAzure(HttpStatusCode httpStatusCode)
+        {
+			// Continue stream with azure stream if NoContent or reaches max retry with api
+			if (httpStatusCode == HttpStatusCode.NoContent)
+            {
+				_runWithoutAzure = true;
+				return _runWithoutAzure;
+			}
+
+			return false;
 		}
 
 		#region vmix steps
