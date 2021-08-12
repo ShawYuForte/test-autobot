@@ -3,7 +3,7 @@ rem you need to change version in device-cli.nuspec first and build solution in 
 
 choco pack
 nuget sources remove -name forte-approved
-nuget sources add -name forte-approved -Source https://pkgs.dev.azure.com/forte-fit/_packaging/forte-approved/nuget/v3/index.json -username NugetUser -password hbtyeyq5sl26zmrtq3iw642veuvngvx3oypvl6oc4y2ovinmmhba
+nuget sources add -name forte-approved -Source https://pkgs.dev.azure.com/forte-fit/_packaging/forte-approved/nuget/v3/index.json -username NugetUser -password hb3snqecpnjw4xpk2xf5vl7jsgjmlgkuaht5gxri5grdifjyjf7q
 
 FOR %%f in (*.nupkg) DO (
 nuget push -Source forte-approved -ApiKey az %%f
