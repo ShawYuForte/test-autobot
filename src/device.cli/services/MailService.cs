@@ -1,9 +1,11 @@
 ﻿using System;
-using System.Net.Mail;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using forte.devices.config;
 using forte.services;
+using Newtonsoft.Json;
 using SendGrid;
+using SendGrid.Helpers.Mail;
 
 namespace forte.devices.services
 {
@@ -24,28 +26,32 @@ namespace forte.devices.services
             var deviceName = config.Get<string>(SettingParams.DeviceName);
 
             var setts = System.Configuration.ConfigurationManager.AppSettings;
-            var from = setts["mail:from"];
+            var from = new EmailAddress(setts["mail:from"], "From Autobot");
             var to = setts["mail:to"].Split(',');
+            var recipients = new List<EmailAddress>();
             var apiKey = setts["mail:SendGrid:ApiKey"];
 
             try
             {
-                var gridMessage = new SendGridMessage();
+
                 foreach (var i in to)
                 {
                     var iTrimmed = i.Trim();
                     #if DEBUG
                     if (i == "techsupport@forte.fit") continue;
                     #endif
-                    gridMessage.AddTo(iTrimmed);
+                    recipients.Add(new EmailAddress(iTrimmed));
                 }
 
-                gridMessage.From = new MailAddress(from);
-                gridMessage.Subject = $"Autobot Error on {deviceName}";
-                gridMessage.Text = $"{deviceName} {Environment.NewLine} {message} {Environment.NewLine} Error details: {ex.Message} {ex.StackTrace}";
+                var subject = $"Autobot Error on {deviceName}";
+                var client = new SendGridClient(apiKey);
+                var plainTextContent = "";
+                var htmlContent = $"<span style='color: red'>{deviceName} {Environment.NewLine} {message} {Environment.NewLine}</span>";
+                var msg = MailHelper.CreateSingleEmailToMultipleRecipients(from, recipients, subject, plainTextContent, htmlContent);
+                var response = await client.SendEmailAsync(msg);
 
-                var transportWeb = new Web(apiKey);
-                await transportWeb.DeliverAsync(gridMessage);
+                _logger.Debug(JsonConvert.SerializeObject(response));
+                
             }
             catch (Exception exx)
             {
