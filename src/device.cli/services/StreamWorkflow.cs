@@ -462,13 +462,22 @@ namespace forte.devices.workflow
 
 				if (m.StatusCode != HttpStatusCode.OK)
 				{
-					throw new Exception($"{s.Permalink}: bad response: {m.ErrorMessage} {m.Content}, retry in {retrySeconds} seconds");
+					var exception = new Exception($"{s.Permalink}: bad response: {m.ErrorMessage} {m.Content}, retry in {retrySeconds} seconds");
+					if (RunWithoutAzure(m.StatusCode))
+					{
+						_logger.Error($"Start Stream have failed {s.RetryCount} times. Further stream might run without azure stream.");
+						await ReportErrorAsync(exception, s, "Start Stream");
+					}
+					else
+					{
+						throw exception;
+					}
 				}
 
 				_logger.Debug($"{s.Permalink}: StartStream success");
 				if (_verbose) { _logger.Debug($"{m.Content}"); }
 
-				if (m.Data == null)
+				if (!_runWithoutAzure && m.Data == null)
 				{
 					SetSessionStatus(s, WorkflowState.Processed);
 					ClearSessionRetry(s);
