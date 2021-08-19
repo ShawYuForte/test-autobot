@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading.Tasks;
 using forte.devices.config;
 using forte.services;
 using Newtonsoft.Json;
 using SendGrid;
 using SendGrid.Helpers.Mail;
+using SendGrid.Helpers.Reliability;
 
 namespace forte.devices.services
 {
@@ -44,7 +46,16 @@ namespace forte.devices.services
                 }
 
                 var subject = $"Autobot Error on {deviceName}";
-                var client = new SendGridClient(apiKey);
+                var options = new SendGridClientOptions
+                {
+                    ApiKey = apiKey,
+                    ReliabilitySettings = new ReliabilitySettings(5, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(1)),
+                };
+
+                var retryHandler = new RetryDelegatingHandler(new HttpClientHandler(), options.ReliabilitySettings);
+
+                var httpClient = new HttpClient(retryHandler) { Timeout = TimeSpan.FromMilliseconds(6000) };
+                var client = new SendGridClient(httpClient, options.ApiKey);
                 var plainTextContent = "";
                 var htmlContent = $"<span style='color: red'>{deviceName} {Environment.NewLine} {message} {Environment.NewLine}</span>";
                 var msg = MailHelper.CreateSingleEmailToMultipleRecipients(from, recipients, subject, plainTextContent, htmlContent);
