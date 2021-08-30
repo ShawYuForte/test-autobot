@@ -83,8 +83,7 @@
       <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="Serilog, Version=2.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
-      <HintPath>..\packages\Serilog.2.2.1\lib\net45\Serilog.dll</HintPath>
-      <Private>True</Private>
+      <HintPath>..\packages\Serilog.2.3.0\lib\net46\Serilog.dll</HintPath>
     </Reference>
     <Reference Include="Serilog.Sinks.AzureTableStorage, Version=2.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
       <HintPath>..\packages\Serilog.Sinks.AzureTableStorage.2.0.0\lib\net45\Serilog.Sinks.AzureTableStorage.dll</HintPath>
@@ -97,6 +96,9 @@
     <Reference Include="Serilog.Sinks.Email, Version=2.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
       <HintPath>..\packages\Serilog.Sinks.Email.2.0.0\lib\net45\Serilog.Sinks.Email.dll</HintPath>
       <Private>True</Private>
+    </Reference>
+    <Reference Include="Serilog.Sinks.EventLog, Version=3.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
+      <HintPath>..\packages\Serilog.Sinks.EventLog.3.1.0\lib\net45\Serilog.Sinks.EventLog.dll</HintPath>
     </Reference>
     <Reference Include="Serilog.Sinks.File, Version=2.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
       <HintPath>..\packages\Serilog.Sinks.File.3.0.1\lib\net45\Serilog.Sinks.File.dll</HintPath>
@@ -133,6 +135,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="data\ForteEntityFrameworkLoggingInterceptor.cs" />
+    <Compile Include="EventLog\DeviceEventIdProvider.cs" />
+    <Compile Include="EventLog\LogEventType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SerilogModule.cs" />
     <Compile Include="services\SeriLogger.cs" />
@@ -141,6 +145,7 @@
     <None Include="app.config" />
     <None Include="forte.modules.serilog.nuspec" />
     <None Include="packages.config" />
+    <None Include="stylecop.json" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\forte.specs\forte.specs.csproj">
