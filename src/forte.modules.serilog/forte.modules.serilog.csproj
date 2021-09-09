@@ -21,14 +21,18 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Nullable>enable</Nullable>
+    <LangVersion>preview</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
+    <Optimize>false</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Nullable>enable</Nullable>
+    <LangVersion>preview</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
@@ -83,7 +87,10 @@
       <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="Serilog, Version=2.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
-      <HintPath>..\packages\Serilog.2.3.0\lib\net46\Serilog.dll</HintPath>
+      <HintPath>..\packages\Serilog.2.10.0\lib\net46\Serilog.dll</HintPath>
+    </Reference>
+    <Reference Include="Serilog.Expressions, Version=3.2.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
+      <HintPath>..\packages\Serilog.Expressions.3.2.0\lib\netstandard2.0\Serilog.Expressions.dll</HintPath>
     </Reference>
     <Reference Include="Serilog.Sinks.AzureTableStorage, Version=2.0.0.0, Culture=neutral, PublicKeyToken=24c2f752a8e58a10, processorArchitecture=MSIL">
       <HintPath>..\packages\Serilog.Sinks.AzureTableStorage.2.0.0\lib\net45\Serilog.Sinks.AzureTableStorage.dll</HintPath>
@@ -137,6 +144,17 @@
     <Compile Include="data\ForteEntityFrameworkLoggingInterceptor.cs" />
     <Compile Include="EventLog\DeviceEventIdProvider.cs" />
     <Compile Include="EventLog\LogEventType.cs" />
+    <Compile Include="Nullable\AllowNullAttribute.cs" />
+    <Compile Include="Nullable\DisallowNullAttribute.cs" />
+    <Compile Include="Nullable\DoesNotReturnAttribute.cs" />
+    <Compile Include="Nullable\DoesNotReturnIfAttribute.cs" />
+    <Compile Include="Nullable\MaybeNullAttribute.cs" />
+    <Compile Include="Nullable\MaybeNullWhenAttribute.cs" />
+    <Compile Include="Nullable\MemberNotNullAttribute.cs" />
+    <Compile Include="Nullable\MemberNotNullWhenAttribute.cs" />
+    <Compile Include="Nullable\NotNullAttribute.cs" />
+    <Compile Include="Nullable\NotNullIfNotNullAttribute.cs" />
+    <Compile Include="Nullable\NotNullWhenAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SerilogModule.cs" />
     <Compile Include="services\SeriLogger.cs" />

@@ -384,12 +384,13 @@ namespace forte.services
                     out restrictedToMinimumLevel);
             }
 
-            configuration
-                    .WriteTo.EventLog(
-                        ConfigurationManager.AppSettings["forte:modules:serilog.sinks.windows.source"],
-                        manageEventSource: true,
-                        restrictedToMinimumLevel: restrictedToMinimumLevel,
-                        eventIdProvider: new DeviceEventIdProvider());
+            configuration.WriteTo.Logger(win => win.WriteTo.EventLog(
+                                       ConfigurationManager.AppSettings["forte:modules:serilog.sinks.windows.source"],
+                                       manageEventSource: true,
+                                       restrictedToMinimumLevel: restrictedToMinimumLevel,
+                                       eventIdProvider: new DeviceEventIdProvider())
+                                      .Filter.ByExcluding(
+                                       ConfigurationManager.AppSettings["forte:modules:serilog.sinks.windows:filter:ByExcluding.expression"]));
         }
     }
 }
