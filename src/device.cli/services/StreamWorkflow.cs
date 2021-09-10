@@ -520,10 +520,12 @@ namespace forte.devices.workflow
                     }
 				}
 
+				_logger.Debug($"{s.Permalink}: PublishStream success");
+				if (_verbose) { _logger.Debug($"{m.Content}"); }
+
 				if (!_runWithoutAzure && m.Data == null)
 				{
-					_logger.Debug($"{s.Permalink}: PublishStream success");
-					if (_verbose) { _logger.Debug($"{m.Content}"); }
+					_logger.Debug($"{s.Permalink}: Setting state to Processed");
 					SetSessionStatus(s, WorkflowState.Processed);
 					ClearSessionRetry(s);
 					return;
