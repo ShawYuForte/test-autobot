@@ -42,6 +42,7 @@ namespace forte.devices.workflow
 		private ConcurrentDictionary<Guid, SessionState> _lockedSessions = new ConcurrentDictionary<Guid, SessionState>();
 		private bool _runWithoutAzure = false;
 		private readonly int _clientTimeout;
+		private readonly int _startStreamMaxRetryCount = 5;
 
 		public StreamWorkflow(
 			AgoraService agora,
@@ -377,7 +378,7 @@ namespace forte.devices.workflow
 						{
 							_logger.Warning($"{s.Permalink}: publish stream");
 							_lockedSessions[s.SessioId] = s;
-							PublishStream(s, streamRetrySeconds);
+							 PublishStream(s, streamRetrySeconds);
 							continue;
 						}
 
@@ -684,7 +685,9 @@ namespace forte.devices.workflow
 				if (s.SessionType != SessionType.Manual)
 				{
 					FlushDns();
-					_streamingClient.StartStreaming(testrun);
+					// hide ErrorDialog after fifth try
+					var hidErrorDialog = s.RetryCount > _startStreamMaxRetryCount;
+					await _streamingClient.StartStreaming(s.RetryCount, testrun, hidErrorDialog);
 				}
 				ClearSessionRetry(s, testrun);
 				_lockedSessions.TryRemove(s.SessioId, out var t);
@@ -692,7 +695,7 @@ namespace forte.devices.workflow
 			}
 			catch (Exception ex)
 			{
-                await ReportErrorAsync(s, ex, "Start Client Stream");
+                await ReportErrorAsync(s, ex, "Start Client Stream Failed");
 				if (!testrun)
 				{
 					await Task.Delay(15000);
