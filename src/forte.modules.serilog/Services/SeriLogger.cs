@@ -4,6 +4,7 @@ using System.Data.Entity.Infrastructure.Interception;
 using System.Net;
 using System.Threading;
 using forte.data;
+using forte.EventLog;
 using Microsoft.WindowsAzure.Storage;
 using Serilog;
 using Serilog.Configuration;
@@ -221,6 +222,7 @@ namespace forte.services
             ConfigureRollingFileSink(configuration);
             ConfigureColoredConsoleSink(configuration);
             ConfigureEmailSink(configuration);
+            ConfigureWindowEventSink(configuration);
 
             return configuration;
         }
@@ -367,6 +369,28 @@ namespace forte.services
                 batchPostingLimit: 5,
                 restrictedToMinimumLevel: SqlSeverSinkMinLevel ?? restrictedToMinimumLevel,
                 columnOptions: columnOptions);
+        }
+
+        private void ConfigureWindowEventSink(LoggerConfiguration configuration)
+        {
+            if (!Enum.TryParse(
+              ConfigurationManager.AppSettings["forte:modules:serilog.sinks.windows.min-level"],
+              true,
+              out LogEventLevel restrictedToMinimumLevel))
+            {
+                Enum.TryParse(
+                    ConfigurationManager.AppSettings["forte:modules:serilog.min-log-level"],
+                    true,
+                    out restrictedToMinimumLevel);
+            }
+
+            configuration.WriteTo.Logger(win => win.WriteTo.EventLog(
+                                       ConfigurationManager.AppSettings["forte:modules:serilog.sinks.windows.source"],
+                                       manageEventSource: true,
+                                       restrictedToMinimumLevel: restrictedToMinimumLevel,
+                                       eventIdProvider: new DeviceEventIdProvider())
+                                      .Filter.ByExcluding(
+                                       ConfigurationManager.AppSettings["forte:modules:serilog.sinks.windows:filter:ByExcluding.expression"]));
         }
     }
 }

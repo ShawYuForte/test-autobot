@@ -12,6 +12,7 @@
 		public static string AgoraRtmpEnabled => "agora-rtmp-enabled";
 		public static string AgoraApiUrl => "agora-api-url";
         public static string AgoraRtmpUrl => "agora-rtmp-url";
-        public static string VMixFullScreen => "vmx-full-screen";
+		//HTTP client time out
+		public static string ClientTimeOut => "client-time-out";
 	}
 }

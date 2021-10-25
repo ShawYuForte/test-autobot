@@ -32,6 +32,7 @@ namespace forte.devices.services.clients
         private string _vmixPresetOutputFile;
         private int _stopStreamRetryCount;
         private int _stopStreamMaxRetryCount = 5;
+
 		#region init
 
 		public VmixStreamingClient(IConfigurationManager configurationManager, ILogger logger, IRuntimeConfig cfg)
@@ -71,8 +72,12 @@ namespace forte.devices.services.clients
 				_configurationManager.UpdateSetting(VmixSettingParams.EnableOutroStatic, true);
 			if(!config.Contains(VmixSettingParams.StaticImageTime))
 				_configurationManager.UpdateSetting(VmixSettingParams.StaticImageTime, 30);
+			if (!config.Contains(VmixSettingParams.VmixLoadTimeout))
+				_configurationManager.UpdateSetting(VmixSettingParams.VmixLoadTimeout, 2);
+			if (!config.Contains(VmixSettingParams.VMixFullScreen))
+				_configurationManager.UpdateSetting(VmixSettingParams.VMixFullScreen, false);
 
-            _client = new RestClient(config.Get<string>(VmixSettingParams.VmixApiPath));
+			_client = new RestClient(config.Get<string>(VmixSettingParams.VmixApiPath));
         }
 
 #endregion
@@ -175,7 +180,7 @@ namespace forte.devices.services.clients
 
 #region stream
 
-		public async void StartStreaming(bool testrun = false)
+		public async Task StartStreaming(int Retry, bool testrun = false, bool showErrorDialog = false)
 		{
 			var vmixState = GetVmixState();
 			if(vmixState == null) return;
@@ -194,7 +199,7 @@ namespace forte.devices.services.clients
 
 			if (!testrun)
 			{
-				await StartStreamingCommand(5);
+				await StartStreamingCommand(Retry, showErrorDialog);
 			}
 
 			_logger.Debug("Starting started.");
@@ -229,33 +234,31 @@ namespace forte.devices.services.clients
 			}
 		}
 
-		private async Task<VmixState> StartStreamingCommand(int retries)
+		private async Task<VmixState> StartStreamingCommand(int retries, bool hideErrorDialog)
 		{
-			if(retries == 0) throw (new Exception("Streaming wasn't able to start"));
-			try
+			var config = _configurationManager.GetDeviceConfig();
+			CallAndFetchState("/?Function=StartStreaming", "start streaming");
+			await Task.Delay(5000);
+			var state = GetVmixState();
+			var closeErrorDialog = hideErrorDialog ? true : config.Get(VmixSettingParams.AutoCloseVmixErrorDialog, false);
+
+			if (closeErrorDialog)
 			{
-				var config = _configurationManager.GetDeviceConfig();
-				CallAndFetchState("/?Function=StartStreaming", "start streaming");
-				await Task.Delay(5000);
-				var state = GetVmixState();
-				if(config.Get(VmixSettingParams.AutoCloseVmixErrorDialog, false))
-				{
-					// When streaming fails, API returns true, but an error dialog is displayed, so make sure no dialogs open
-					CloseModalErrorWindowIfOpen();
-					await Task.Delay(1000);
-				}
-				if(state.Streaming && !VmixDialogsOpen())
-				{
-					return state;
-				}
-				//no success, try again
-				return await StartStreamingCommand(retries - 1);
+				// When streaming fails, API returns true, but an error dialog is displayed, so make sure no dialogs open
+				CloseModalErrorWindowIfOpen();
+				await Task.Delay(1000);
 			}
-			catch(Exception ex)
+			var isVmixDialogsOpen = VmixDialogsOpen();
+
+			_logger.Debug($"Streaming status={state.Streaming} errorDialoag opened={isVmixDialogsOpen} " +
+				$"forced errorDialoag to close={closeErrorDialog} at try#{retries}");
+
+			if (state.Streaming && !isVmixDialogsOpen)
 			{
-				_logger.Error(ex, "Streaming wasn't able to start, retry");
-				return await StartStreamingCommand(retries - 1);
+				return state;
 			}
+			//no success, try again
+			throw new Exception("Streaming wasn't able to start");
 		}
 
 #endregion

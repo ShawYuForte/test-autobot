@@ -20,6 +20,7 @@
 
         public static string VmixApiPath => "vmix-api-path";
         public static string VmixExePath => "vmix-exe-path";
+        // vmix Timeout in minutes
         public static string VmixLoadTimeout => "vmix-load-timeout";
         public static string VmixPlaylistName => "vmix-playlist-name";
         public static string VmixPresetTemplateFilePath => "vmix-preset-template-file-path";
