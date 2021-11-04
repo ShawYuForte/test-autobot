@@ -169,7 +169,7 @@ namespace forte.devices.workflow
 				var linkRetrySeconds = 15;
 				var streamRetrySeconds = 15;
 				var streamStopRetrySeconds = 15;
-				var linkTimeSeconds = 25 * 60;
+				var linkTimeSeconds = config.Get(SettingParams.LinkTime, 25) * 60;
 				var staticImageSeconds = config.Get(VmixSettingParams.StaticImageTime, 30);
 				var serverStreamSeconds = staticImageSeconds + 10;
 				var sessions = _dbRepository.GetSessions();
