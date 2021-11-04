@@ -257,6 +257,11 @@ namespace forte.devices
 			{
 				configManager.UpdateSetting(SettingParams.ClientTimeOut, 60000);
 			}
+
+			if (!config.Contains(SettingParams.LinkTime))
+			{
+				configManager.UpdateSetting(SettingParams.LinkTime, 25);
+			}
 		}
 	}
 }

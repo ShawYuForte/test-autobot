@@ -14,5 +14,7 @@
         public static string AgoraRtmpUrl => "agora-rtmp-url";
 		//HTTP client time out
 		public static string ClientTimeOut => "client-time-out";
+
+		public static string LinkTime => "link-time";
 	}
 }
