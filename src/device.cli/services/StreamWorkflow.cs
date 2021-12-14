@@ -513,7 +513,7 @@ namespace forte.devices.workflow
 					if (RunWithoutAzure(m.StatusCode))
 					{
 						_logger.Error($"Publish Stream have failed {s.RetryCount} times. Further stream might run without azure stream.");
-						await ReportErrorAndSendEmailAsync(s, exception, "Link Stream");
+						await ReportErrorAndSendEmailAsync(s, exception, "Publish Stream");
 					}
 					else
 					{
