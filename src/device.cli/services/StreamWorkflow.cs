@@ -38,7 +38,7 @@ namespace forte.devices.workflow
 		private bool _running = true;
 		private bool _verbose = true;
 		private string _deviceId;
-        private string _agoraRtmpUrl;
+		private string _agoraRtmpUrl;
 		private ConcurrentDictionary<Guid, SessionState> _lockedSessions = new ConcurrentDictionary<Guid, SessionState>();
 		private bool _runWithoutAzure = false;
 		private readonly int _clientTimeout;
@@ -65,7 +65,7 @@ namespace forte.devices.workflow
 			var apiPath = config.Get<string>(SettingParams.ServerApiPath);
 			_verbose = config.Get<bool>(SettingParams.VerboseDebug);
 			_deviceId = config.Get<string>(SettingParams.DeviceId);
-            _agoraRtmpUrl = config.Get<string>(SettingParams.AgoraRtmpUrl);
+			_agoraRtmpUrl = config.Get<string>(SettingParams.AgoraRtmpUrl);
 			_clientTimeout = config.Get<int>(SettingParams.ClientTimeOut);
 
 			try
@@ -162,10 +162,10 @@ namespace forte.devices.workflow
 
 		private async void Run()
 		{
-            int commandFetchedRetries = 0;
+			int commandFetchedRetries = 0;
 			try
 			{
-                var config = _configurationManager.GetDeviceConfig();
+				var config = _configurationManager.GetDeviceConfig();
 				var linkRetrySeconds = 15;
 				var streamRetrySeconds = 15;
 				var streamStopRetrySeconds = 15;
@@ -195,7 +195,7 @@ namespace forte.devices.workflow
 						{
 							if (commandFetchedRetries == 0)
 							{
-                                await _ms.MailErrorAsync(exception.Message, exception);
+								await _ms.MailErrorAsync(exception.Message, exception);
 							}
 							_logger.Error(exception, exception.Message);
 							commandFetchedRetries--;
@@ -235,7 +235,7 @@ namespace forte.devices.workflow
 										_logger.Warning($"{session.Permalink}: {message}");
 										_lockedSessions[session.SessioId] = session;
 										await StopStream(session, streamStopRetrySeconds, restart);
-                                        break;
+										break;
 									default:
 										throw new ArgumentOutOfRangeException();
 								}
@@ -289,7 +289,7 @@ namespace forte.devices.workflow
 					var vmixSession = sessions.FirstOrDefault(s => s.VmixUsed == true);
 					foreach (var s in sessions)
 					{
-                        if (_lockedSessions.ContainsKey(s.SessioId)) continue;
+						if (_lockedSessions.ContainsKey(s.SessioId)) continue;
 						//check if vmix is free to use for this session and it's time
 						var isVmixSession = (vmixSession == null || vmixSession.Id == s.Id);
 						var needsLinking = s.StartTime.AddSeconds(-linkTimeSeconds) <= DateTime.UtcNow;
@@ -304,7 +304,7 @@ namespace forte.devices.workflow
 							_logger.Warning($"{s.Permalink}: {(DateTime.UtcNow - s.EndTime).TotalSeconds} seconds after end, terminate");
 							_lockedSessions[s.SessioId] = s;
 							StopStream(s, streamStopRetrySeconds);
-                            continue;
+							continue;
 						}
 
 						//start new session
@@ -323,20 +323,20 @@ namespace forte.devices.workflow
 							_logger.Warning($"{s.Permalink}");
 
 							var agoraRtmpEnabled = config.Get<bool>(SettingParams.AgoraRtmpEnabled);
-                            string agoraRtmpUrl = null;
+							string agoraRtmpUrl = null;
 							if (agoraRtmpEnabled && s.SessionType == SessionType.Scheduled)
-                            {
+							{
 								var channelName = s.SessioId.ToString().ToUpper();
 								var agoraUserId = (uint)channelName.GetHashCode();
 								var channelKey = _agora.GetChannelKey(channelName, _deviceId, agoraUserId);
 								channelKey = channelKey.Replace("/", "%2F");
 								agoraRtmpUrl = $"{_agoraRtmpUrl}/live?appid={channelKey}&channel={channelName}&uid={agoraUserId}&abr=150000&dual=true&dfps=24&dvbr=500000&dwidth=640&dheight=360&end=true";
 								_logger.Information($"vMix agora rtmp loading - {agoraRtmpUrl}");
-                            }
+							}
 
 							var loadPreset = await LoadPreset(s, agoraRtmpUrl);
-                            if (!loadPreset) continue; //something went wrong with loading preset
-                            
+							if (!loadPreset) continue; //something went wrong with loading preset
+
 							SetSessionStatus(s, WorkflowState.VmixLoaded);
 							continue;
 						}
@@ -369,7 +369,7 @@ namespace forte.devices.workflow
 						//connect to agora after we started streaming on vmix
 						if (s.Status == WorkflowState.StreamingAgora)
 						{
-                            SetSessionStatus(s, WorkflowState.StreamingPublish);
+							SetSessionStatus(s, WorkflowState.StreamingPublish);
 							continue;
 						}
 
@@ -378,7 +378,7 @@ namespace forte.devices.workflow
 						{
 							_logger.Warning($"{s.Permalink}: publish stream");
 							_lockedSessions[s.SessioId] = s;
-							 PublishStream(s, streamRetrySeconds);
+							PublishStream(s, streamRetrySeconds);
 							continue;
 						}
 
@@ -402,7 +402,7 @@ namespace forte.devices.workflow
 			}
 			catch (Exception ex)
 			{
-                await _ms.MailErrorAsync($"Running failed.", ex);
+				await _ms.MailErrorAsync($"Running failed.", ex);
 				_logger.Fatal(ex, $"Running failed.");
 				_running = false;
 			}
@@ -422,7 +422,7 @@ namespace forte.devices.workflow
 					if (RunWithoutAzure(m.StatusCode))
 					{
 						_logger.Error($"Link Stream have failed {s.RetryCount} times. Further stream might run without azure stream.");
-						await ReportErrorAsync(exception, s, "Link Stream");
+						await ReportErrorAndSendEmailAsync(s, exception, "Link Stream");
 					}
 					else
 					{
@@ -447,13 +447,13 @@ namespace forte.devices.workflow
 			}
 			catch (Exception ex)
 			{
-                await ReportErrorAsync(ex, s, "Link Stream");
+				await ReportErrorAsync(ex, s, "Link Stream", false);
 				await Task.Delay(retrySeconds * 1000);
 				_lockedSessions.TryRemove(s.SessioId, out var t);
 			}
 		}
 
-        private async Task StartStream(SessionState s, int retrySeconds)
+		private async Task StartStream(SessionState s, int retrySeconds)
 		{
 			try
 			{
@@ -492,7 +492,7 @@ namespace forte.devices.workflow
 			}
 			catch (Exception ex)
 			{
-                await ReportErrorAsync(ex, s, "Start Stream");
+				await ReportErrorAsync(ex, s, "Start Stream");
 				await Task.Delay(retrySeconds * 1000);
 				_lockedSessions.TryRemove(s.SessioId, out var t);
 			}
@@ -505,20 +505,20 @@ namespace forte.devices.workflow
 				AddSessionRetry(s);
 				var request = new RestRequest($"streamPublish/{s.SessioId}?retryNum={s.RetryCount}&deviceId={_deviceId}&requestRef={s.Permalink}", Method.GET);
 				var m = await _client.ExecuteAsync<VideoStreamModel>(request);
-				
+
 
 				if (m.StatusCode != HttpStatusCode.OK)
 				{
 					var exception = new InvalidOperationException($"{s.Permalink}: bad response: {m?.ErrorMessage} {m?.Content}, retry in {retrySeconds} seconds");
-					if(RunWithoutAzure(m.StatusCode))
+					if (RunWithoutAzure(m.StatusCode))
 					{
 						_logger.Error($"Publish Stream have failed {s.RetryCount} times. Further stream might run without azure stream.");
-						await ReportErrorAsync(exception, s, "Publish Stream");
+						await ReportErrorAndSendEmailAsync(s, exception, "Publish Stream");
 					}
 					else
-                    {
+					{
 						throw exception;
-                    }
+					}
 				}
 
 				_logger.Debug($"{s.Permalink}: PublishStream success");
@@ -537,7 +537,7 @@ namespace forte.devices.workflow
 			}
 			catch (Exception ex)
 			{
-				await ReportErrorAsync(ex, s, "Publish Stream");
+				await ReportErrorAsync(ex, s, "Publish Stream", false);
 				await Task.Delay(retrySeconds * 1000);
 				_lockedSessions.TryRemove(s.SessioId, out var t);
 			}
@@ -581,18 +581,18 @@ namespace forte.devices.workflow
 			}
 			catch (Exception ex)
 			{
-                await ReportErrorAsync(ex, s, "Stop Stream");
+				await ReportErrorAsync(ex, s, "Stop Stream");
 				await Task.Delay(retrySeconds * 1000);
 				_lockedSessions.TryRemove(s.SessioId, out var t);
 			}
 		}
 
-		private async Task ReportErrorAsync(Exception ex, SessionState s, string name)
+		private async Task ReportErrorAsync(Exception ex, SessionState s, string name, bool sendEmail = true)
 		{
 			_logger.Debug(ex, "");
 			try
 			{
-                await ReportErrorAsync(s, ex, name);
+				await ReportErrorAsync(s, ex, name, sendEmail);
 			}
 			catch (Exception ex1)
 			{
@@ -636,10 +636,10 @@ namespace forte.devices.workflow
 			}
 		}
 		private bool RunWithoutAzure(HttpStatusCode httpStatusCode)
-        {
+		{
 			// Continue stream with azure stream if NoContent or reaches max retry with api
 			if (httpStatusCode == HttpStatusCode.NoContent)
-            {
+			{
 				_runWithoutAzure = true;
 				return _runWithoutAzure;
 			}
@@ -657,7 +657,7 @@ namespace forte.devices.workflow
 				AddSessionRetry(s, testrun);
 				if (s.SessionType != SessionType.Manual)
 				{
-                    await _streamingClient.LoadVideoStreamPreset(s.VmixPreset, s.PrimaryIngestUrl, agoraUrl);
+					await _streamingClient.LoadVideoStreamPreset(s.VmixPreset, s.PrimaryIngestUrl, agoraUrl);
 				}
 				ClearSessionRetry(s, testrun);
 				_lockedSessions.TryRemove(s.SessioId, out var t);
@@ -665,7 +665,7 @@ namespace forte.devices.workflow
 			}
 			catch (Exception ex)
 			{
-                await ReportErrorAsync(s, ex, "Load Preset");
+				await ReportErrorAsync(s, ex, "Load Preset");
 				if (!testrun)
 				{
 					await Task.Delay(15000);
@@ -695,7 +695,7 @@ namespace forte.devices.workflow
 			}
 			catch (Exception ex)
 			{
-                await ReportErrorAsync(s, ex, "Start Client Stream Failed");
+				await ReportErrorAsync(s, ex, "Start Client Stream Failed");
 				if (!testrun)
 				{
 					await Task.Delay(15000);
@@ -722,7 +722,7 @@ namespace forte.devices.workflow
 			}
 			catch (Exception ex)
 			{
-                await ReportErrorAsync(s, ex, "Start Program");
+				await ReportErrorAsync(s, ex, "Start Program");
 				if (!testrun)
 				{
 					await Task.Delay(15000);
@@ -863,15 +863,23 @@ namespace forte.devices.workflow
 			}
 		}
 
-		private async Task ReportErrorAsync(SessionState s, Exception ex, string message)
+		private async Task ReportErrorAsync(SessionState s, Exception ex, string message, bool sendEmail = true)
 		{
 			if (s.RetryCount != 5)
 			{
 				_logger.Error(ex, message);
 				return;
 			}
+			if (!sendEmail) return;
 			var mess = $"{s.Permalink}: Streaming action {message} have failed 5 times. The system might be trying to retry further, but it is recommended to check the cause of this error.";
-            await _ms.MailErrorAsync(mess, ex);
+			await _ms.MailErrorAsync(mess, ex);
+			_logger.Fatal(ex, mess);
+		}
+
+		private async Task ReportErrorAndSendEmailAsync(SessionState s, Exception ex, string message)
+		{
+			var mess = $"{s.Permalink}: Streaming action {message} have failed {s.RetryCount} times. The system might be trying to retry further, but it is recommended to check the cause of this error.";
+			await _ms.MailErrorAsync(mess, ex);
 			_logger.Fatal(ex, mess);
 		}
 
