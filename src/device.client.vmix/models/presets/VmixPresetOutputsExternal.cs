@@ -47,5 +47,11 @@ namespace forte.devices.models
         public string ExternalPort { get; set; }
         [XmlElement(ElementName = "ExternalAudioChannel")]
         public string ExternalAudioChannel { get; set; }
+        [XmlElement(ElementName = "ExternalAlphaChannel")]
+        public string ExternalAlphaChannel { get; set; }
+        [XmlElement(ElementName = "VirtualUseStreaming")]
+        public string VirtualUseStreaming { get; set; }
+        [XmlElement(ElementName = "ExternalUseDisplay")]
+        public string ExternalUseDisplay { get; set; }
     }
 }

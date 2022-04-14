@@ -77,5 +77,27 @@ namespace forte.devices.models.presets
         public string KeyframeAligned { get; set; }
         [XmlElement(ElementName = "AudioChannel")]
         public string AudioChannel { get; set; }
+        [XmlElement(ElementName = "HardwareEncoding2")]
+        public string HardwareEncoding2 { get; set; }
+        [XmlElement(ElementName = "Level2")]
+        public string Level2 { get; set; }
+        [XmlElement(ElementName = "Preset2")]
+        public string Preset2 { get; set; }
+        [XmlElement(ElementName = "Profile2")]
+        public string Profile2 { get; set; }
+        [XmlElement(ElementName = "AudioChannel1")]
+        public string AudioChannel1 { get; set; }
+        [XmlElement(ElementName = "AspectRatioCrop")]
+        public string AspectRatioCrop { get; set; }
+        [XmlElement(ElementName = "AspectRatioCrop2")]
+        public string AspectRatioCrop2 { get; set; }
+        [XmlElement(ElementName = "CustomName")]
+        public string CustomName { get; set; }
+        [XmlElement(ElementName = "CustomName2")]
+        public string CustomName2 { get; set; }
+        [XmlElement(ElementName = "Source")]
+        public string Source { get; set; }
+        [XmlElement(ElementName = "Source2")]
+        public string Source2 { get; set; }
     }
 }

@@ -9,6 +9,10 @@ namespace forte.devices.models
         public VmixPresetOutputsExternal OutputsExternal { get; set; }
         [XmlElement(ElementName = "OutputsExternal2")]
         public VmixPresetOutputsExternal OutputsExternal2 { get; set; }
+        [XmlElement(ElementName = "OutputsExternal3")]
+        public VmixPresetOutputsExternal OutputsExternal3 { get; set; }
+        [XmlElement(ElementName = "OutputsExternal4")]
+        public VmixPresetOutputsExternal OutputsExternal4 { get; set; }
         [XmlElement(ElementName = "OutputsFullscreen")]
         public VmixPresetOutputsFullscreen OutputsFullscreen { get; set; }
         [XmlElement(ElementName = "OutputsFullscreen2")]

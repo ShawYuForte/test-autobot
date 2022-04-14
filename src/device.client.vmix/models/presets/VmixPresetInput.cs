@@ -77,7 +77,23 @@ namespace forte.devices.models.presets
                 VideoShader_ClippingX2 = "1",
                 VideoShader_ClippingY1 = "0",
                 VideoShader_ClippingY2 = "1",
-                VideoShader_PremultipliedAlpha = "False"
+                VideoShader_PremultipliedAlpha = "False",
+                FrameDelay = "0",
+                PTZDefaultFocusSpeed = "0.5",
+                PTZDefaultFocusEnabled = "False",
+                PTZAlwaysShowThumbnail = "False",
+                VideoShader_CCLiftR = "0",
+                VideoShader_CCLiftG = "0",
+                VideoShader_CCLiftB = "0",
+                VideoShader_CCGammaR = "1",
+                VideoShader_CCGammaG = "1",
+                VideoShader_CCGammaB = "1",
+                VideoShader_CCGainR = "1",
+                VideoShader_CCGainG = "1",
+                VideoShader_CCGainB = "1",
+                VideoShader_Saturation2 = "0",
+                VideoShader_Hue = "0",
+                VideoShader_Rec601Fix = "False",
             };
         }
 
@@ -136,6 +152,8 @@ namespace forte.devices.models.presets
         [XmlAttribute(AttributeName = "BusB")]
         public string BusB { get; set; }
         [XmlAttribute(AttributeName = "Positions")]
+        public string FrameDelay { get; set; }
+        [XmlAttribute(AttributeName = "FrameDelay")]
         public string Positions { get; set; }
         [XmlAttribute(AttributeName = "Triggers")]
         public string Triggers { get; set; }
@@ -177,6 +195,16 @@ namespace forte.devices.models.presets
         [XmlAttribute(AttributeName = "PTZDefaultPositionSpeed")]
         public string PTZDefaultPositionSpeed { get; set; }
 
+        [XmlAttribute(AttributeName = "PTZDefaultFocusSpeed")]
+        public string PTZDefaultFocusSpeed { get; set; }
+        [XmlAttribute(AttributeName = "PTZDefaultFocusEnabled")]
+        public string PTZDefaultFocusEnabled { get; set; }
+        [XmlAttribute(AttributeName = "PTZAlwaysShowThumbnail")]
+        public string PTZAlwaysShowThumbnail { get; set; }
+        [XmlAttribute(AttributeName = "VirtualInputKey")]
+        public string VirtualInputKey { get; set; }
+        [XmlAttribute(AttributeName = "PTZPosition")]
+        public string PTZPosition { get; set; }
         [XmlAttribute(AttributeName = "VideoShader_ColorCorrectionSourceEnabled")]
         public string VideoShader_ColorCorrectionSourceEnabled { get; set; }
         [XmlAttribute(AttributeName = "VideoShader_White")]
@@ -193,6 +221,32 @@ namespace forte.devices.models.presets
         public string VideoShader_Alpha { get; set; }
         [XmlAttribute(AttributeName = "VideoShader_Saturation")]
         public string VideoShader_Saturation { get; set; }
+        [XmlAttribute(AttributeName = "VideoShader_CCLiftR")]
+        public string VideoShader_CCLiftR { get; set; }
+        [XmlAttribute(AttributeName = "VideoShader_CCLiftG")]
+        public string VideoShader_CCLiftG { get; set; }
+        [XmlAttribute(AttributeName = "VideoShader_CCLiftB")]
+        public string VideoShader_CCLiftB { get; set; }
+        [XmlAttribute(AttributeName = "VideoShader_CCGammaR")]
+        public string VideoShader_CCGammaR { get; set; }
+        [XmlAttribute(AttributeName = "VideoShader_CCGammaG")]
+        public string VideoShader_CCGammaG { get; set; }
+
+        [XmlAttribute(AttributeName = "VideoShader_CCGammaB")]
+        public string VideoShader_CCGammaB { get; set; }
+        [XmlAttribute(AttributeName = "VideoShader_CCGainR")]
+        public string VideoShader_CCGainR { get; set; }
+        [XmlAttribute(AttributeName = "VideoShader_CCGainG")]
+        public string VideoShader_CCGainG { get; set; }
+        [XmlAttribute(AttributeName = "VideoShader_CCGainB")]
+        public string VideoShader_CCGainB { get; set; }
+        [XmlAttribute(AttributeName = "VideoShader_Saturation2")]
+        public string VideoShader_Saturation2 { get; set; }
+        [XmlAttribute(AttributeName = "VideoShader_Hue")]
+        public string VideoShader_Hue { get; set; }
+        [XmlAttribute(AttributeName = "VideoShader_Rec601Fix")]
+        public string VideoShader_Rec601Fix { get; set; }
+
         [XmlAttribute(AttributeName = "VideoShader_ColorKey")]
         public string VideoShader_ColorKey { get; set; }
         [XmlAttribute(AttributeName = "VideoShader_Deinterlace")]

@@ -164,5 +164,7 @@ namespace forte.devices.models.presets
         public VmixPresetDataSources DataSources { get; set; }
         [XmlElement(ElementName = "Activators")]
         public VmixPresetActivators Activators { get; set; }
+        [XmlElement(ElementName = "MultiViewSettings")]
+        public MultiViewSettings MultiViewSettings { get; set; }
     }
 }

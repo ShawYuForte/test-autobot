@@ -97,6 +97,7 @@
   <ItemGroup>
     <Compile Include="extensions\XmlExtensions.cs" />
     <Compile Include="infrastructure\VmixXmlWriter.cs" />
+    <Compile Include="models\presets\MultiViewSettings.cs" />
     <Compile Include="models\presets\playlists\Loop.cs" />
     <Compile Include="models\presets\playlists\PlayList.cs" />
     <Compile Include="models\presets\playlists\PlayListCollection.cs" />
