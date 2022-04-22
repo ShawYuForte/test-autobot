@@ -343,6 +343,26 @@ namespace forte.devices.models.presets
         public string AudioStartChannel { get; set; }
         [XmlAttribute(AttributeName = "AudioChannelCount")]
         public string AudioChannelCount { get; set; }
+        [XmlAttribute(AttributeName = "AudioPad")]
+        public string AudioPad { get; set; }
+        [XmlAttribute(AttributeName = "AudioRackXML")]
+        public string AudioRackXML { get; set; }
+        [XmlAttribute(AttributeName = "DataSourcesXML")]
+        public string DataSourcesXML { get; set; }
+        [XmlAttribute(AttributeName = "NDISettingsXML")]
+        public string NDISettingsXML { get; set; }
+        [XmlAttribute(AttributeName = "NDISourceName")]
+        public string NDISourceName { get; set; }
+        [XmlAttribute(AttributeName = "NDISourceIP")]
+        public string NDISourceIP { get; set; }
+        [XmlAttribute(AttributeName = "NDILowBandwidth")]
+        public string NDILowBandwidth { get; set; }
+        [XmlAttribute(AttributeName = "NDIAudioOnly")]
+        public string NDIAudioOnly { get; set; }
+        [XmlAttribute(AttributeName = "NDIPSF")]
+        public string NDIPSF { get; set; }
+        [XmlAttribute(AttributeName = "NDIIncreaseBuffer")]
+        public string NDIIncreaseBuffer { get; set; }
     }
 }
 
