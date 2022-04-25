@@ -147,6 +147,8 @@ namespace forte.devices.models.presets
         public VmixPresetState State { get; set; }
         [XmlElement(ElementName = "RecordingSettings")]
         public VmixPresetRecordingSettings RecordingSettings { get; set; }
+        [XmlElement(ElementName = "RecordingSettings2")]
+        public VmixPresetRecordingSettings RecordingSettings2 { get; set; }
         [XmlElement(ElementName = "OverlaySettings")]
         public string OverlaySettings { get; set; }
         [XmlElement(ElementName = "Shortcuts")]
