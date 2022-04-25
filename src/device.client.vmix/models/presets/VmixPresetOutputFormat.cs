@@ -25,5 +25,13 @@ namespace forte.devices.models
         public string OutputFrameRateInterlaced { get; set; }
         [XmlAttribute(AttributeName = "FullscreenEnabled")]
         public string FullscreenEnabled { get; set; }
+        [XmlAttribute(AttributeName = "NDIOutputExternal")]
+        public string NDIOutputExternal { get; set; }
+        [XmlAttribute(AttributeName = "NDIOutputExternal2")]
+        public string NDIOutputExternal2 { get; set; }
+        [XmlAttribute(AttributeName = "NDIOutputExternal3")]
+        public string NDIOutputExternal3 { get; set; }
+        [XmlAttribute(AttributeName = "NDIOutputExternal4")]
+        public string NDIOutputExternal4 { get; set; }
     }
 }
