@@ -10,7 +10,7 @@ using forte.devices.infrastructure;
 
 namespace forte.devices.models.presets
 {
-	[XmlRoot(ElementName = "XML")]
+    [XmlRoot(ElementName = "XML")]
     public class VmixPreset
     {
         public const string PositionsMagicString =
@@ -129,7 +129,7 @@ namespace forte.devices.models.presets
 
             var serialized = stringBuilder.ToString();
 
-            destination = serialized.RemoveXmlAttributeTags("StreamDestination"); 
+            destination = serialized.RemoveXmlAttributeTags("StreamDestination");
         }
 
         [XmlElement(ElementName = "Version")]
@@ -168,5 +168,20 @@ namespace forte.devices.models.presets
         public VmixPresetActivators Activators { get; set; }
         [XmlElement(ElementName = "MultiViewSettings")]
         public MultiViewSettings MultiViewSettings { get; set; }
+        [XmlElement(ElementName = "ProductionClockSettings")]
+        public VmixProductionClockSetting ProductionClockSettings { get; set;}
+        [XmlElement(ElementName = "ProductionClockSettings2")]
+        public VmixProductionClockSetting ProductionClockSettings2 { get; set; }
+        [XmlElement(ElementName = "ProductionClocksInverted")]
+        public string ProductionClocksInverted { get; set; }
+        [XmlElement(ElementName = "MultiViewLayout")]
+        public string MultiViewLayout { get; set; }
+        [XmlElement(ElementName = "SafeAreas")]
+        public string SafeAreas { get; set; }
+        [XmlElement(ElementName = "WaveformPreview")]
+        public string WaveformPreview { get; set; }
+        [XmlElement(ElementName = "WaveformInput")]
+        public string WaveformInput { get; set; }
+
     }
 }

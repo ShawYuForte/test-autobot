@@ -103,6 +103,8 @@
     <Compile Include="models\presets\playlists\PlayListCollection.cs" />
     <Compile Include="models\presets\playlists\PlaylistItem.cs" />
     <Compile Include="models\presets\playlists\PlayLists.cs" />
+    <Compile Include="models\presets\ProductionClockSettings.cs" />
+    <Compile Include="models\presets\VmixProductionClockSetting.cs" />
     <Compile Include="models\presets\VmixPresetActivators.cs" />
     <Compile Include="models\presets\VmixPresetDataSources.cs" />
     <Compile Include="models\presets\VmixPresetShortcut.cs" />
