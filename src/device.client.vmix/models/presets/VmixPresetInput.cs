@@ -151,9 +151,9 @@ namespace forte.devices.models.presets
         public string BusA { get; set; }
         [XmlAttribute(AttributeName = "BusB")]
         public string BusB { get; set; }
-        [XmlAttribute(AttributeName = "Positions")]
-        public string FrameDelay { get; set; }
         [XmlAttribute(AttributeName = "FrameDelay")]
+        public string FrameDelay { get; set; }
+        [XmlAttribute(AttributeName = "Positions")]
         public string Positions { get; set; }
         [XmlAttribute(AttributeName = "Triggers")]
         public string Triggers { get; set; }
