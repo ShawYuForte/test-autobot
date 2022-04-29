@@ -107,6 +107,8 @@ namespace forte.devices.models.presets
         public string RangeStop { get; set; }
         [XmlAttribute(AttributeName = "State")]
         public string State { get; set; }
+        [XmlAttribute(AttributeName = "Title")]
+        public string Title { get; set; }
         [XmlAttribute(AttributeName = "OriginalTitle")]
         public string OriginalTitle { get; set; }
         [XmlAttribute(AttributeName = "ShortcutMappings")]
@@ -155,6 +157,10 @@ namespace forte.devices.models.presets
         public string FrameDelay { get; set; }
         [XmlAttribute(AttributeName = "Positions")]
         public string Positions { get; set; }
+        [XmlAttribute(AttributeName = "PositionsExtended")]
+        public string PositionsExtended { get; set; }
+        [XmlAttribute(AttributeName = "VirtualPTZPosition")]
+        public string VirtualPTZPosition { get; set; }
         [XmlAttribute(AttributeName = "Triggers")]
         public string Triggers { get; set; }
         [XmlAttribute(AttributeName = "TallyCOMPort")]
@@ -201,6 +207,28 @@ namespace forte.devices.models.presets
         public string PTZDefaultFocusEnabled { get; set; }
         [XmlAttribute(AttributeName = "PTZAlwaysShowThumbnail")]
         public string PTZAlwaysShowThumbnail { get; set; }
+        [XmlAttribute(AttributeName = "CapturePath")]
+        public string CapturePath { get; set; }
+        [XmlAttribute(AttributeName = "CaptureVMR")]
+        public string CaptureVMR { get; set; }
+        [XmlAttribute(AttributeName = "Width")]
+        public string Width { get; set; }
+        [XmlAttribute(AttributeName = "Height")]
+        public string Height { get; set; }
+        [XmlAttribute(AttributeName = "Input")]
+        public string Input { get; set; }
+        [XmlAttribute(AttributeName = "CaptureAudioInput")]
+        public string CaptureAudioInput { get; set; }
+        [XmlAttribute(AttributeName = "FrameRate")]
+        public string FrameRate { get; set; }
+        [XmlAttribute(AttributeName = "FrameRateInterlaced")]
+        public string FrameRateInterlaced { get; set; }
+        [XmlAttribute(AttributeName = "CaptureAudioEnabled")]
+        public string CaptureAudioEnabled { get; set; }
+        [XmlAttribute(AttributeName = "CaptureInterlaced")]
+        public string CaptureInterlaced { get; set; }
+        [XmlAttribute(AttributeName = "VideoFormat")]
+        public string VideoFormat { get; set; }
         [XmlAttribute(AttributeName = "VirtualInputKey")]
         public string VirtualInputKey { get; set; }
         [XmlAttribute(AttributeName = "PTZPosition")]
@@ -335,8 +363,6 @@ namespace forte.devices.models.presets
         public string Buffer { get; set; }
         [XmlAttribute(AttributeName = "StreamType")]
         public string StreamType { get; set; }
-        [XmlAttribute(AttributeName = "Title")]
-        public string Title { get; set; }
         [XmlAttribute(AttributeName = "AudioPath")]
         public string AudioPath { get; set; }
         [XmlAttribute(AttributeName = "AudioStartChannel")]

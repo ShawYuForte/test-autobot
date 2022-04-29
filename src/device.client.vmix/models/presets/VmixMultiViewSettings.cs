@@ -3,7 +3,7 @@
 namespace forte.devices.models.presets
 {
     [XmlRoot(ElementName = "MultiViewSettings")]
-    public class MultiViewSettings
+    public class VmixMultiViewSettings
     {
         [XmlElement(ElementName = "TitleLocation")]
         public string TitleLocation { get; set; }
