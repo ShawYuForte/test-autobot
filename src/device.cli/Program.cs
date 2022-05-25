@@ -262,6 +262,11 @@ namespace forte.devices
 			{
 				configManager.UpdateSetting(SettingParams.LinkTime, 25);
 			}
+
+			if (!config.Contains(SettingParams.MailTo))
+			{
+				configManager.UpdateSetting(SettingParams.MailTo, "qa@forte.fit");
+			}
 		}
 	}
 }

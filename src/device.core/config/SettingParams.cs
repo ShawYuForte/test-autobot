@@ -16,5 +16,6 @@
 		public static string ClientTimeOut => "client-time-out";
 
 		public static string LinkTime => "link-time";
+		public static string MailTo => "mail-to";
 	}
 }

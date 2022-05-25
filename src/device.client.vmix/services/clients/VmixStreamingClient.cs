@@ -148,7 +148,7 @@ namespace forte.devices.services.clients
 				if(IsPresetLoaded(vmixPreset)) break;
 				if(timeLeft <= 0)
 				{
-					throw new Exception($"Preset load timed out, could not load within {timeout} seconds.");
+					throw new Exception($"Preset load timed out, could not load within {timeout} minutes.");
 				}
 
 				await Task.Delay(fiveSeconds);

@@ -29,7 +29,7 @@ namespace forte.devices.services
 
             var setts = System.Configuration.ConfigurationManager.AppSettings;
             var from = new EmailAddress(setts["mail:from"], "From Autobot");
-            var to = setts["mail:to"].Split(',');
+            var to = config.Get<string>(SettingParams.MailTo).Split(',');
             var recipients = new List<EmailAddress>();
             var apiKey = setts["mail:SendGrid:ApiKey"];
 

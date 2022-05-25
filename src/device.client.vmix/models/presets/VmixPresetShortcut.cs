@@ -49,5 +49,11 @@ namespace forte.devices.models.presets
         public string JSIndex { get; set; }
         [XmlElement(ElementName = "JSButton")]
         public string JSButton { get; set; }
+        [XmlElement(ElementName = "DisplayType")]
+        public string DisplayType { get; set; }
+        [XmlElement(ElementName = "Mix")]
+        public string Mix { get; set; }
+        [XmlElement(ElementName = "JSPressureEnabled")]
+        public string JSPressureEnabled { get; set; }
     }
 }

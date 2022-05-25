@@ -97,11 +97,13 @@
   <ItemGroup>
     <Compile Include="extensions\XmlExtensions.cs" />
     <Compile Include="infrastructure\VmixXmlWriter.cs" />
+    <Compile Include="models\presets\VmixMultiViewSettings.cs" />
     <Compile Include="models\presets\playlists\Loop.cs" />
     <Compile Include="models\presets\playlists\PlayList.cs" />
     <Compile Include="models\presets\playlists\PlayListCollection.cs" />
     <Compile Include="models\presets\playlists\PlaylistItem.cs" />
     <Compile Include="models\presets\playlists\PlayLists.cs" />
+    <Compile Include="models\presets\VmixProductionClockSetting.cs" />
     <Compile Include="models\presets\VmixPresetActivators.cs" />
     <Compile Include="models\presets\VmixPresetDataSources.cs" />
     <Compile Include="models\presets\VmixPresetShortcut.cs" />
