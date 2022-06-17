@@ -44,6 +44,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutobotLauncher.InstallAsm"
 EndProject
 Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "AutobotLauncher.Install", "AutobotLauncher.Install\AutobotLauncher.Install.vdproj", "{B345C5B7-1BB4-4C23-A3EA-ABFEBB646FDF}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{90449D61-85E6-4EF6-96CA-FF1F402F27E0}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		All|Any CPU = All|Any CPU
@@ -185,7 +190,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {D4D5E4E5-1EA4-45CB-842C-3B7FEBAD5053}
 		EnterpriseLibraryConfigurationToolBinariesPath = packages\TransientFaultHandling.Core.5.1.1209.1\lib\NET4
+		SolutionGuid = {D4D5E4E5-1EA4-45CB-842C-3B7FEBAD5053}
 	EndGlobalSection
 EndGlobal
