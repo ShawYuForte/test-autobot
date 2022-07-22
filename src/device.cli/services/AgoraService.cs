@@ -1,8 +1,10 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Net;
 using forte.devices.config;
 using forte.services;
 using Newtonsoft.Json;
+using RestSharp;
 
 namespace forte.devices.services
 {
@@ -32,6 +34,14 @@ namespace forte.devices.services
 			var keyData = JsonConvert.DeserializeObject<dynamic>(reaponseData);
 			return keyData.token;
 		}
+
+        public string GetAgoraRtmpUrl(Guid sessionId)
+        {
+            var client = new RestClient($"{_agoraApiUrl}/streams/");
+			var request = new RestRequest($"rtmpurl?sessionId={sessionId}", Method.GET);
+            var response = client.Execute<string>(request);
+            return response.Data;
+        }
 
 		private string CallRestMethod(string url, object data)
 		{

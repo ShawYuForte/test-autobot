@@ -38,8 +38,7 @@ namespace forte.devices.workflow
 		private bool _running = true;
 		private bool _verbose = true;
 		private string _deviceId;
-		private string _agoraRtmpUrl;
-		private ConcurrentDictionary<Guid, SessionState> _lockedSessions = new ConcurrentDictionary<Guid, SessionState>();
+        private ConcurrentDictionary<Guid, SessionState> _lockedSessions = new ConcurrentDictionary<Guid, SessionState>();
 		private bool _runWithoutAzure = false;
 		private readonly int _clientTimeout;
 		private readonly int _startStreamMaxRetryCount = 5;
@@ -65,8 +64,7 @@ namespace forte.devices.workflow
 			var apiPath = config.Get<string>(SettingParams.ServerApiPath);
 			_verbose = config.Get<bool>(SettingParams.VerboseDebug);
 			_deviceId = config.Get<string>(SettingParams.DeviceId);
-			_agoraRtmpUrl = config.Get<string>(SettingParams.AgoraRtmpUrl);
-			_clientTimeout = config.Get<int>(SettingParams.ClientTimeOut);
+            _clientTimeout = config.Get<int>(SettingParams.ClientTimeOut);
 
 			try
 			{
@@ -330,7 +328,8 @@ namespace forte.devices.workflow
 								var agoraUserId = (uint)channelName.GetHashCode();
 								var channelKey = _agora.GetChannelKey(channelName, _deviceId, agoraUserId);
 								channelKey = channelKey.Replace("/", "%2F");
-								agoraRtmpUrl = $"{_agoraRtmpUrl}/live?appid={channelKey}&channel={channelName}&uid={agoraUserId}&abr=150000&dual=true&dfps=24&dvbr=500000&dwidth=640&dheight=360&end=true";
+                                var agoraServerUrl = _agora.GetAgoraRtmpUrl(s.SessioId);
+								agoraRtmpUrl = $"{agoraServerUrl}/live?appid={channelKey}&channel={channelName}&uid={agoraUserId}&abr=150000&dual=true&dfps=24&dvbr=500000&dwidth=640&dheight=360&end=true";
 								_logger.Information($"vMix agora rtmp loading - {agoraRtmpUrl}");
 							}
 
