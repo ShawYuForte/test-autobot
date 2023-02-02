@@ -24,6 +24,8 @@ namespace forte.devices.entities
 
         public string PrimaryIngestUrl { get; set; }
 
+		public string PrimaryIngestKey { get; set; }
+
 		public bool VmixUsed { get; set; }
 
 		public int RetryCount { get; set; }

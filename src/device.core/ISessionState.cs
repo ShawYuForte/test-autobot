@@ -14,6 +14,7 @@ namespace forte.devices
 		string Permalink { get; set; }
 		string VmixPreset { get; set; }
 		string PrimaryIngestUrl { get; set; }
+		string PrimaryIngestKey { get; set; }
 		bool VmixUsed { get; set; }
 		int RetryCount { get; set; }
 		SessionType SessionType { get; set; }

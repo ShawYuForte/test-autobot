@@ -440,6 +440,7 @@ namespace forte.devices.workflow
 				}
 
 				SetSessionUrl(s, m.Data?.PrimaryIngestUrl);
+				SetSessionKey(s, m.Data?.PrimaryIngestKey);
 				SetSessionStatus(s, WorkflowState.LinkedToAzure);
 				ClearSessionRetry(s);
 				_lockedSessions.TryRemove(s.SessioId, out var t);
@@ -485,6 +486,7 @@ namespace forte.devices.workflow
 				}
 
 				SetSessionUrl(s, m.Data?.PrimaryIngestUrl);
+				SetSessionKey(s, m.Data?.PrimaryIngestKey);
 				SetSessionStatus(s, WorkflowState.StreamingServer);
 				ClearSessionRetry(s);
 				_lockedSessions.TryRemove(s.SessioId, out var t);
@@ -611,6 +613,15 @@ namespace forte.devices.workflow
 			_dbRepository.UpdateSession(s);
 		}
 
+		private void SetSessionKey(SessionState s, string primaryKey = null)
+		{
+			if(primaryKey != null)
+			{
+                s.PrimaryIngestKey = primaryKey;
+                _dbRepository.UpdateSession(s);
+            }
+		}
+
 		private void SetSessionVmix(SessionState s, bool vmixUsed)
 		{
 			s.VmixUsed = vmixUsed;
@@ -656,7 +667,7 @@ namespace forte.devices.workflow
 				AddSessionRetry(s, testrun);
 				if (s.SessionType != SessionType.Manual)
 				{
-					await _streamingClient.LoadVideoStreamPreset(s.VmixPreset, s.PrimaryIngestUrl, agoraUrl);
+					await _streamingClient.LoadVideoStreamPreset(s.VmixPreset, s.PrimaryIngestUrl, s.PrimaryIngestKey,  agoraUrl);
 				}
 				ClearSessionRetry(s, testrun);
 				_lockedSessions.TryRemove(s.SessioId, out var t);

@@ -115,6 +115,11 @@ namespace forte.models.streaming
         public string PrimaryIngestUrl { get; set; }
 
         /// <summary>
+        ///     Primary ingest key used for streaming
+        /// </summary>
+        public string PrimaryIngestKey { get; set; }
+
+        /// <summary>
         ///     Secondary ingest url used for streaming
         /// </summary>
         public string SecondaryIngestUrl { get; set; }

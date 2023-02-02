@@ -136,5 +136,7 @@ namespace forte.models.classes
         public short? DeviceType { get; set; }
 
         public string PrimaryIngestUrl { get; set; }
+
+        public string PrimaryIngestKey { get; set; }
     }
 }

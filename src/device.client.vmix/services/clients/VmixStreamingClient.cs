@@ -84,9 +84,9 @@ namespace forte.devices.services.clients
 
 #region preset
 
-		public async Task<string> LoadVideoStreamPreset(string preset, string primaryUrl, string agoraUrl)
+		public async Task<string> LoadVideoStreamPreset(string preset, string primaryUrl, string primaryKey, string agoraUrl)
 		{
-			var presetIdentifier = await LoadPreset(preset, primaryUrl, agoraUrl);
+			var presetIdentifier = await LoadPreset(preset, primaryUrl, primaryKey, agoraUrl);
 			if(presetIdentifier == null)
 			{
 				throw new Exception("Could not load preset");
@@ -94,7 +94,7 @@ namespace forte.devices.services.clients
 			return presetIdentifier;
 		}
 
-		private async Task<string> LoadPreset(string preset, string primaryUrl, string agoraUrl)
+		private async Task<string> LoadPreset(string preset, string primaryUrl, string primaryKey, string agoraUrl)
 		{
 			var vmixProcessHandle = EnsureVmixIsRunning(startFresh: true);
 			var config = _configurationManager.GetDeviceConfig();
@@ -133,6 +133,7 @@ namespace forte.devices.services.clients
             }
 
             vMixOutputs.Add(new VmixStreamDestination("Primary", primaryUrl));
+			vMixOutputs.Add(new VmixStreamDestination(string.Empty, primaryKey));
 			vmixPreset.Outputs = vMixOutputs;
 
 			_logger.Debug("Saving preset file {@vmixPresetOutputFile}", _vmixPresetOutputFile);
